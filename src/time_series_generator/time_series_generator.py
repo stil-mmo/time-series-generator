@@ -1,7 +1,6 @@
 from component import Component
 from numpy import array, vstack, zeros
 from numpy.random import normal, triangular, uniform
-
 from utils.utils import show_plot
 
 NO_LAG = 0

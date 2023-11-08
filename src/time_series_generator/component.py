@@ -1,6 +1,5 @@
 from numpy import array, ndarray, transpose
 from numpy.random import normal
-
 from utils.utils import show_plot
 
 
