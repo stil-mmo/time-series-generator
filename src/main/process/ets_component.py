@@ -1,9 +1,10 @@
 from numpy import array, ndarray, transpose
 from numpy.random import normal
-from utils.utils import show_plot
+
+from src.main.utils.utils import show_plot
 
 
-class Component:
+class ETSComponent:
     """
     This class provides basic interface
     for computing various time series components (error, trend, seasonality etc.)
@@ -53,7 +54,7 @@ class Component:
 
 
 if __name__ == "__main__":
-    seasonal = Component(
+    seasonal = ETSComponent(
         lag=3,
         init_values=array([0.1, 0.5, 0.2]),
         parameter=0.1,
@@ -62,7 +63,7 @@ if __name__ == "__main__":
     print(seasonal.values)
     other_values = ndarray(shape=(1, 10))
     other_values[0] = seasonal.values
-    long_term = Component(
+    long_term = ETSComponent(
         lag=1,
         init_values=array([0.0]),
         parameter=0.001,
