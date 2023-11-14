@@ -8,7 +8,7 @@ NO_LAG = 0
 STABLE_PARAMETER = 1.0
 
 
-class ETSProcess:
+class ETSProcessBuilder:
     def __init__(self, samples_count):
         self.num_samples = samples_count
         self.components = zeros(shape=(1, samples_count))
@@ -87,7 +87,7 @@ class ETSProcess:
 def exponential_smoothing(
     num_samples, long_term_init_value, long_term_param, mean, std
 ):
-    ts = ETSProcess(num_samples)
+    ts = ETSProcessBuilder(num_samples)
     ts.set_normal_error(mean=mean, std=std)
     ts.set_long_term(init_value=long_term_init_value, parameter=long_term_param)
     return ts.generate_time_series()
@@ -102,7 +102,7 @@ def trend_model(
     mean,
     std,
 ):
-    ts = ETSProcess(num_samples)
+    ts = ETSProcessBuilder(num_samples)
     ts.set_normal_error(mean=mean, std=std)
     trend_index = ts.set_trend(init_value=trend_init_value, parameter=trend_param)
     ts.set_long_term(
