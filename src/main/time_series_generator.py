@@ -1,3 +1,5 @@
+"""This module provides main interface for time series generation"""
+
 from numpy import ndarray
 from scheduler import Scheduler
 
@@ -7,6 +9,8 @@ from src.main.utils.utils import show_plot
 
 
 class TimeSeriesGenerator:
+    """Provides methods to generate time series"""
+
     def __init__(
         self,
         num_time_series: int,
@@ -25,6 +29,7 @@ class TimeSeriesGenerator:
         schedule: list[tuple[str, list[tuple[int, tuple[float, ...]]]]],
         border_values: tuple[float, float],
     ) -> TimeSeries:
+        """Generates single time series with schedule"""
         time_series = TimeSeries()
         for process_name, process_schedule in schedule:
             process = process_list.get_processes([process_name])[0]
@@ -51,6 +56,7 @@ class TimeSeriesGenerator:
         stable_parameters=True,
         single_schedule=True,
     ):
+        """Generates all time series and schedules for them"""
         time_series_array = ndarray((self.num_time_series, self.num_steps))
         scheduler = Scheduler(self.num_steps, self.process_list, self.process_order)
         schedule = (

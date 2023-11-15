@@ -1,3 +1,5 @@
+"""This module provides ETSComponent class"""
+
 from numpy import array, ndarray, transpose
 from numpy.random import normal
 
@@ -40,6 +42,7 @@ class ETSComponent:
         self.values = self.set_values(additional_values)
 
     def set_values(self, additional_values=None):
+        """Computes component values"""
         component_values = array([0.0 for _ in range(self.num_samples)])
         for i in range(self.lag):
             component_values[i] = self.init_values[i]

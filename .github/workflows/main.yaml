@@ -24,3 +24,6 @@ jobs:
     - name: Lint with Isort
       run: |
         isort . -c -v
+    - name: Analysing the code with pylint
+        run: |
+          pylint $(git ls-files '*.py') --ignore-patterns=test_.*?py

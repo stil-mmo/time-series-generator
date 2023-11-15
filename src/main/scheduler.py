@@ -1,3 +1,5 @@
+"""This module implements Scheduler class"""
+
 from math import sqrt
 from random import randint, shuffle
 
@@ -7,6 +9,8 @@ from src.main.specific_processes.white_noise_process import WhiteNoiseProcess
 
 
 class Scheduler:
+    """This class provides methods to generate schedule for time series generation"""
+
     def __init__(
         self,
         num_steps: int,
@@ -25,6 +29,7 @@ class Scheduler:
 
     @staticmethod
     def generate_process_list():
+        """Generates process list with all available processes"""
         process_list = ProcessList()
         process_list.add_processes([WhiteNoiseProcess(), RandomWalkProcess()])
         return process_list
@@ -33,6 +38,7 @@ class Scheduler:
     def generate_steps_number(
         num_max: int, num_parts: int, strict_num_parts: bool = False
     ) -> list[int]:
+        """Generates random distribution of steps number between some parts"""
         current_num_max = num_max
         if num_parts <= 1:
             return [current_num_max]
@@ -53,6 +59,7 @@ class Scheduler:
         return steps_list
 
     def generate_process_order(self) -> list[tuple[int, str]]:
+        """Generates random process order with steps number for each process"""
         process_schedule = []
         num_parts = randint(1, int(sqrt(self.num_steps)))
         processes_steps = self.generate_steps_number(self.num_steps, num_parts)
@@ -65,6 +72,7 @@ class Scheduler:
     def generate_schedule(
         self, low_value: float, high_value: float, stable_parameters: bool = False
     ) -> list[tuple[str, list[tuple[int, tuple[float, ...]]]]]:
+        """Generates schedule for time series generation"""
         schedule = []
         for steps, process_name in self.process_order:
             process = self.process_list.get_processes([process_name])[0]
