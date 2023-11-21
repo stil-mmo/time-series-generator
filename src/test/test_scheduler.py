@@ -2,10 +2,12 @@ from unittest import TestCase
 
 from src.main.scheduler import Scheduler
 
+BORDER_VALUES = (-10, 10)
+
 
 class TestScheduler(TestCase):
     def test_generate_process_list(self):
-        schedule = Scheduler(100)
+        schedule = Scheduler(100, border_values=BORDER_VALUES)
         self.assertTrue(
             schedule.process_list.contains("white_noise")
             and schedule.process_list.contains("random_walk")
@@ -22,7 +24,7 @@ class TestScheduler(TestCase):
         self.assertEqual(sum(steps_list), num_max)
 
     def test_generate_process_order(self):
-        schedule = Scheduler(100)
+        schedule = Scheduler(100, border_values=BORDER_VALUES)
         process_order = schedule.generate_process_order()
         self.assertTrue(sum([steps for steps, _ in process_order]) == 100)
         self.assertTrue(len(process_order) <= 10)
@@ -36,8 +38,8 @@ class TestScheduler(TestCase):
         )
 
     def test_generate_schedule(self):
-        scheduler = Scheduler(100)
-        schedule = scheduler.generate_schedule(-10, 10)
+        scheduler = Scheduler(100, border_values=BORDER_VALUES)
+        schedule = scheduler.generate_schedule()
         self.assertEqual(len(schedule), len(scheduler.process_order))
         steps_sum = []
         for _, process_data in schedule:
