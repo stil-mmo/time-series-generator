@@ -1,6 +1,7 @@
 from math import sqrt
 from random import randint, shuffle
 
+from src.main.generator_linspace import GeneratorLinspace
 from src.main.process_list import ProcessList
 from src.main.specific_processes.random_walk_process import RandomWalkProcess
 from src.main.specific_processes.white_noise_process import WhiteNoiseProcess
@@ -13,12 +14,12 @@ class Scheduler:
     def __init__(
         self,
         num_steps: int,
-        border_values: tuple[float, float],
+        generator_linspace: GeneratorLinspace,
         process_list: ProcessList | None = None,
         process_order: list[tuple[int, str]] | None = None,
     ):
         self.num_steps = num_steps
-        self.border_values = border_values
+        self.generator_linspace = generator_linspace
         self.process_list = (
             process_list if process_list is not None else self.generate_process_list()
         )
@@ -55,8 +56,8 @@ class Scheduler:
         process_list = ProcessList()
         process_list.add_processes(
             [
-                WhiteNoiseProcess(border_values=self.border_values),
-                RandomWalkProcess(border_values=self.border_values),
+                WhiteNoiseProcess(generator_linspace=self.generator_linspace),
+                RandomWalkProcess(generator_linspace=self.generator_linspace),
             ]
         )
         return process_list

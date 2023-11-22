@@ -3,13 +3,14 @@ from math import sqrt
 from numpy import array
 from numpy.random import normal, randint, uniform
 from numpy.typing import NDArray
+from src.main.generator_linspace import GeneratorLinspace
 from src.main.process import Process
 from src.main.time_series import TimeSeries
 
 
 class WhiteNoiseProcess(Process):
-    def __init__(self, border_values: tuple[float, float], lag: int = 0):
-        super().__init__(lag, border_values)
+    def __init__(self, generator_linspace: GeneratorLinspace, lag: int = 0):
+        super().__init__(lag, generator_linspace)
         self.distributions = {0: normal, 1: uniform}
 
     @property
@@ -23,12 +24,12 @@ class WhiteNoiseProcess(Process):
     def generate_parameters(self) -> tuple[float, ...]:
         distribution_id = randint(0, len(self.distributions.keys()))
         if distribution_id == 0:
-            mean = uniform(self.border_values[0], self.border_values[1])
-            std = uniform(self.border_values[0], self.border_values[1])
+            mean = self.generate_value()
+            std = self.generate_value()
             return float(distribution_id), mean, sqrt(abs(std))
         else:
-            low = uniform(self.border_values[0], self.border_values[1])
-            high = uniform(self.border_values[0], self.border_values[1])
+            low = self.generate_value()
+            high = self.generate_value()
             return float(distribution_id), min(low, high), max(low, high)
 
     def generate_init_values(self) -> NDArray:

@@ -1,13 +1,15 @@
 from abc import ABC, abstractmethod
 
+from numpy.random import uniform
 from numpy.typing import NDArray
+from src.main.generator_linspace import GeneratorLinspace
 from src.main.time_series import TimeSeries
 
 
 class Process(ABC):
-    def __init__(self, lag: int, border_values: tuple[float, float]):
+    def __init__(self, lag: int, generator_linspace: GeneratorLinspace):
         self._lag = lag
-        self._border_values = border_values
+        self._generator_linspace = generator_linspace
 
     @property
     @abstractmethod
@@ -28,12 +30,12 @@ class Process(ABC):
         self._lag = lag
 
     @property
-    def border_values(self) -> tuple[float, float]:
-        return self._border_values
+    def generator_linspace(self) -> GeneratorLinspace:
+        return self._generator_linspace
 
-    @border_values.setter
-    def border_values(self, border_values: tuple[float, float]) -> None:
-        self._border_values = border_values
+    @generator_linspace.setter
+    def generator_linspace(self, generator_linspace: GeneratorLinspace) -> None:
+        self._generator_linspace = generator_linspace
 
     @abstractmethod
     def generate_parameters(self) -> tuple[float, ...]:
@@ -50,6 +52,9 @@ class Process(ABC):
         previous_values: NDArray | None = None,
     ) -> tuple[TimeSeries, dict]:
         pass
+
+    def generate_value(self) -> float:
+        return uniform(self.generator_linspace.start, self.generator_linspace.stop)
 
     def get_info(
         self,

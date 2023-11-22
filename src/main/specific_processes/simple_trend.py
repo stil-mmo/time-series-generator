@@ -10,25 +10,26 @@ from src.main.time_series import TimeSeries
 from src.main.utils.utils import draw_process_plot
 
 
-class SimpleExponentialSmoothing(Process):
+class SimpleTrend(Process):
     def __init__(self, generator_linspace: GeneratorLinspace, lag: int = 1):
         super().__init__(lag, generator_linspace)
 
     @property
     def name(self) -> str:
-        return "simple_exponential_smoothing"
+        return "simple_trend"
 
     @property
     def num_parameters(self) -> int:
-        return 2
+        return 3
 
     def generate_parameters(self) -> tuple[float, ...]:
         std = abs(self.generate_value()) / self.generator_linspace.parts
-        error_coefficient = uniform(0.0, 1.0)
-        return error_coefficient, std
+        long_term_coefficient = uniform(0.0, 1.0)
+        trend_coefficient = uniform(0.0, 0.1)
+        return long_term_coefficient, trend_coefficient, std
 
     def generate_init_values(self) -> NDArray:
-        return array([self.generate_value()])
+        return array([self.generate_value(), 0.0])
 
     def generate_time_series(
         self,
@@ -36,20 +37,30 @@ class SimpleExponentialSmoothing(Process):
         previous_values: NDArray | None = None,
     ) -> tuple[TimeSeries, dict]:
         ets_values = ETSProcessBuilder(sample[0])
-        ets_values.set_normal_error(mean=0.0, std=sample[1][1])
+        ets_values.set_normal_error(mean=0.0, std=sample[1][2])
         if previous_values is None:
-            init_value = self.generate_init_values()[0]
+            long_term_init_value, trend_init_value = self.generate_init_values()
         else:
-            init_value = previous_values[-1]
-        ets_values.set_long_term(init_value=init_value, parameter=sample[1][0])
-        exp_time_series = TimeSeries(sample[0])
-        exp_time_series.add_values(ets_values.generate_values(), (self.name, sample))
-        return exp_time_series, self.get_info(sample, init_value)
+            long_term_init_value = previous_values[-1]
+            trend_init_value = self.generate_init_values()[1]
+        trend_index = ets_values.set_trend(
+            init_value=trend_init_value, parameter=sample[1][1]
+        )
+        ets_values.set_long_term(
+            init_value=long_term_init_value,
+            parameter=sample[1][0],
+            add_component_indexes=[trend_index],
+        )
+        trend_time_series = TimeSeries(sample[0])
+        trend_time_series.add_values(ets_values.generate_values(), (self.name, sample))
+        return trend_time_series, self.get_info(
+            sample, (long_term_init_value, trend_init_value)
+        )
 
 
 if __name__ == "__main__":
     test_generator_linspace = GeneratorLinspace(0.0, 100.0, 100)
-    proc = SimpleExponentialSmoothing(test_generator_linspace)
+    proc = SimpleTrend(test_generator_linspace)
     test_sample = (100, proc.generate_parameters())
     ts, info = proc.generate_time_series(test_sample)
     draw_process_plot(ts, info)
