@@ -1,7 +1,6 @@
 from numpy import zeros
-from numpy.random import uniform, normal
+from numpy.random import normal, uniform
 from numpy.typing import NDArray
-
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process import Process
 from src.main.specific_processes.ets_process_resources.ets_process_builder import (
