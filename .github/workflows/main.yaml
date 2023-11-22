@@ -23,4 +23,4 @@ jobs:
         black . --check
     - name: Lint with Isort
       run: |
-        isort . -c -v --settings-path ../../config/
+        isort . -c -v --settings-path config/
