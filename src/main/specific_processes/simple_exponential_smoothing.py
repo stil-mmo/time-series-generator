@@ -3,10 +3,10 @@ from math import sqrt
 from numpy import array
 from numpy.random import uniform
 from numpy.typing import NDArray
-
 from src.main.process import Process
-from src.main.specific_processes.ets_process_resources.ets_process_builder import \
-    ETSProcessBuilder
+from src.main.specific_processes.ets_process_resources.ets_process_builder import (
+    ETSProcessBuilder,
+)
 from src.main.time_series import TimeSeries
 from src.main.utils.utils import draw_process_plot
 
