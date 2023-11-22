@@ -1,13 +1,14 @@
 from unittest import TestCase
 
+from src.main.generator_linspace import GeneratorLinspace
 from src.main.scheduler import Scheduler
 
-BORDER_VALUES = (-10, 10)
+GENERATOR_LINSPACE = GeneratorLinspace(0.0, 1.0, 100)
 
 
 class TestScheduler(TestCase):
     def test_generate_process_list(self):
-        schedule = Scheduler(100, border_values=BORDER_VALUES)
+        schedule = Scheduler(100, generator_linspace=GENERATOR_LINSPACE)
         self.assertTrue(
             schedule.process_list.contains("white_noise")
             and schedule.process_list.contains("random_walk")
@@ -24,7 +25,7 @@ class TestScheduler(TestCase):
         self.assertEqual(sum(steps_list), num_max)
 
     def test_generate_process_order(self):
-        schedule = Scheduler(100, border_values=BORDER_VALUES)
+        schedule = Scheduler(100, generator_linspace=GENERATOR_LINSPACE)
         process_order = schedule.generate_process_order()
         self.assertTrue(sum([steps for steps, _ in process_order]) == 100)
         self.assertTrue(len(process_order) <= 10)
@@ -38,7 +39,7 @@ class TestScheduler(TestCase):
         )
 
     def test_generate_schedule(self):
-        scheduler = Scheduler(100, border_values=BORDER_VALUES)
+        scheduler = Scheduler(100, generator_linspace=GENERATOR_LINSPACE)
         schedule = scheduler.generate_schedule()
         self.assertEqual(len(schedule), len(scheduler.process_order))
         steps_sum = []

@@ -1,3 +1,4 @@
+from generator_linspace import GeneratorLinspace
 from numpy import ndarray
 from scheduler import PROCESS_ORDER, PROCESS_SAMPLES, Scheduler
 from src.main.process_list import ProcessList
@@ -43,14 +44,14 @@ class TimeSeriesGenerator:
 
     def generate_all(
         self,
-        border_values: tuple[float, float] = (-10, 10),
+        generator_linspace: GeneratorLinspace,
         stable_parameters: bool = True,
         single_schedule: bool = True,
     ):
         time_series_array = ndarray((self.num_time_series, self.num_steps))
         scheduler = Scheduler(
             num_steps=self.num_steps,
-            border_values=border_values,
+            generator_linspace=generator_linspace,
             process_list=self.process_list,
             process_order=self.process_order,
         )
@@ -74,4 +75,5 @@ class TimeSeriesGenerator:
 
 if __name__ == "__main__":
     ts_generator = TimeSeriesGenerator(2, 100)
-    show_plot(ts_generator.generate_all())
+    test_generator_linspace = GeneratorLinspace(0, 1, 100)
+    show_plot(ts_generator.generate_all(generator_linspace=test_generator_linspace))
