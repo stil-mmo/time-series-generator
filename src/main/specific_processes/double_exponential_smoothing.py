@@ -25,7 +25,7 @@ class DoubleExponentialSmoothing(Process):
     def generate_parameters(self) -> tuple[float, ...]:
         std = abs(self.generate_value()) / self.generator_linspace.parts
         long_term_coefficient = uniform(0.0, 1.0)
-        trend_coefficient = uniform(0.0, 0.1)
+        trend_coefficient = uniform(0.0, 0.05)
         return long_term_coefficient, trend_coefficient, std
 
     def generate_init_values(self) -> NDArray:
