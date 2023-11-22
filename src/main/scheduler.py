@@ -3,7 +3,17 @@ from random import randint, shuffle
 
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process_list import ProcessList
-from src.main.specific_processes.random_walk_process import RandomWalkProcess
+from src.main.specific_processes.double_exponential_smoothing import (
+    DoubleExponentialSmoothing,
+)
+from src.main.specific_processes.random_walk import RandomWalk
+from src.main.specific_processes.simple_exponential_smoothing import (
+    SimpleExponentialSmoothing,
+)
+from src.main.specific_processes.simple_random_walk import SimpleRandomWalk
+from src.main.specific_processes.triple_exponential_smoothing import (
+    TripleExponentialSmoothing,
+)
 from src.main.specific_processes.white_noise_process import WhiteNoiseProcess
 
 PROCESS_ORDER = list[tuple[int, str]]
@@ -57,7 +67,13 @@ class Scheduler:
         process_list.add_processes(
             [
                 WhiteNoiseProcess(generator_linspace=self.generator_linspace),
-                RandomWalkProcess(generator_linspace=self.generator_linspace),
+                SimpleRandomWalk(generator_linspace=self.generator_linspace),
+                RandomWalk(generator_linspace=self.generator_linspace),
+                SimpleExponentialSmoothing(generator_linspace=self.generator_linspace),
+                DoubleExponentialSmoothing(generator_linspace=self.generator_linspace),
+                TripleExponentialSmoothing(
+                    generator_linspace=self.generator_linspace, lag=12
+                ),
             ]
         )
         return process_list

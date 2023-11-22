@@ -1,5 +1,5 @@
 from numpy import zeros
-from numpy.random import normal, uniform
+from numpy.random import uniform
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process import Process
@@ -22,8 +22,11 @@ class TripleExponentialSmoothing(Process):
     def num_parameters(self) -> int:
         return 4
 
+    def create_parameters(self, source_values: NDArray) -> tuple[float, ...]:
+        return self.generate_parameters()
+
     def generate_parameters(self) -> tuple[float, ...]:
-        std = abs(self.generate_value()) / self.generator_linspace.parts
+        std = self.generator_linspace.generate_std()
         long_term_coefficient = uniform(0.0, 1.0)
         trend_coefficient = uniform(0.0, 0.05)
         seasonality_coefficient = uniform(0.0, 1.0)
@@ -31,10 +34,11 @@ class TripleExponentialSmoothing(Process):
 
     def generate_init_values(self) -> NDArray:
         init_values = zeros((3, self.lag))
-        init_values[0][0] = self.generate_value()
+        init_values[0][0] = self.generator_linspace.generate_values()
         init_values[1][0] = 0.0
-        center = (self.generator_linspace.start + self.generator_linspace.stop) / 2
-        init_values[2] = normal(0.25 * center, self.generator_linspace.step, self.lag)
+        init_values[2] = self.generator_linspace.generate_values(
+            num_values=self.lag, center_shift=0.25
+        )
         return init_values
 
     def generate_time_series(
@@ -42,6 +46,12 @@ class TripleExponentialSmoothing(Process):
         sample: tuple[int, tuple[float, ...]],
         previous_values: NDArray | None = None,
     ) -> tuple[TimeSeries, dict]:
+        if sample[0] <= self.lag:
+            ts = TimeSeries(sample[0])
+            ts.add_values(
+                self.generate_init_values()[2][: sample[0]], (self.name, sample)
+            )
+            return ts, self.get_info(sample)
         ets_values = ETSProcessBuilder(sample[0])
         ets_values.set_normal_error(mean=0.0, std=sample[1][3])
         if previous_values is None or len(previous_values) < 1:

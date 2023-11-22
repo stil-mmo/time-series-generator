@@ -75,5 +75,5 @@ class TimeSeriesGenerator:
 
 if __name__ == "__main__":
     ts_generator = TimeSeriesGenerator(2, 100)
-    test_generator_linspace = GeneratorLinspace(0, 1, 100)
+    test_generator_linspace = GeneratorLinspace(0, 100, 100)
     show_plot(ts_generator.generate_all(generator_linspace=test_generator_linspace))

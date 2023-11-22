@@ -1,4 +1,3 @@
-from numpy import array
 from numpy.random import uniform
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
@@ -22,14 +21,21 @@ class DoubleExponentialSmoothing(Process):
     def num_parameters(self) -> int:
         return 3
 
+    def create_parameters(self, source_values: NDArray) -> tuple[float, ...]:
+        return self.generate_parameters()
+
     def generate_parameters(self) -> tuple[float, ...]:
-        std = abs(self.generate_value()) / self.generator_linspace.parts
+        std = self.generator_linspace.generate_std()
         long_term_coefficient = uniform(0.0, 1.0)
         trend_coefficient = uniform(0.0, 0.05)
         return long_term_coefficient, trend_coefficient, std
 
     def generate_init_values(self) -> NDArray:
-        return array([self.generate_value(), 0.0])
+        init_values = self.generator_linspace.generate_values(
+            num_values=2, is_normal=False
+        )
+        init_values[1] = 0.0
+        return init_values
 
     def generate_time_series(
         self,
