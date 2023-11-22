@@ -2,7 +2,8 @@ from numpy import array, vstack, zeros
 from numpy.random import normal, triangular, uniform
 from numpy.typing import NDArray
 
-from src.main.specific_processes.ets_process_resources.ets_component import ETSComponent
+from src.main.specific_processes.ets_process_resources.ets_component import \
+    ETSComponent
 from src.main.utils.utils import show_plot
 
 NO_LAG = 0
