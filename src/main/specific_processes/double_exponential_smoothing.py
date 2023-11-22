@@ -10,13 +10,13 @@ from src.main.time_series import TimeSeries
 from src.main.utils.utils import draw_process_plot
 
 
-class SimpleTrend(Process):
+class DoubleExponentialSmoothing(Process):
     def __init__(self, generator_linspace: GeneratorLinspace, lag: int = 1):
         super().__init__(lag, generator_linspace)
 
     @property
     def name(self) -> str:
-        return "simple_trend"
+        return "double_exponential_smoothing"
 
     @property
     def num_parameters(self) -> int:
@@ -60,7 +60,7 @@ class SimpleTrend(Process):
 
 if __name__ == "__main__":
     test_generator_linspace = GeneratorLinspace(0.0, 100.0, 100)
-    proc = SimpleTrend(test_generator_linspace)
+    proc = DoubleExponentialSmoothing(test_generator_linspace)
     test_sample = (100, proc.generate_parameters())
     ts, info = proc.generate_time_series(test_sample)
     draw_process_plot(ts, info)
