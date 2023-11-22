@@ -1,6 +1,5 @@
 from numpy import ndarray
 from scheduler import PROCESS_ORDER, PROCESS_SAMPLES, Scheduler
-
 from src.main.process_list import ProcessList
 from src.main.time_series import TimeSeries
 from src.main.utils.utils import show_plot

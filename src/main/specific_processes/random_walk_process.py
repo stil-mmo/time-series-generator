@@ -2,7 +2,6 @@ from random import uniform
 
 from numpy import array
 from numpy.typing import NDArray
-
 from src.main.process import Process
 from src.main.time_series import TimeSeries
 

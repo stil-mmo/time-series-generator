@@ -1,6 +1,6 @@
 from numpy import array, ndarray, transpose
 from numpy.random import normal
-
+from numpy.typing import NDArray
 from src.main.utils.utils import show_plot
 
 
@@ -31,7 +31,14 @@ class ETSComponent:
         computes component values
     """
 
-    def __init__(self, lag, init_values, parameter, error, additional_values=None):
+    def __init__(
+        self,
+        lag: int,
+        init_values: NDArray,
+        parameter: float,
+        error: NDArray,
+        additional_values: NDArray | None = None,
+    ):
         self.num_samples = len(error)
         self.lag = lag
         self.init_values = init_values

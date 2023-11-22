@@ -3,7 +3,6 @@ from math import sqrt
 from numpy import array
 from numpy.random import normal, randint, uniform
 from numpy.typing import NDArray
-
 from src.main.process import Process
 from src.main.time_series import TimeSeries
 

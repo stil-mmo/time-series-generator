@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
 from numpy.typing import NDArray
-
 from src.main.time_series import TimeSeries
 
 

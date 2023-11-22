@@ -1,7 +1,7 @@
-from ets_component import ETSComponent
 from numpy import array, vstack, zeros
 from numpy.random import normal, triangular, uniform
-
+from numpy.typing import NDArray
+from src.main.specific_processes.ets_process_resources.ets_component import ETSComponent
 from src.main.utils.utils import show_plot
 
 NO_LAG = 0
@@ -9,18 +9,18 @@ STABLE_PARAMETER = 1.0
 
 
 class ETSProcessBuilder:
-    def __init__(self, samples_count):
+    def __init__(self, samples_count: int):
         self.num_samples = samples_count
         self.components = zeros(shape=(1, samples_count))
         self.set_normal_error()
 
-    def remove_component(self, index):
+    def remove_component(self, index: int) -> None:
         if index < self.components.shape[0]:
             self.components[index] = array([0.0 for _ in range(self.num_samples)])
         else:
             raise ValueError("There is no component with this index")
 
-    def set_normal_error(self, mean=0.0, std=1.0):
+    def set_normal_error(self, mean=0.0, std=1.0) -> None:
         error = ETSComponent(
             lag=NO_LAG,
             init_values=array([]),
@@ -29,7 +29,7 @@ class ETSProcessBuilder:
         )
         self.components[0] = error.values
 
-    def set_uniform_error(self, left=-1.0, right=1.0):
+    def set_uniform_error(self, left=-1.0, right=1.0) -> None:
         error = ETSComponent(
             lag=NO_LAG,
             init_values=array([]),
@@ -38,7 +38,7 @@ class ETSProcessBuilder:
         )
         self.components[0] = error.values
 
-    def set_triangular_error(self, left=-1.0, right=1.0, mode=0.0):
+    def set_triangular_error(self, left=-1.0, right=1.0, mode=0.0) -> None:
         error = ETSComponent(
             lag=NO_LAG,
             init_values=array([]),
@@ -47,7 +47,12 @@ class ETSProcessBuilder:
         )
         self.components[0] = error.values
 
-    def set_long_term(self, init_value, parameter, add_component_indexes=None):
+    def set_long_term(
+        self,
+        init_value: float,
+        parameter: float,
+        add_component_indexes: list[int] | None = None,
+    ) -> int:
         long_term = ETSComponent(
             lag=1,
             init_values=array([init_value]),
@@ -60,7 +65,7 @@ class ETSProcessBuilder:
         self.components = vstack([self.components, long_term.values])
         return self.components.shape[0] - 1
 
-    def set_trend(self, init_value, parameter):
+    def set_trend(self, init_value: float, parameter: float) -> int:
         trend = ETSComponent(
             lag=1,
             init_values=array([init_value]),
@@ -70,7 +75,7 @@ class ETSProcessBuilder:
         self.components = vstack([self.components, trend.values])
         return self.components.shape[0] - 1
 
-    def set_seasonal(self, lag, init_values, parameter):
+    def set_seasonal(self, lag: int, init_values: NDArray, parameter: float) -> int:
         seasonal = ETSComponent(
             lag=lag,
             init_values=init_values,
@@ -80,7 +85,7 @@ class ETSProcessBuilder:
         self.components = vstack([self.components, seasonal.values])
         return self.components.shape[0] - 1
 
-    def generate_time_series(self):
+    def generate_values(self) -> NDArray:
         return self.components.sum(axis=0)
 
 
@@ -90,7 +95,7 @@ def exponential_smoothing(
     ts = ETSProcessBuilder(num_samples)
     ts.set_normal_error(mean=mean, std=std)
     ts.set_long_term(init_value=long_term_init_value, parameter=long_term_param)
-    return ts.generate_time_series()
+    return ts.generate_values()
 
 
 def trend_model(
@@ -110,7 +115,7 @@ def trend_model(
         parameter=long_term_param,
         add_component_indexes=[trend_index],
     )
-    return ts.generate_time_series()
+    return ts.generate_values()
 
 
 if __name__ == "__main__":
