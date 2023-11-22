@@ -1,6 +1,7 @@
-from numpy import array, zeros
-from numpy.random import uniform
+from numpy import zeros
+from numpy.random import uniform, normal
 from numpy.typing import NDArray
+
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process import Process
 from src.main.specific_processes.ets_process_resources.ets_process_builder import (
@@ -25,8 +26,8 @@ class TripleExponentialSmoothing(Process):
     def generate_parameters(self) -> tuple[float, ...]:
         std = abs(self.generate_value()) / self.generator_linspace.parts
         long_term_coefficient = uniform(0.0, 1.0)
-        trend_coefficient = uniform(0.0, 0.1)
-        seasonality_coefficient = uniform(0.0, 0.1)
+        trend_coefficient = uniform(0.0, 0.05)
+        seasonality_coefficient = uniform(0.0, 1.0)
         return long_term_coefficient, trend_coefficient, seasonality_coefficient, std
 
     def generate_init_values(self) -> NDArray:
@@ -34,9 +35,7 @@ class TripleExponentialSmoothing(Process):
         init_values[0][0] = self.generate_value()
         init_values[1][0] = 0.0
         center = (self.generator_linspace.start + self.generator_linspace.stop) / 2
-        init_values[2] = array(
-            [uniform(0.5 * center, 1.5 * center) for _ in range(self.lag)]
-        )
+        init_values[2] = normal(0.25 * center, self.generator_linspace.step, self.lag)
         return init_values
 
     def generate_time_series(
