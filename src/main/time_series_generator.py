@@ -1,7 +1,6 @@
+from generator_linspace import GeneratorLinspace
 from numpy import ndarray
 from numpy.typing import NDArray
-
-from generator_linspace import GeneratorLinspace
 from scheduler import Scheduler
 from src.main.generator_typing import ProcessDataType, ProcessOrderType
 from src.main.point_sampling import sample_points
@@ -42,7 +41,8 @@ class TimeSeriesGenerator:
                 else:
                     current_time_series.add_values(
                         process.generate_time_series(
-                            process_data, previous_values=current_time_series.get_values()
+                            process_data,
+                            previous_values=current_time_series.get_values(),
                         )[0].get_values(),
                         (process.name, process_data),
                     )
@@ -91,9 +91,7 @@ class TimeSeriesGenerator:
                     ts_array[i] = ts.get_values()
                     ts_list.append(ts)
             else:
-                ts = self.generate_time_series(
-                    scheduler.process_list, schedule
-                )
+                ts = self.generate_time_series(scheduler.process_list, schedule)
                 ts_array[i] = ts.get_values()
                 ts_list.append(ts)
         return ts_array, ts_list

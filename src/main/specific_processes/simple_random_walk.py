@@ -74,7 +74,7 @@ class SimpleRandomWalk(Process):
         rw_time_series.add_values(values, (self.name, data))
         if previous_values is None:
             return rw_time_series, self.get_info(
-                data, values[0: data[0] - values_to_add]
+                data, values[0 : data[0] - values_to_add]
             )
         else:
             return rw_time_series, self.get_info(data, (previous_values[-1],))

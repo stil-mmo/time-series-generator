@@ -10,7 +10,9 @@ class TimeSeries:
         self.metadata = []
 
     def add_values(
-        self, new_values: NDArray, new_metadata: tuple[str, tuple[int, tuple[float, ...]]]
+        self,
+        new_values: NDArray,
+        new_metadata: tuple[str, tuple[int, tuple[float, ...]]],
     ) -> None:
         if self.last_index + len(new_values) > self.num_steps:
             print(

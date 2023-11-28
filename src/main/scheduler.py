@@ -3,6 +3,7 @@ from math import sqrt
 from numpy.random import normal, randint, shuffle
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
+from src.main.generator_typing import ProcessDataType, ProcessOrderType
 from src.main.process_list import ProcessList
 from src.main.specific_processes.double_exponential_smoothing import (
     DoubleExponentialSmoothing,
@@ -16,7 +17,6 @@ from src.main.specific_processes.triple_exponential_smoothing import (
     TripleExponentialSmoothing,
 )
 from src.main.specific_processes.white_noise_process import WhiteNoiseProcess
-from src.main.generator_typing import ProcessOrderType, ProcessDataType
 
 
 class Scheduler:
