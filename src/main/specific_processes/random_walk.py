@@ -1,9 +1,10 @@
-from numpy import array
+from numpy import array, sqrt
 from numpy.random import normal
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process import Process
 from src.main.time_series import TimeSeries
+from src.main.utils.parameters_approximation import weighted_mean
 from src.main.utils.utils import draw_process_plot
 
 
@@ -19,8 +20,14 @@ class RandomWalk(Process):
     def num_parameters(self) -> int:
         return 1
 
-    def create_parameters(self, source_values: NDArray) -> tuple[float, ...]:
-        return self.generate_parameters()
+    def calculate_data(
+        self, source_values: NDArray | None = None
+    ) -> tuple[tuple[float, ...], NDArray]:
+        if source_values is None:
+            return self.generate_parameters(), self.generate_init_values()
+        mean = weighted_mean(source_values)
+        std = self.generator_linspace.calculate_std(mean)
+        return (sqrt(std),), array([mean / 2])
 
     def generate_parameters(self) -> tuple[float, ...]:
         return (self.generator_linspace.generate_std(),)
@@ -30,28 +37,28 @@ class RandomWalk(Process):
 
     def generate_time_series(
         self,
-        sample: tuple[int, tuple[float, ...]],
+        data: tuple[int, tuple[float, ...]],
         previous_values: NDArray | None = None,
     ) -> tuple[TimeSeries, dict]:
-        values = array([0.0 for _ in range(0, sample[0])])
-        values_to_add = sample[0]
+        values = array([0.0 for _ in range(0, data[0])])
+        values_to_add = data[0]
         if previous_values is None:
             values[0] = self.generate_init_values()[0]
             previous_value = values[0]
             values_to_add -= 1
         else:
             previous_value = previous_values[-1]
-        for i in range(sample[0] - values_to_add, sample[0]):
-            previous_value += normal(0.0, sample[1][0])
+        for i in range(data[0] - values_to_add, data[0]):
+            previous_value += normal(0.0, data[1][0])
             values[i] = previous_value
-        rw_time_series = TimeSeries(sample[0])
-        rw_time_series.add_values(values, (self.name, sample))
+        rw_time_series = TimeSeries(data[0])
+        rw_time_series.add_values(values, (self.name, data))
         if previous_values is None:
             return rw_time_series, self.get_info(
-                sample, values[0 : sample[0] - values_to_add]
+                data, values[0 : data[0] - values_to_add]
             )
         else:
-            return rw_time_series, self.get_info(sample, (previous_values[-1],))
+            return rw_time_series, self.get_info(data, (previous_values[-1],))
 
 
 if __name__ == "__main__":

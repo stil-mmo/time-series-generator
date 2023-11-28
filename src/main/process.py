@@ -37,7 +37,9 @@ class Process(ABC):
         self._generator_linspace = generator_linspace
 
     @abstractmethod
-    def create_parameters(self, source_values: NDArray) -> tuple[float, ...]:
+    def calculate_data(
+        self, source_values: NDArray | None = None
+    ) -> tuple[tuple[float, ...], NDArray]:
         pass
 
     @abstractmethod
@@ -51,21 +53,21 @@ class Process(ABC):
     @abstractmethod
     def generate_time_series(
         self,
-        sample: tuple[int, tuple[float, ...]],
+        data: tuple[int, tuple[float, ...]],
         previous_values: NDArray | None = None,
     ) -> tuple[TimeSeries, dict]:
         pass
 
     def get_info(
         self,
-        sample: tuple[int, tuple[float, ...]],
+        data: tuple[int, tuple[float, ...]],
         init_values: tuple[float, ...] | None = None,
     ) -> dict:
         info = {
             "name": self.name,
             "lag": self.lag,
             "initial_values": init_values,
-            "steps": sample[0],
-            "parameters": sample[1],
+            "steps": data[0],
+            "parameters": data[1],
         }
         return info

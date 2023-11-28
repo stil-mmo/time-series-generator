@@ -47,17 +47,17 @@ class ETSComponent:
         self.values = self.set_values(additional_values)
 
     def set_values(self, additional_values=None):
-        component_values = array([0.0 for _ in range(self.num_samples)])
+        component_values = array([0.0 for _ in range(self.num_samples + self.lag)])
         for i in range(self.lag):
             component_values[i] = self.init_values[i]
-        for i in range(self.num_samples - self.lag):
+        for i in range(self.num_samples):
             component_value = self.parameter * self.error[i]
             if self.lag != 0:
                 component_value += component_values[i]
             if additional_values is not None:
                 component_value += transpose(additional_values[:, i])
             component_values[self.lag + i] = component_value
-        return component_values
+        return component_values[self.lag :]
 
 
 if __name__ == "__main__":

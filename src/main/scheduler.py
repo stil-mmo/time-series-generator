@@ -1,7 +1,9 @@
 from math import sqrt
-from random import randint, shuffle
 
+from numpy.random import normal, randint, shuffle
+from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
+from src.main.generator_typing import ProcessDataType, ProcessOrderType
 from src.main.process_list import ProcessList
 from src.main.specific_processes.double_exponential_smoothing import (
     DoubleExponentialSmoothing,
@@ -15,9 +17,6 @@ from src.main.specific_processes.triple_exponential_smoothing import (
     TripleExponentialSmoothing,
 )
 from src.main.specific_processes.white_noise_process import WhiteNoiseProcess
-
-PROCESS_ORDER = list[tuple[int, str]]
-PROCESS_SAMPLES = tuple[str, list[tuple[int, tuple[float, ...]]]]
 
 
 class Scheduler:
@@ -38,6 +37,7 @@ class Scheduler:
             if process_order is not None
             else self.generate_process_order()
         )
+        self.source_values = None
 
     @staticmethod
     def generate_steps_number(
@@ -52,15 +52,31 @@ class Scheduler:
             shuffle(steps_list)
             return steps_list
         steps_list = []
-        while current_num_max > 0 and len(steps_list) < num_parts:
+        while current_num_max > 1 and len(steps_list) < num_parts:
             if len(steps_list) == num_parts - 1:
                 steps = current_num_max
             else:
                 steps = randint(1, current_num_max)
             current_num_max -= steps
             steps_list.append(steps)
+        if sum(steps_list) < num_max:
+            steps_list.append(num_max - sum(steps_list))
         shuffle(steps_list)
         return steps_list
+
+    def set_source_values(self, source_values: NDArray[float] | None) -> None:
+        self.source_values = source_values
+
+    def change_source_values(self) -> None:
+        new_source_values = self.source_values.copy()
+        for i in range(len(new_source_values)):
+            new_source_values[i] = normal(
+                new_source_values[i], self.generator_linspace.step * 2
+            )
+        self.source_values = new_source_values
+
+    def set_process_order(self, process_order: ProcessOrderType) -> None:
+        self.process_order = process_order
 
     def generate_process_list(self) -> ProcessList:
         process_list = ProcessList()
@@ -78,7 +94,7 @@ class Scheduler:
         )
         return process_list
 
-    def generate_process_order(self) -> PROCESS_ORDER:
+    def generate_process_order(self) -> ProcessOrderType:
         process_schedule = []
         num_parts = randint(1, int(sqrt(self.num_steps)))
         processes_steps = self.generate_steps_number(self.num_steps, num_parts)
@@ -90,22 +106,36 @@ class Scheduler:
 
     def generate_schedule(
         self, stable_parameters: bool = False
-    ) -> list[PROCESS_SAMPLES]:
+    ) -> list[ProcessDataType]:
         schedule = []
         for steps, process_name in self.process_order:
             process = self.process_list.get_processes([process_name])[0]
             process_data = (process_name, [])
             if stable_parameters or steps == 1:
-                process_data[1].append((steps, process.generate_parameters()))
+                if self.source_values is None:
+                    process_data[1].append((steps, process.generate_parameters()))
+                else:
+                    process_data[1].append(
+                        (steps, process.calculate_data(self.source_values)[0])
+                    )
             else:
                 parameters_steps = self.generate_steps_number(steps, randint(1, steps))
                 num_parts = len(parameters_steps)
                 for i in range(num_parts):
-                    process_data[1].append(
-                        (
-                            parameters_steps[i],
-                            process.generate_parameters(),
+                    if self.source_values is None:
+                        process_data[1].append(
+                            (
+                                parameters_steps[i],
+                                process.generate_parameters(),
+                            )
                         )
-                    )
+                    else:
+                        process_data[1].append(
+                            (
+                                parameters_steps[i],
+                                process.calculate_data(self.source_values)[0],
+                            )
+                        )
+                        self.change_source_values()
             schedule.append(process_data)
         return schedule

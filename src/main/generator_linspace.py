@@ -1,3 +1,4 @@
+from numpy import sqrt
 from numpy.random import normal, uniform
 from numpy.typing import NDArray
 
@@ -18,4 +19,12 @@ class GeneratorLinspace:
         return uniform(self.start, self.stop, num_values)
 
     def generate_std(self, std_coefficient=1.0) -> float:
-        return abs(normal(self.step, std_coefficient * self.step))
+        return sqrt(abs(normal(self.step, std_coefficient * self.step)))
+
+    def calculate_std(self, source_value: float) -> float:
+        std_coefficient = source_value / self.stop
+        if std_coefficient >= 0.5:
+            std = self.step * (1 + (1 - std_coefficient) * 2)
+        else:
+            std = self.step * (1 - std_coefficient * 2)
+        return abs(std)
