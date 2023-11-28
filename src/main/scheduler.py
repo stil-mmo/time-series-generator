@@ -61,6 +61,8 @@ class Scheduler:
                 steps = randint(1, current_num_max)
             current_num_max -= steps
             steps_list.append(steps)
+        if sum(steps_list) < num_max:
+            steps_list.append(num_max - sum(steps_list))
         shuffle(steps_list)
         return steps_list
 
@@ -80,6 +82,7 @@ class Scheduler:
         process_list.add_processes(
             [
                 WhiteNoiseProcess(generator_linspace=self.generator_linspace),
+                SimpleRandomWalk(generator_linspace=self.generator_linspace),
                 RandomWalk(generator_linspace=self.generator_linspace),
                 SimpleExponentialSmoothing(generator_linspace=self.generator_linspace),
                 DoubleExponentialSmoothing(generator_linspace=self.generator_linspace),

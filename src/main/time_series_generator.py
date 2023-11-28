@@ -28,23 +28,23 @@ class TimeSeriesGenerator:
         process_list: ProcessList,
         schedule: list[PROCESS_SAMPLES],
     ) -> TimeSeries:
-        time_series = TimeSeries(self.num_steps)
+        current_time_series = TimeSeries(self.num_steps)
         for process_name, process_schedule in schedule:
             process = process_list.get_processes([process_name])[0]
             for sample in process_schedule:
-                if len(time_series.get_values()) == 0:
-                    time_series.add_values(
+                if current_time_series.last_index == 0:
+                    current_time_series.add_values(
                         process.generate_time_series(sample)[0].get_values(),
                         (process.name, sample),
                     )
                 else:
-                    time_series.add_values(
+                    current_time_series.add_values(
                         process.generate_time_series(
-                            sample, previous_values=time_series.get_values()
+                            sample, previous_values=current_time_series.get_values()
                         )[0].get_values(),
                         (process.name, sample),
                     )
-        return time_series
+        return current_time_series
 
     def generate_all(
         self,
@@ -98,9 +98,13 @@ class TimeSeriesGenerator:
 
 
 if __name__ == "__main__":
-    coordinates, border_values = sample_points(3)
+    coordinates = ndarray((1, 3))
+    coordinates[0] = array([100.0, 21.0, 76.0])
+    #coordinates[1] = array([98.0, 23.0, 74.0])
+    #coordinates[2] = array([12.0, 95.0, 31.0])
+    border_values = array([0.0, 100.0])
     ts_generator = TimeSeriesGenerator(
-        num_time_series=3, num_steps=100, points=coordinates
+        num_time_series=1, num_steps=100, points=coordinates
     )
     test_generator_linspace = GeneratorLinspace(
         start=border_values[0], stop=border_values[1], parts=100
@@ -110,4 +114,9 @@ if __name__ == "__main__":
         stable_parameters=False,
         single_schedule=False,
     )
+    print("------------------")
+    for time_series in time_series_list:
+        print(time_series.samples)
+        print(time_series.get_values())
+        print("------------------")
     show_plot(time_series_array)
