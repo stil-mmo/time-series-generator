@@ -1,5 +1,5 @@
 from matplotlib import pyplot as plt
-from numpy import cos, linspace, max, min, ones_like, outer, pi, sin
+from numpy import cos, linspace, max, min, ones_like, outer, pi, sin, transpose
 from numpy.linalg import norm
 from numpy.random import randn
 from numpy.typing import NDArray
@@ -13,15 +13,9 @@ def sample_spherical(num_points: int, ndim=3) -> NDArray:
 
 def get_border_value(coordinates: NDArray, is_min: bool = True) -> float:
     if is_min:
-        min_x = min(coordinates[:, 0])
-        min_y = min(coordinates[:, 1])
-        min_z = min(coordinates[:, 2])
-        return min([min_x, min_y, min_z])
+        return min(coordinates)
     else:
-        max_x = max(coordinates[:, 0])
-        max_y = max(coordinates[:, 1])
-        max_z = max(coordinates[:, 2])
-        return max([max_x, max_y, max_z])
+        return max(coordinates)
 
 
 def move_points(coordinates: NDArray) -> NDArray:
@@ -37,18 +31,20 @@ def sample_points(num_points: int) -> tuple[NDArray, tuple[float, float]]:
         get_border_value(coordinates, is_min=True),
         get_border_value(coordinates, is_min=False),
     )
-    return coordinates, border_values
+    return transpose(coordinates), border_values
 
 
-if __name__ == "__main__":
+def show_sphere(coordinates: NDArray) -> None:
     phi = linspace(0, pi, 20)
     theta = linspace(0, 2 * pi, 40)
     x = outer(sin(theta), cos(phi))
     y = outer(sin(theta), sin(phi))
     z = outer(cos(theta), ones_like(phi))
 
-    xi, yi, zi = sample_spherical(10)
-
     fig, ax = plt.subplots(1, 1, subplot_kw={"projection": "3d", "aspect": "equal"})
     ax.plot_wireframe(x, y, z, color="k", rstride=1, cstride=1)
-    ax.scatter(xi, yi, zi, s=100, c="r", zorder=10)
+    ax.scatter(coordinates[0], coordinates[1], coordinates[2], s=100, c="r", zorder=10)
+
+
+if __name__ == "__main__":
+    show_sphere(sample_spherical(10))
