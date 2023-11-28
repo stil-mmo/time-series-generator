@@ -1,5 +1,5 @@
 from matplotlib import pyplot as plt
-from numpy import min, max, sin, cos, linspace, pi, outer, ones_like
+from numpy import cos, linspace, max, min, ones_like, outer, pi, sin
 from numpy.linalg import norm
 from numpy.random import randn
 from numpy.typing import NDArray

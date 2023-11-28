@@ -1,14 +1,13 @@
-from numpy import zeros, sqrt, max, min
+from numpy import max, min, sqrt, zeros
 from numpy.random import uniform
 from numpy.typing import NDArray
-
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process import Process
 from src.main.specific_processes.ets_process_resources.ets_process_builder import (
     ETSProcessBuilder,
 )
 from src.main.time_series import TimeSeries
-from src.main.utils.parameters_approximation import weighted_mean, moving_average
+from src.main.utils.parameters_approximation import moving_average, weighted_mean
 from src.main.utils.utils import draw_process_plot
 
 

@@ -1,6 +1,6 @@
+from numpy import sqrt
 from numpy.random import normal, uniform
 from numpy.typing import NDArray
-from numpy import sqrt
 
 
 class GeneratorLinspace:

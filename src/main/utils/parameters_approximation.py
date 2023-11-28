@@ -1,6 +1,6 @@
-from numpy import zeros, average, array, flip, cumsum, insert, std
-from numpy.typing import NDArray
+from numpy import array, average, cumsum, flip, insert, std, zeros
 from numpy.linalg import norm
+from numpy.typing import NDArray
 
 
 def calculate_distance(point: NDArray) -> float:

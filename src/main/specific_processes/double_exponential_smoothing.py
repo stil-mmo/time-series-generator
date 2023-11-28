@@ -1,7 +1,6 @@
-from numpy import sqrt, array
+from numpy import array, sqrt
 from numpy.random import uniform
 from numpy.typing import NDArray
-
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process import Process
 from src.main.specific_processes.ets_process_resources.ets_process_builder import (

@@ -1,12 +1,11 @@
-from numpy.typing import NDArray
-
 from generator_linspace import GeneratorLinspace
-from numpy import ndarray, array
+from numpy import array, ndarray
+from numpy.typing import NDArray
 from scheduler import PROCESS_ORDER, PROCESS_SAMPLES, Scheduler
+from src.main.point_sampling import sample_points
 from src.main.process_list import ProcessList
 from src.main.time_series import TimeSeries
 from src.main.utils.utils import show_plot
-from src.main.point_sampling import sample_points
 
 
 class TimeSeriesGenerator:

@@ -1,8 +1,7 @@
 from math import sqrt
 
+from numpy.random import normal, randint, shuffle
 from numpy.typing import NDArray
-from numpy.random import randint, shuffle, normal
-
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process_list import ProcessList
 from src.main.specific_processes.double_exponential_smoothing import (
