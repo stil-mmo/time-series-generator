@@ -1,4 +1,3 @@
-from numpy import array
 from numpy.random import uniform
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
@@ -22,13 +21,16 @@ class SimpleExponentialSmoothing(Process):
     def num_parameters(self) -> int:
         return 2
 
+    def create_parameters(self, source_values: NDArray) -> tuple[float, ...]:
+        return self.generate_parameters()
+
     def generate_parameters(self) -> tuple[float, ...]:
-        std = abs(self.generate_value()) / self.generator_linspace.parts
+        std = self.generator_linspace.generate_std()
         error_coefficient = uniform(0.0, 1.0)
         return error_coefficient, std
 
     def generate_init_values(self) -> NDArray:
-        return array([self.generate_value()])
+        return self.generator_linspace.generate_values(is_normal=False)
 
     def generate_time_series(
         self,

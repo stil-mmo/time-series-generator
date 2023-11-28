@@ -1,6 +1,7 @@
 from random import uniform
 
 from numpy import array
+from numpy.random import normal
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process import Process
@@ -8,27 +9,36 @@ from src.main.time_series import TimeSeries
 from src.main.utils.utils import draw_process_plot
 
 
-class RandomWalkProcess(Process):
-    def __init__(self, generator_linspace: GeneratorLinspace, lag: int = 1):
+class SimpleRandomWalk(Process):
+    def __init__(
+        self,
+        generator_linspace: GeneratorLinspace,
+        lag: int = 1,
+        fixed_walk: float | None = None,
+    ):
         super().__init__(lag, generator_linspace)
+        self.fixed_walk = fixed_walk
 
     @property
     def name(self) -> str:
-        return "random_walk"
+        return "simple_random_walk"
 
     @property
     def num_parameters(self) -> int:
         return 3
 
+    def create_parameters(self, source_values: NDArray) -> tuple[float, ...]:
+        return self.generate_parameters()
+
     def generate_parameters(self) -> tuple[float, ...]:
         up_probability = uniform(0.0, 1.0)
         down_probability = 1 - up_probability
         step = self.generator_linspace.step
-        walk = uniform(0.5 * step, 1.5 * step)
+        walk = normal(step, step / 2) if self.fixed_walk is None else self.fixed_walk
         return up_probability, down_probability, walk
 
     def generate_init_values(self) -> NDArray:
-        return array([self.generate_value()])
+        return self.generator_linspace.generate_values(is_normal=False)
 
     def generate_time_series(
         self,
@@ -63,7 +73,7 @@ class RandomWalkProcess(Process):
 
 if __name__ == "__main__":
     test_generator_linspace = GeneratorLinspace(0.0, 100.0, 100)
-    proc = RandomWalkProcess(test_generator_linspace)
+    proc = SimpleRandomWalk(test_generator_linspace)
     test_sample = (100, proc.generate_parameters())
     test_time_series, test_info = proc.generate_time_series(test_sample)
     print(test_time_series.get_values())
