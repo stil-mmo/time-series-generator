@@ -1,5 +1,5 @@
-from numpy import max, min, sqrt, zeros, array, sum
-from numpy.random import uniform, normal
+from numpy import array, max, min, sqrt, sum, zeros
+from numpy.random import normal, uniform
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process import Process
@@ -24,7 +24,7 @@ class TripleExponentialSmoothing(Process):
         return 4
 
     def calculate_data(
-            self, source_values: NDArray | None = None
+        self, source_values: NDArray | None = None
     ) -> tuple[tuple[float, ...], NDArray]:
         if source_values is None:
             return self.generate_parameters(), self.generate_init_values()
@@ -44,11 +44,11 @@ class TripleExponentialSmoothing(Process):
         else:
             init_values = values[: self.lag]
         return (
-                   long_term_coefficient,
-                   trend_coefficient,
-                   seasonality_coefficient,
-                   sqrt(std),
-               ), init_values
+            long_term_coefficient,
+            trend_coefficient,
+            seasonality_coefficient,
+            sqrt(std),
+        ), init_values
 
     def generate_parameters(self) -> tuple[float, ...]:
         std = self.generator_linspace.generate_std()
@@ -67,9 +67,9 @@ class TripleExponentialSmoothing(Process):
         return init_values
 
     def generate_time_series(
-            self,
-            sample: tuple[int, tuple[float, ...]],
-            previous_values: NDArray | None = None,
+        self,
+        sample: tuple[int, tuple[float, ...]],
+        previous_values: NDArray | None = None,
     ) -> tuple[TimeSeries, dict]:
         ets_values = ETSProcessBuilder(sample[0])
         ets_values.set_normal_error(mean=0.0, std=sample[1][3])
@@ -82,16 +82,20 @@ class TripleExponentialSmoothing(Process):
             init_values = self.generate_init_values()
             long_term_init_value = previous_values[-1]
             trend_init_value = init_values[1][0]
-            seasonality_init_values = array([0. for _ in range(self.lag)])
+            seasonality_init_values = array([0.0 for _ in range(self.lag)])
             seasonality_init_values[: len(previous_values)] = previous_values
             for i in range(len(previous_values), self.lag):
-                seasonality_init_values[i] = normal(previous_values[-1], self.generator_linspace.step)
+                seasonality_init_values[i] = normal(
+                    previous_values[-1], self.generator_linspace.step
+                )
         else:
             long_term_init_value = previous_values[-1]
             trend_init_value = 0.0
-            seasonality_init_values = previous_values[-self.lag:]
+            seasonality_init_values = previous_values[-self.lag :]
         ets_values.set_seasonal(
-            lag=self.lag, init_values=seasonality_init_values / sum(seasonality_init_values), parameter=sample[1][2]
+            lag=self.lag,
+            init_values=seasonality_init_values / sum(seasonality_init_values),
+            parameter=sample[1][2],
         )
         trend_index = ets_values.set_trend(
             init_value=trend_init_value, parameter=sample[1][1]

@@ -98,13 +98,9 @@ class TimeSeriesGenerator:
 
 
 if __name__ == "__main__":
-    coordinates = ndarray((1, 3))
-    coordinates[0] = array([100.0, 21.0, 76.0])
-    #coordinates[1] = array([98.0, 23.0, 74.0])
-    #coordinates[2] = array([12.0, 95.0, 31.0])
-    border_values = array([0.0, 100.0])
+    coordinates, border_values = sample_points(3)
     ts_generator = TimeSeriesGenerator(
-        num_time_series=1, num_steps=100, points=coordinates
+        num_time_series=3, num_steps=100, points=coordinates
     )
     test_generator_linspace = GeneratorLinspace(
         start=border_values[0], stop=border_values[1], parts=100
