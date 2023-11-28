@@ -43,19 +43,19 @@ class SimpleExponentialSmoothing(Process):
 
     def generate_time_series(
         self,
-        sample: tuple[int, tuple[float, ...]],
+        data: tuple[int, tuple[float, ...]],
         previous_values: NDArray | None = None,
     ) -> tuple[TimeSeries, dict]:
-        ets_values = ETSProcessBuilder(sample[0])
-        ets_values.set_normal_error(mean=0.0, std=sample[1][1])
+        ets_values = ETSProcessBuilder(data[0])
+        ets_values.set_normal_error(mean=0.0, std=data[1][1])
         if previous_values is None:
             init_value = self.generate_init_values()[0]
         else:
             init_value = previous_values[-1]
-        ets_values.set_long_term(init_value=init_value, parameter=sample[1][0])
-        exp_time_series = TimeSeries(sample[0])
-        exp_time_series.add_values(ets_values.generate_values(), (self.name, sample))
-        return exp_time_series, self.get_info(sample, init_value)
+        ets_values.set_long_term(init_value=init_value, parameter=data[1][0])
+        exp_time_series = TimeSeries(data[0])
+        exp_time_series.add_values(ets_values.generate_values(), (self.name, data))
+        return exp_time_series, self.get_info(data, init_value)
 
 
 if __name__ == "__main__":

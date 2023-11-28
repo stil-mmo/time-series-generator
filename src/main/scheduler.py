@@ -16,9 +16,7 @@ from src.main.specific_processes.triple_exponential_smoothing import (
     TripleExponentialSmoothing,
 )
 from src.main.specific_processes.white_noise_process import WhiteNoiseProcess
-
-PROCESS_ORDER = list[tuple[int, str]]
-PROCESS_SAMPLES = tuple[str, list[tuple[int, tuple[float, ...]]]]
+from src.main.generator_typing import ProcessOrderType, ProcessDataType
 
 
 class Scheduler:
@@ -77,6 +75,9 @@ class Scheduler:
             )
         self.source_values = new_source_values
 
+    def set_process_order(self, process_order: ProcessOrderType) -> None:
+        self.process_order = process_order
+
     def generate_process_list(self) -> ProcessList:
         process_list = ProcessList()
         process_list.add_processes(
@@ -93,7 +94,7 @@ class Scheduler:
         )
         return process_list
 
-    def generate_process_order(self) -> PROCESS_ORDER:
+    def generate_process_order(self) -> ProcessOrderType:
         process_schedule = []
         num_parts = randint(1, int(sqrt(self.num_steps)))
         processes_steps = self.generate_steps_number(self.num_steps, num_parts)
@@ -105,7 +106,7 @@ class Scheduler:
 
     def generate_schedule(
         self, stable_parameters: bool = False
-    ) -> list[PROCESS_SAMPLES]:
+    ) -> list[ProcessDataType]:
         schedule = []
         for steps, process_name in self.process_order:
             process = self.process_list.get_processes([process_name])[0]

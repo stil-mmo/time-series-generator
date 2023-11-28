@@ -20,7 +20,7 @@ class ProcessList:
                 self.processes.pop(process_name)
                 self.num_processes -= 1
             else:
-                raise ValueError(f"Process {process_name} not found in process list.")
+                print(f"Process {process_name} not found in process list.")
 
     def get_processes(self, process_names: list[str]) -> list[Process]:
         processes = []
@@ -28,7 +28,7 @@ class ProcessList:
             if process_name in self.processes.keys():
                 processes.append(self.processes[process_name])
             else:
-                raise ValueError(f"Process {process_name} not found in process list.")
+                print(f"Process {process_name} not found in process list.")
         return processes
 
     def get_random_processes(self, num_processes: int) -> list[Process]:

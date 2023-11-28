@@ -50,20 +50,20 @@ class WhiteNoiseProcess(Process):
 
     def generate_time_series(
         self,
-        sample: tuple[int, tuple[float, ...]],
+        data: tuple[int, tuple[float, ...]],
         previous_values: NDArray | None = None,
     ) -> tuple[TimeSeries, dict]:
-        distribution_id, *parameters = sample[1]
+        distribution_id, *parameters = data[1]
         if previous_values is None:
             wn_values = self.distributions[int(distribution_id)](
-                size=sample[0], *parameters
+                size=data[0], *parameters
             )
         else:
             std = self.generator_linspace.generate_std()
-            wn_values = normal(previous_values[-1], std, sample[0])
-        wn_time_series = TimeSeries(sample[0])
-        wn_time_series.add_values(wn_values, (self.name, sample))
-        return wn_time_series, self.get_info(sample)
+            wn_values = normal(previous_values[-1], std, data[0])
+        wn_time_series = TimeSeries(data[0])
+        wn_time_series.add_values(wn_values, (self.name, data))
+        return wn_time_series, self.get_info(data)
 
 
 if __name__ == "__main__":

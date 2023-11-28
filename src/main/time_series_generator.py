@@ -1,7 +1,9 @@
-from generator_linspace import GeneratorLinspace
-from numpy import array, ndarray
+from numpy import ndarray
 from numpy.typing import NDArray
-from scheduler import PROCESS_ORDER, PROCESS_SAMPLES, Scheduler
+
+from generator_linspace import GeneratorLinspace
+from scheduler import Scheduler
+from src.main.generator_typing import ProcessDataType, ProcessOrderType
 from src.main.point_sampling import sample_points
 from src.main.process_list import ProcessList
 from src.main.time_series import TimeSeries
@@ -14,7 +16,7 @@ class TimeSeriesGenerator:
         num_time_series: int,
         num_steps: int,
         process_list: ProcessList | None = None,
-        process_order: PROCESS_ORDER | None = None,
+        process_order: ProcessOrderType | None = None,
         points: NDArray | None = None,
     ):
         self.num_time_series = num_time_series
@@ -26,23 +28,23 @@ class TimeSeriesGenerator:
     def generate_time_series(
         self,
         process_list: ProcessList,
-        schedule: list[PROCESS_SAMPLES],
+        schedule: list[ProcessDataType],
     ) -> TimeSeries:
         current_time_series = TimeSeries(self.num_steps)
         for process_name, process_schedule in schedule:
             process = process_list.get_processes([process_name])[0]
-            for sample in process_schedule:
+            for process_data in process_schedule:
                 if current_time_series.last_index == 0:
                     current_time_series.add_values(
-                        process.generate_time_series(sample)[0].get_values(),
-                        (process.name, sample),
+                        process.generate_time_series(process_data)[0].get_values(),
+                        (process.name, process_data),
                     )
                 else:
                     current_time_series.add_values(
                         process.generate_time_series(
-                            sample, previous_values=current_time_series.get_values()
+                            process_data, previous_values=current_time_series.get_values()
                         )[0].get_values(),
-                        (process.name, sample),
+                        (process.name, process_data),
                     )
         return current_time_series
 
@@ -52,8 +54,8 @@ class TimeSeriesGenerator:
         stable_parameters: bool = True,
         single_schedule: bool = True,
     ) -> tuple[ndarray, list[TimeSeries]]:
-        time_series_array = ndarray((self.num_time_series, self.num_steps))
-        time_series_list = []
+        ts_array = ndarray((self.num_time_series, self.num_steps))
+        ts_list = []
         scheduler = Scheduler(
             num_steps=self.num_steps,
             generator_linspace=generator_linspace,
@@ -70,31 +72,31 @@ class TimeSeriesGenerator:
         for i in range(self.num_time_series):
             if schedule is None:
                 if self.points is None:
-                    time_series = self.generate_time_series(
+                    ts = self.generate_time_series(
                         scheduler.process_list,
                         scheduler.generate_schedule(
                             stable_parameters=stable_parameters
                         ),
                     )
-                    time_series_array[i] = time_series.get_values()
-                    time_series_list.append(time_series)
+                    ts_array[i] = ts.get_values()
+                    ts_list.append(ts)
                 else:
                     scheduler.set_source_values(self.points[i])
-                    time_series = self.generate_time_series(
+                    ts = self.generate_time_series(
                         scheduler.process_list,
                         scheduler.generate_schedule(
                             stable_parameters=stable_parameters
                         ),
                     )
-                    time_series_array[i] = time_series.get_values()
-                    time_series_list.append(time_series)
+                    ts_array[i] = ts.get_values()
+                    ts_list.append(ts)
             else:
-                time_series = self.generate_time_series(
+                ts = self.generate_time_series(
                     scheduler.process_list, schedule
                 )
-                time_series_array[i] = time_series.get_values()
-                time_series_list.append(time_series)
-        return time_series_array, time_series_list
+                ts_array[i] = ts.get_values()
+                ts_list.append(ts)
+        return ts_array, ts_list
 
 
 if __name__ == "__main__":
@@ -110,9 +112,4 @@ if __name__ == "__main__":
         stable_parameters=False,
         single_schedule=False,
     )
-    print("------------------")
-    for time_series in time_series_list:
-        print(time_series.samples)
-        print(time_series.get_values())
-        print("------------------")
     show_plot(time_series_array)
