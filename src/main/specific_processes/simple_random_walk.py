@@ -1,11 +1,13 @@
 from random import uniform
 
-from numpy import array
+from numpy import array, sum
 from numpy.random import normal
 from numpy.typing import NDArray
+
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process import Process
 from src.main.time_series import TimeSeries
+from src.main.utils.parameters_approximation import weighted_mean
 from src.main.utils.utils import draw_process_plot
 
 
@@ -27,8 +29,16 @@ class SimpleRandomWalk(Process):
     def num_parameters(self) -> int:
         return 3
 
-    def create_parameters(self, source_values: NDArray) -> tuple[float, ...]:
-        return self.generate_parameters()
+    def calculate_data(
+        self, source_values: NDArray | None = None
+    ) -> tuple[tuple[float, ...], NDArray]:
+        if source_values is None:
+            return self.generate_parameters(), self.generate_init_values()
+        mean = weighted_mean(source_values)
+        up_probability = mean / sum(source_values)
+        down_probability = 1 - up_probability
+        step = self.generator_linspace.calculate_std(mean)
+        return (up_probability, down_probability, step), array([mean / 2])
 
     def generate_parameters(self) -> tuple[float, ...]:
         up_probability = uniform(0.0, 1.0)

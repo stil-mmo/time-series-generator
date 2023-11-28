@@ -37,7 +37,9 @@ class Process(ABC):
         self._generator_linspace = generator_linspace
 
     @abstractmethod
-    def create_parameters(self, source_values: NDArray) -> tuple[float, ...]:
+    def calculate_data(
+        self, source_values: NDArray | None = None
+    ) -> tuple[tuple[float, ...], NDArray]:
         pass
 
     @abstractmethod

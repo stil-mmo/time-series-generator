@@ -1,11 +1,14 @@
+from numpy import array, sqrt
 from numpy.random import uniform
 from numpy.typing import NDArray
+
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process import Process
 from src.main.specific_processes.ets_process_resources.ets_process_builder import (
     ETSProcessBuilder,
 )
 from src.main.time_series import TimeSeries
+from src.main.utils.parameters_approximation import weighted_mean
 from src.main.utils.utils import draw_process_plot
 
 
@@ -21,8 +24,15 @@ class SimpleExponentialSmoothing(Process):
     def num_parameters(self) -> int:
         return 2
 
-    def create_parameters(self, source_values: NDArray) -> tuple[float, ...]:
-        return self.generate_parameters()
+    def calculate_data(
+        self, source_values: NDArray | None = None
+    ) -> tuple[tuple[float, ...], NDArray]:
+        if source_values is None:
+            return self.generate_parameters(), self.generate_init_values()
+        mean = weighted_mean(source_values)
+        error_coefficient = mean / self.generator_linspace.stop
+        std = self.generator_linspace.calculate_std(mean)
+        return (error_coefficient, sqrt(std)), array([mean])
 
     def generate_parameters(self) -> tuple[float, ...]:
         std = self.generator_linspace.generate_std()
