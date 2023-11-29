@@ -1,4 +1,4 @@
-from numpy import array, max, sqrt, min, float32
+from numpy import array, float32, max, min, sqrt
 from numpy.random import normal, randint, uniform
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace

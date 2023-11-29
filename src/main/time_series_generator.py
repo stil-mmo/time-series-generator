@@ -1,10 +1,9 @@
-from numpy import ndarray
-
 from generator_linspace import GeneratorLinspace
+from numpy import ndarray
 from scheduler import Scheduler
 from src.main.generator_typing import ProcessDataType, ProcessOrderType
 from src.main.point_clustering import cluster_points
-from src.main.point_sampling import sample_points, move_points
+from src.main.point_sampling import move_points, sample_points
 from src.main.process_list import ProcessList
 from src.main.scheduler_storage import SchedulerStorage
 from src.main.time_series import TimeSeries
@@ -40,11 +39,15 @@ class TimeSeriesGenerator:
             process_order=self.process_order,
         )
 
-    def get_point_schedule(self, point_index: int) -> tuple[ProcessList, list[ProcessDataType]]:
+    def get_point_schedule(
+        self, point_index: int
+    ) -> tuple[ProcessList, list[ProcessDataType]]:
         cluster = self.scheduler_storage.get_cluster(point_index)
         scheduler = self.scheduler_storage.get_scheduler(cluster)
         scheduler.set_source_values(self.scheduler_storage.points[point_index])
-        return scheduler.process_list, scheduler.generate_schedule(self.stable_parameters)
+        return scheduler.process_list, scheduler.generate_schedule(
+            self.stable_parameters
+        )
 
     def generate_time_series(
         self,
@@ -70,7 +73,9 @@ class TimeSeriesGenerator:
                     )
         return current_time_series
 
-    def generate_all(self, ) -> tuple[ndarray, list[TimeSeries]]:
+    def generate_all(
+        self,
+    ) -> tuple[ndarray, list[TimeSeries]]:
         ts_array = ndarray((self.num_time_series, self.num_steps))
         ts_list = []
         scheduler = self.generate_new_scheduler()
@@ -79,7 +84,9 @@ class TimeSeriesGenerator:
                 if self.single_schedule:
                     ts = self.generate_time_series(
                         scheduler.process_list,
-                        scheduler.generate_schedule(stable_parameters=self.stable_parameters),
+                        scheduler.generate_schedule(
+                            stable_parameters=self.stable_parameters
+                        ),
                     )
                 else:
                     scheduler = self.generate_new_scheduler()
