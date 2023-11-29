@@ -1,4 +1,4 @@
-from numpy import array, max, sqrt
+from numpy import array, float32, max, min, sqrt
 from numpy.random import normal, randint, uniform
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
@@ -35,7 +35,7 @@ class WhiteNoiseProcess(Process):
         if distribution_id == 0:
             mean = self.generator_linspace.generate_values(is_normal=False)[0]
             std = self.generator_linspace.generate_std()
-            return float(distribution_id), mean, abs(std)
+            return distribution_id, mean, abs(std)
         else:
             low = self.generator_linspace.generate_values(
                 is_normal=False, center_shift=0.5
@@ -43,7 +43,7 @@ class WhiteNoiseProcess(Process):
             high = self.generator_linspace.generate_values(
                 is_normal=False, center_shift=1.5
             )[0]
-            return float(distribution_id), min(low, high), max(low, high)
+            return distribution_id, min(array([low, high])), max(array([low, high]))
 
     def generate_init_values(self) -> NDArray:
         return array([])

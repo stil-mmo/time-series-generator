@@ -1,16 +1,17 @@
-from numpy import transpose
-from point_sampling import sample_spherical, show_sphere
-from sklearn.neighbors import NearestNeighbors
+from numpy import float32
+from numpy.typing import NDArray
+from sklearn.cluster import KMeans
+from src.main.point_sampling import sample_points
 
 
-def get_knn(points, k):
-    neighbours = NearestNeighbors(n_neighbors=k, algorithm="ball_tree").fit(points)
-    knn_distances, knn_indices = neighbours.kneighbors(points)
-    return knn_indices, knn_distances
+def cluster_points(points: NDArray[float32], n_clusters: int) -> NDArray[float32]:
+    model = KMeans(n_clusters=n_clusters)
+    model.fit(points)
+    yhat = model.predict(points)
+    return yhat
 
 
 if __name__ == "__main__":
-    coordinates = sample_spherical(3)
-    print(transpose(coordinates))
-    show_sphere(coordinates)
-    print(get_knn(transpose(coordinates), 2))
+    sample_points, _ = sample_points(4)
+    print(sample_points)
+    cluster_points(points=sample_points, n_clusters=2)
