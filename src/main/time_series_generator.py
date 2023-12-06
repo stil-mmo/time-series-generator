@@ -5,8 +5,7 @@ from src.main.process.process_list import ProcessList
 from src.main.scheduler.scheduler import Scheduler
 from src.main.scheduler.scheduler_storage import SchedulerStorage
 from src.main.source_data_processing.aggregated_data import AggregatedData
-from src.main.source_data_processing.point_clustering import cluster_points
-from src.main.source_data_processing.point_sampling import move_points, sample_points
+from src.main.source_data_processing.point_clustering import get_blobs
 from src.main.time_series import TimeSeries
 from src.main.utils.utils import show_plot
 
@@ -113,10 +112,8 @@ class TimeSeriesGenerator:
 
 
 if __name__ == "__main__":
-    coordinates, border_values = sample_points(5)
-    coordinates = move_points(coordinates)
+    coordinates, clusters, border_values = get_blobs(num_samples=5, centers=3)
     print(coordinates)
-    clusters = cluster_points(coordinates, 4)
     print(f"Clusters: {clusters}")
     test_generator_linspace = GeneratorLinspace(
         start=border_values[0], stop=border_values[1], parts=100

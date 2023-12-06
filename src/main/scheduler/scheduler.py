@@ -7,7 +7,6 @@ from src.main.process.double_exponential_smoothing import DoubleExponentialSmoot
 from src.main.process.process_list import ProcessList
 from src.main.process.random_walk import RandomWalk
 from src.main.process.simple_exponential_smoothing import SimpleExponentialSmoothing
-from src.main.process.simple_random_walk import SimpleRandomWalk
 from src.main.process.triple_exponential_smoothing import TripleExponentialSmoothing
 from src.main.process.white_noise_process import WhiteNoiseProcess
 from src.main.source_data_processing.aggregated_data import AggregatedData
@@ -69,7 +68,6 @@ class Scheduler:
         process_list.add_processes(
             [
                 WhiteNoiseProcess(generator_linspace=self.generator_linspace),
-                SimpleRandomWalk(generator_linspace=self.generator_linspace),
                 RandomWalk(generator_linspace=self.generator_linspace),
                 SimpleExponentialSmoothing(generator_linspace=self.generator_linspace),
                 DoubleExponentialSmoothing(generator_linspace=self.generator_linspace),
