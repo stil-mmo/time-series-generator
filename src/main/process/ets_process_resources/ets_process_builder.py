@@ -1,7 +1,6 @@
 from numpy import array, vstack, zeros
 from numpy.random import normal, triangular, uniform
 from numpy.typing import NDArray
-
 from src.main.process.ets_process_resources.ets_component import ETSComponent
 from src.main.utils.utils import show_plot
 

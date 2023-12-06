@@ -1,7 +1,6 @@
 from numpy import float32
 from numpy.typing import NDArray
 from sklearn.cluster import KMeans
-
 from src.main.source_data_processing.point_sampling import sample_points
 
 

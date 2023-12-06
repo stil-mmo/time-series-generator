@@ -1,14 +1,12 @@
 from generator_linspace import GeneratorLinspace
 from numpy import ndarray
-
 from src.main.generator_typing import ProcessDataType, ProcessOrderType
 from src.main.process.process_list import ProcessList
 from src.main.scheduler.scheduler import Scheduler
 from src.main.scheduler.scheduler_storage import SchedulerStorage
 from src.main.source_data_processing.aggregated_data import AggregatedData
 from src.main.source_data_processing.point_clustering import cluster_points
-from src.main.source_data_processing.point_sampling import (move_points,
-                                                            sample_points)
+from src.main.source_data_processing.point_sampling import move_points, sample_points
 from src.main.time_series import TimeSeries
 from src.main.utils.utils import show_plot
 

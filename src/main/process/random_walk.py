@@ -1,7 +1,6 @@
 from numpy import array
 from numpy.random import normal
 from numpy.typing import NDArray
-
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process.process import Process
 from src.main.source_data_processing.aggregated_data import AggregatedData

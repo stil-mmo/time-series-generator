@@ -1,6 +1,5 @@
 from numpy import float32
 from numpy.typing import NDArray
-
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.scheduler.scheduler import Scheduler
 

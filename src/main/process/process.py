@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
 from numpy.typing import NDArray
-
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.source_data_processing.aggregated_data import AggregatedData
 from src.main.time_series import TimeSeries
