@@ -1,7 +1,8 @@
-from numpy import float32
+import numpy as np
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.scheduler.scheduler import Scheduler
+from src.main.source_data_processing.aggregated_data import AggregatedData
 
 
 class SchedulerStorage:
@@ -9,7 +10,7 @@ class SchedulerStorage:
         self,
         num_steps: int,
         generator_linspace: GeneratorLinspace,
-        points: NDArray[float32],
+        points: NDArray[np.float32],
         clusters: NDArray[int],
     ):
         self.num_steps = num_steps
@@ -30,8 +31,8 @@ class SchedulerStorage:
         return self.clusters[point_index]
 
     def get_scheduler(
-        self, cluster: int, source_values: NDArray[float] | None = None
+        self, cluster: int, aggregated_data: AggregatedData | None = None
     ) -> Scheduler:
-        if source_values is not None:
-            self.scheduler_storage[cluster].set_aggregated_data(source_values)
+        if aggregated_data is not None:
+            self.scheduler_storage[cluster].set_aggregated_data(aggregated_data)
         return self.scheduler_storage[cluster]

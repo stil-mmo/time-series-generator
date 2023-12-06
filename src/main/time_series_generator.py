@@ -1,5 +1,6 @@
+import numpy as np
 from generator_linspace import GeneratorLinspace
-from numpy import ndarray
+from numpy.typing import NDArray
 from src.main.generator_typing import ProcessDataType, ProcessOrderType
 from src.main.process.process_list import ProcessList
 from src.main.scheduler.scheduler import Scheduler
@@ -43,8 +44,9 @@ class TimeSeriesGenerator:
         self, point_index: int, aggregated_data: AggregatedData
     ) -> tuple[ProcessList, list[ProcessDataType]]:
         cluster = self.scheduler_storage.get_cluster(point_index)
-        scheduler = self.scheduler_storage.get_scheduler(cluster)
-        scheduler.set_aggregated_data(aggregated_data)
+        scheduler = self.scheduler_storage.get_scheduler(
+            cluster=cluster, aggregated_data=aggregated_data
+        )
         return scheduler.process_list, scheduler.generate_schedule(
             self.stable_parameters
         )
@@ -77,8 +79,8 @@ class TimeSeriesGenerator:
 
     def generate_all(
         self,
-    ) -> tuple[ndarray, list[TimeSeries]]:
-        ts_array = ndarray((self.num_time_series, self.num_steps))
+    ) -> tuple[NDArray, list[TimeSeries]]:
+        ts_array = np.ndarray((self.num_time_series, self.num_steps))
         ts_list = []
         scheduler = self.generate_new_scheduler()
         iterations = (

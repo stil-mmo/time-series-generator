@@ -1,5 +1,4 @@
-from numpy import array
-from numpy.random import normal
+import numpy as np
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process.process import Process
@@ -38,7 +37,7 @@ class RandomWalk(Process):
         if self.aggregated_data is None:
             values = self.generator_linspace.generate_values(is_normal=False)
         else:
-            values = array([self.aggregated_data.mean_value])
+            values = np.array([self.aggregated_data.mean_value])
         return values
 
     def generate_time_series(
@@ -46,7 +45,7 @@ class RandomWalk(Process):
         data: tuple[int, tuple[float, ...]],
         previous_values: NDArray | None = None,
     ) -> tuple[TimeSeries, dict]:
-        values = array([0.0 for _ in range(0, data[0])])
+        values = np.array([0.0 for _ in range(0, data[0])])
         values_to_add = data[0]
         if previous_values is None:
             values[0] = self.generate_init_values()[0]
@@ -55,7 +54,7 @@ class RandomWalk(Process):
         else:
             previous_value = previous_values[-1]
         for i in range(data[0] - values_to_add, data[0]):
-            previous_value += normal(0.0, data[1][0])
+            previous_value += np.random.normal(0.0, data[1][0])
             values[i] = previous_value
         rw_time_series = TimeSeries(data[0])
         rw_time_series.add_values(values, (self.name, data))

@@ -1,5 +1,4 @@
-from random import choice
-
+import numpy as np
 from src.main.process.process import Process
 
 
@@ -32,7 +31,10 @@ class ProcessList:
         return processes
 
     def get_random_processes(self, num_processes: int) -> list[Process]:
-        return [choice(list(self.processes.values())) for _ in range(num_processes)]
+        return [
+            np.random.choice(list(self.processes.values()))
+            for _ in range(num_processes)
+        ]
 
     def contains(self, process_name: str) -> bool:
         return process_name in self.processes.keys()

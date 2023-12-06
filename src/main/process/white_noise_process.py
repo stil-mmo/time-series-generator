@@ -1,5 +1,4 @@
-from numpy import array
-from numpy.random import normal
+import numpy as np
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process.process import Process
@@ -37,7 +36,7 @@ class WhiteNoiseProcess(Process):
         return mean, std
 
     def generate_init_values(self) -> NDArray:
-        return array([])
+        return np.array([])
 
     def generate_time_series(
         self,
@@ -45,10 +44,10 @@ class WhiteNoiseProcess(Process):
         previous_values: NDArray | None = None,
     ) -> tuple[TimeSeries, dict]:
         if previous_values is None:
-            wn_values = normal(size=data[0], *data[1])
+            wn_values = np.random.normal(size=data[0], *data[1])
         else:
             std = self.generator_linspace.generate_std()
-            wn_values = normal(previous_values[-1], std, data[0])
+            wn_values = np.random.normal(previous_values[-1], std, data[0])
         wn_time_series = TimeSeries(data[0])
         wn_time_series.add_values(wn_values, (self.name, data))
         return wn_time_series, self.get_info(data)

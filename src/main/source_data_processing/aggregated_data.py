@@ -1,4 +1,4 @@
-from numpy import array, average, flip, max, min
+import numpy as np
 from numpy.typing import NDArray
 
 
@@ -9,10 +9,10 @@ class AggregatedData:
         self.source_data = source_data
         self.num_values = source_data.shape[0]
         self.sum_values = source_data.sum()
-        self.max_value = max(source_data)
-        self.min_value = min(source_data)
+        self.max_value = np.max(source_data)
+        self.min_value = np.min(source_data)
         self.weights = self.calculate_weights() if weighted_values else None
-        self.mean_value = average(source_data, weights=self.weights)
+        self.mean_value = np.average(source_data, weights=self.weights)
         self.fraction = (
             self.mean_value / self.max_value
             if use_max
@@ -21,5 +21,5 @@ class AggregatedData:
 
     def calculate_weights(self) -> NDArray:
         progression_sum = (1 + self.num_values) * self.num_values / 2
-        values = array([i + 1 for i in range(self.num_values)])
-        return flip(values) / progression_sum
+        values = np.array([i + 1 for i in range(self.num_values)])
+        return np.flip(values) / progression_sum
