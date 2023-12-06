@@ -1,12 +1,11 @@
 from random import uniform
 
-from numpy import array, sum
-from numpy.random import normal
+from numpy import array
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
-from src.main.process import Process
+from src.main.process.process import Process
+from src.main.source_data_processing.aggregated_data import AggregatedData
 from src.main.time_series import TimeSeries
-from src.main.utils.parameters_approximation import weighted_mean
 from src.main.utils.utils import draw_process_plot
 
 
@@ -15,9 +14,10 @@ class SimpleRandomWalk(Process):
         self,
         generator_linspace: GeneratorLinspace,
         lag: int = 1,
+        aggregated_data: AggregatedData | None = None,
         fixed_walk: float | None = None,
     ):
-        super().__init__(lag, generator_linspace)
+        super().__init__(lag, generator_linspace, aggregated_data)
         self.fixed_walk = fixed_walk
 
     @property
@@ -28,26 +28,29 @@ class SimpleRandomWalk(Process):
     def num_parameters(self) -> int:
         return 3
 
-    def calculate_data(
-        self, source_values: NDArray | None = None
-    ) -> tuple[tuple[float, ...], NDArray]:
-        if source_values is None:
-            return self.generate_parameters(), self.generate_init_values()
-        mean = weighted_mean(source_values)
-        up_probability = mean / sum(source_values)
-        down_probability = 1 - up_probability
-        step = self.generator_linspace.calculate_std(mean)
-        return (up_probability, down_probability, step), array([mean / 2])
-
     def generate_parameters(self) -> tuple[float, ...]:
-        up_probability = uniform(0.0, 1.0)
-        down_probability = 1 - up_probability
-        step = self.generator_linspace.step
-        walk = normal(step, step / 2) if self.fixed_walk is None else self.fixed_walk
+        if self.aggregated_data is None:
+            up_probability = uniform(0.0, 1.0)
+            down_probability = 1 - up_probability
+            walk = (
+                self.generator_linspace.generate_std()
+                if self.fixed_walk is None
+                else self.fixed_walk
+            )
+        else:
+            up_probability = self.aggregated_data.fraction
+            down_probability = 1 - up_probability
+            walk = self.generator_linspace.generate_std(
+                source_value=self.aggregated_data.fraction
+            )
         return up_probability, down_probability, walk
 
     def generate_init_values(self) -> NDArray:
-        return self.generator_linspace.generate_values(is_normal=False)
+        if self.aggregated_data is None:
+            values = self.generator_linspace.generate_values(is_normal=False)
+        else:
+            values = array([self.aggregated_data.mean_value])
+        return values
 
     def generate_time_series(
         self,

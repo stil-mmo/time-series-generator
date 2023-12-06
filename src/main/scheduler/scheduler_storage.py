@@ -1,7 +1,7 @@
 from numpy import float32
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
-from src.main.scheduler import Scheduler
+from src.main.scheduler.scheduler import Scheduler
 
 
 class SchedulerStorage:
@@ -33,5 +33,5 @@ class SchedulerStorage:
         self, cluster: int, source_values: NDArray[float] | None = None
     ) -> Scheduler:
         if source_values is not None:
-            self.scheduler_storage[cluster].set_source_values(source_values)
+            self.scheduler_storage[cluster].set_aggregated_data(source_values)
         return self.scheduler_storage[cluster]

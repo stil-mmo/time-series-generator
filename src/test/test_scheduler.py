@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from src.main.generator_linspace import GeneratorLinspace
-from src.main.scheduler import Scheduler
+from src.main.scheduler.scheduler import Scheduler
 
 GENERATOR_LINSPACE = GeneratorLinspace(0.0, 1.0, 100)
 

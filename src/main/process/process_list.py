@@ -1,6 +1,6 @@
 from random import choice
 
-from src.main.process import Process
+from src.main.process.process import Process
 
 
 class ProcessList:

@@ -21,7 +21,7 @@ def get_border_value(coordinates: NDArray, is_min: bool = True) -> float:
 def move_points(coordinates: NDArray) -> NDArray:
     min_coordinate = get_border_value(coordinates)
     if min_coordinate < 0:
-        coordinates += abs(min_coordinate) * ones_like(coordinates)
+        coordinates += abs(min_coordinate)
     return coordinates
 
 

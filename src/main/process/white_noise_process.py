@@ -1,17 +1,21 @@
-from numpy import array, float32, max, min, sqrt
-from numpy.random import normal, randint, uniform
+from numpy import array
+from numpy.random import normal
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
-from src.main.process import Process
+from src.main.process.process import Process
+from src.main.source_data_processing.aggregated_data import AggregatedData
 from src.main.time_series import TimeSeries
-from src.main.utils.parameters_approximation import weighted_mean
 from src.main.utils.utils import draw_process_plot
 
 
 class WhiteNoiseProcess(Process):
-    def __init__(self, generator_linspace: GeneratorLinspace, lag: int = 0):
-        super().__init__(lag, generator_linspace)
-        self.distributions = {0: normal, 1: uniform}
+    def __init__(
+        self,
+        generator_linspace: GeneratorLinspace,
+        lag: int = 0,
+        aggregated_data: AggregatedData | None = None,
+    ):
+        super().__init__(lag, generator_linspace, aggregated_data)
 
     @property
     def name(self) -> str:
@@ -19,31 +23,18 @@ class WhiteNoiseProcess(Process):
 
     @property
     def num_parameters(self) -> int:
-        return 3
-
-    def calculate_data(
-        self, source_values: NDArray | None = None
-    ) -> tuple[tuple[float, ...], NDArray]:
-        if source_values is None:
-            return self.generate_parameters(), array([])
-        mean = weighted_mean(source_values)
-        std = self.generator_linspace.calculate_std(mean)
-        return (float(0), mean, sqrt(std)), self.generate_init_values()
+        return 2
 
     def generate_parameters(self) -> tuple[float, ...]:
-        distribution_id = randint(0, len(self.distributions.keys()))
-        if distribution_id == 0:
+        if self.aggregated_data is None:
             mean = self.generator_linspace.generate_values(is_normal=False)[0]
             std = self.generator_linspace.generate_std()
-            return distribution_id, mean, abs(std)
         else:
-            low = self.generator_linspace.generate_values(
-                is_normal=False, center_shift=0.5
-            )[0]
-            high = self.generator_linspace.generate_values(
-                is_normal=False, center_shift=1.5
-            )[0]
-            return distribution_id, min(array([low, high])), max(array([low, high]))
+            mean = self.aggregated_data.mean_value
+            std = self.generator_linspace.generate_std(
+                source_value=self.aggregated_data.fraction
+            )
+        return mean, std
 
     def generate_init_values(self) -> NDArray:
         return array([])
@@ -53,11 +44,8 @@ class WhiteNoiseProcess(Process):
         data: tuple[int, tuple[float, ...]],
         previous_values: NDArray | None = None,
     ) -> tuple[TimeSeries, dict]:
-        distribution_id, *parameters = data[1]
         if previous_values is None:
-            wn_values = self.distributions[int(distribution_id)](
-                size=data[0], *parameters
-            )
+            wn_values = normal(size=data[0], *data[1])
         else:
             std = self.generator_linspace.generate_std()
             wn_values = normal(previous_values[-1], std, data[0])
