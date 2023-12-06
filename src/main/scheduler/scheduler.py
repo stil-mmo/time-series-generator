@@ -1,6 +1,6 @@
 from math import sqrt
 
-from numpy.random import randint, shuffle
+import numpy as np
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.generator_typing import ProcessDataType, ProcessOrderType
 from src.main.process.double_exponential_smoothing import DoubleExponentialSmoothing
@@ -42,19 +42,17 @@ class Scheduler:
         if strict_num_parts:
             steps_list = [num_max // num_parts] * num_parts
             steps_list[-1] += num_max % num_parts
-            shuffle(steps_list)
             return steps_list
         steps_list = []
         while current_num_max > 1 and len(steps_list) < num_parts:
             if len(steps_list) == num_parts - 1:
                 steps = current_num_max
             else:
-                steps = randint(1, current_num_max)
+                steps = np.random.randint(1, current_num_max)
             current_num_max -= steps
             steps_list.append(steps)
         if sum(steps_list) < num_max:
             steps_list.append(num_max - sum(steps_list))
-        shuffle(steps_list)
         return steps_list
 
     def set_aggregated_data(self, aggregated_data: AggregatedData) -> None:
@@ -80,7 +78,7 @@ class Scheduler:
 
     def generate_process_order(self) -> ProcessOrderType:
         process_schedule = []
-        num_parts = randint(1, int(sqrt(self.num_steps)))
+        num_parts = np.random.randint(1, int(sqrt(self.num_steps)))
         processes_steps = self.generate_steps_number(self.num_steps, num_parts)
         actual_num_parts = len(processes_steps)
         random_processes = self.process_list.get_random_processes(actual_num_parts)
@@ -99,7 +97,9 @@ class Scheduler:
             if stable_parameters or steps == 1:
                 process_data[1].append((steps, process.generate_parameters()))
             else:
-                parameters_steps = self.generate_steps_number(steps, randint(1, steps))
+                parameters_steps = self.generate_steps_number(
+                    steps, np.random.randint(1, steps)
+                )
                 num_parts = len(parameters_steps)
                 for i in range(num_parts):
                     process_data[1].append(

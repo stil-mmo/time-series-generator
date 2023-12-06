@@ -1,5 +1,4 @@
-from numpy import array
-from numpy.random import uniform
+import numpy as np
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process.ets_process_resources.ets_process_builder import ETSProcessBuilder
@@ -29,7 +28,7 @@ class SimpleExponentialSmoothing(Process):
     def generate_parameters(self) -> tuple[float, ...]:
         if self.aggregated_data is None:
             std = self.generator_linspace.generate_std()
-            error_coefficient = uniform(0.0, 1.0)
+            error_coefficient = np.random.uniform(0.0, 1.0)
         else:
             std = self.generator_linspace.generate_std(
                 source_value=self.aggregated_data.fraction
@@ -41,7 +40,7 @@ class SimpleExponentialSmoothing(Process):
         if self.aggregated_data is None:
             values = self.generator_linspace.generate_values(is_normal=False)
         else:
-            values = array([self.aggregated_data.mean_value])
+            values = np.array([self.aggregated_data.mean_value])
         return values
 
     def generate_time_series(

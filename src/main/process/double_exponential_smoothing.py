@@ -1,5 +1,4 @@
-from numpy import array
-from numpy.random import uniform
+import numpy as np
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process.ets_process_resources.ets_process_builder import ETSProcessBuilder
@@ -29,8 +28,8 @@ class DoubleExponentialSmoothing(Process):
     def generate_parameters(self) -> tuple[float, ...]:
         if self.aggregated_data is None:
             std = self.generator_linspace.generate_std()
-            long_term_coefficient = uniform(0.0, 1.0)
-            trend_coefficient = uniform(0.0, 0.05)
+            long_term_coefficient = np.random.uniform(0.0, 1.0)
+            trend_coefficient = np.random.uniform(0.0, 0.05)
         else:
             std = self.generator_linspace.generate_std(
                 source_value=self.aggregated_data.fraction
@@ -46,7 +45,7 @@ class DoubleExponentialSmoothing(Process):
             )
             init_values[1] = 0.0
         else:
-            init_values = array([self.aggregated_data.mean_value, 0.0])
+            init_values = np.array([self.aggregated_data.mean_value, 0.0])
         return init_values
 
     def generate_time_series(

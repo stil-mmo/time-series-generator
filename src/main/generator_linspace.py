@@ -1,4 +1,4 @@
-from numpy.random import normal, uniform
+import numpy as np
 from numpy.typing import NDArray
 
 
@@ -14,12 +14,12 @@ class GeneratorLinspace:
     ) -> NDArray:
         if is_normal:
             center = (self.start + self.stop) / 2
-            return normal(center_shift * center, self.step, num_values)
-        return uniform(self.start, self.stop, num_values)
+            return np.normal(center_shift * center, self.step, num_values)
+        return np.uniform(self.start, self.stop, num_values)
 
     def generate_std(self, source_value: float | None = None) -> float:
         if source_value is None:
-            std = abs(normal(self.step, self.step))
+            std = abs(np.random.normal(self.step, self.step))
         else:
             std = self.step * (1.0 + source_value)
         return std

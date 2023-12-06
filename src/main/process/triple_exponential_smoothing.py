@@ -1,5 +1,4 @@
-from numpy import array, sum, zeros
-from numpy.random import normal, uniform
+import numpy as np
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process.ets_process_resources.ets_process_builder import ETSProcessBuilder
@@ -29,9 +28,9 @@ class TripleExponentialSmoothing(Process):
     def generate_parameters(self) -> tuple[float, ...]:
         if self.aggregated_data is None:
             std = self.generator_linspace.generate_std()
-            long_term_coefficient = uniform(0.0, 1.0)
-            trend_coefficient = uniform(0.0, 0.05)
-            seasonality_coefficient = uniform(0.0, 1.0)
+            long_term_coefficient = np.random.uniform(0.0, 1.0)
+            trend_coefficient = np.random.uniform(0.0, 0.05)
+            seasonality_coefficient = np.random.uniform(0.0, 1.0)
         else:
             std = self.generator_linspace.generate_std(
                 source_value=self.aggregated_data.fraction
@@ -45,19 +44,19 @@ class TripleExponentialSmoothing(Process):
 
     def generate_init_values(self) -> NDArray:
         if self.aggregated_data is None:
-            init_values = zeros((3, self.lag))
+            init_values = np.zeros((3, self.lag))
             init_values[0][0] = self.generator_linspace.generate_values()
             init_values[1][0] = 0.0
             init_values[2] = self.generator_linspace.generate_values(
                 num_values=self.lag
             )
         else:
-            init_values = zeros((3, self.lag))
+            init_values = np.zeros((3, self.lag))
             init_values[0][0] = self.aggregated_data.mean_value
             init_values[1][0] = 0.0
             init_values[2][0] = 0.0
             for i in range(1, self.lag):
-                init_values[2][i] = init_values[2][i - 1] + normal(
+                init_values[2][i] = init_values[2][i - 1] + np.random.normal(
                     0.0, self.generator_linspace.step
                 )
         return init_values
@@ -78,10 +77,10 @@ class TripleExponentialSmoothing(Process):
             init_values = self.generate_init_values()
             long_term_init_value = previous_values[-1]
             trend_init_value = init_values[1][0]
-            seasonality_init_values = array([0.0 for _ in range(self.lag)])
+            seasonality_init_values = np.array([0.0 for _ in range(self.lag)])
             seasonality_init_values[: len(previous_values)] = previous_values
             for i in range(len(previous_values), self.lag):
-                seasonality_init_values[i] = normal(
+                seasonality_init_values[i] = np.random.normal(
                     previous_values[-1], self.generator_linspace.step
                 )
         else:

@@ -1,6 +1,4 @@
-from random import uniform
-
-from numpy import array
+import numpy as np
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.process.process import Process
@@ -30,7 +28,7 @@ class SimpleRandomWalk(Process):
 
     def generate_parameters(self) -> tuple[float, ...]:
         if self.aggregated_data is None:
-            up_probability = uniform(0.0, 1.0)
+            up_probability = np.random.uniform(0.0, 1.0)
             down_probability = 1 - up_probability
             walk = (
                 self.generator_linspace.generate_std()
@@ -49,7 +47,7 @@ class SimpleRandomWalk(Process):
         if self.aggregated_data is None:
             values = self.generator_linspace.generate_values(is_normal=False)
         else:
-            values = array([self.aggregated_data.mean_value])
+            values = np.random.array([self.aggregated_data.mean_value])
         return values
 
     def generate_time_series(
@@ -58,7 +56,7 @@ class SimpleRandomWalk(Process):
         previous_values: NDArray | None = None,
     ) -> tuple[TimeSeries, dict]:
         up_probability, down_probability, walk = data[1]
-        values = array([0.0 for _ in range(0, data[0])])
+        values = np.array([0.0 for _ in range(0, data[0])])
         values_to_add = data[0]
         if previous_values is None:
             init_values = self.generate_init_values()
@@ -68,7 +66,7 @@ class SimpleRandomWalk(Process):
         else:
             previous_value = previous_values[-1]
         for i in range(data[0] - values_to_add, data[0]):
-            if uniform(0, 1) < up_probability:
+            if np.random.uniform(0, 1) < up_probability:
                 previous_value += walk
             else:
                 previous_value -= walk

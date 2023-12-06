@@ -1,4 +1,4 @@
-from numpy import float32
+import numpy as np
 from numpy.typing import NDArray
 from sklearn.cluster import KMeans
 from sklearn.datasets import make_blobs
@@ -9,7 +9,7 @@ from src.main.source_data_processing.point_sampling import (
 )
 
 
-def cluster_points(points: NDArray[float32], n_clusters: int) -> NDArray[float32]:
+def cluster_points(points: NDArray[np.float32], n_clusters: int) -> NDArray[np.float32]:
     model = KMeans(n_clusters=n_clusters)
     model.fit(points)
     yhat = model.predict(points)
@@ -18,7 +18,7 @@ def cluster_points(points: NDArray[float32], n_clusters: int) -> NDArray[float32
 
 def get_blobs(
     num_samples: int, centers: int
-) -> tuple[NDArray[float32], NDArray[float32], tuple[float, float]]:
+) -> tuple[NDArray[np.float32], NDArray[np.float32], tuple[float, float]]:
     X, y = make_blobs(n_samples=num_samples, centers=centers, center_box=(-1.0, 1.0))
     move_points(X)
     border_values = (
