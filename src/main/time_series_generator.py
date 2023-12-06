@@ -1,11 +1,14 @@
 from generator_linspace import GeneratorLinspace
 from numpy import ndarray
-from scheduler import Scheduler
+
 from src.main.generator_typing import ProcessDataType, ProcessOrderType
-from src.main.point_clustering import cluster_points
-from src.main.point_sampling import move_points, sample_points
-from src.main.process_list import ProcessList
-from src.main.scheduler_storage import SchedulerStorage
+from src.main.process.process_list import ProcessList
+from src.main.scheduler.scheduler import Scheduler
+from src.main.scheduler.scheduler_storage import SchedulerStorage
+from src.main.source_data_processing.aggregated_data import AggregatedData
+from src.main.source_data_processing.point_clustering import cluster_points
+from src.main.source_data_processing.point_sampling import (move_points,
+                                                            sample_points)
 from src.main.time_series import TimeSeries
 from src.main.utils.utils import show_plot
 
@@ -16,7 +19,7 @@ class TimeSeriesGenerator:
         num_time_series: int,
         num_steps: int,
         generator_linspace: GeneratorLinspace,
-        scheduler_storage: SchedulerStorage,
+        scheduler_storage: SchedulerStorage | None = None,
         process_list: ProcessList | None = None,
         process_order: ProcessOrderType | None = None,
         stable_parameters: bool = True,
@@ -40,11 +43,11 @@ class TimeSeriesGenerator:
         )
 
     def get_point_schedule(
-        self, point_index: int
+        self, point_index: int, aggregated_data: AggregatedData
     ) -> tuple[ProcessList, list[ProcessDataType]]:
         cluster = self.scheduler_storage.get_cluster(point_index)
         scheduler = self.scheduler_storage.get_scheduler(cluster)
-        scheduler.set_source_values(self.scheduler_storage.points[point_index])
+        scheduler.set_aggregated_data(aggregated_data)
         return scheduler.process_list, scheduler.generate_schedule(
             self.stable_parameters
         )
@@ -53,10 +56,12 @@ class TimeSeriesGenerator:
         self,
         process_list: ProcessList,
         schedule: list[ProcessDataType],
+        aggregated_data: AggregatedData | None = None,
     ) -> TimeSeries:
         current_time_series = TimeSeries(self.num_steps)
         for process_name, process_schedule in schedule:
             process = process_list.get_processes([process_name])[0]
+            process.aggregated_data = aggregated_data
             for process_data in process_schedule:
                 if current_time_series.last_index == 0:
                     current_time_series.add_values(
@@ -79,33 +84,33 @@ class TimeSeriesGenerator:
         ts_array = ndarray((self.num_time_series, self.num_steps))
         ts_list = []
         scheduler = self.generate_new_scheduler()
-        for i in range(self.num_time_series):
+        iterations = (
+            self.num_time_series
+            if self.scheduler_storage is None
+            else self.scheduler_storage.points.shape[0]
+        )
+        for i in range(iterations):
             if self.scheduler_storage is None:
-                if self.single_schedule:
-                    ts = self.generate_time_series(
-                        scheduler.process_list,
-                        scheduler.generate_schedule(
-                            stable_parameters=self.stable_parameters
-                        ),
-                    )
-                else:
+                if not self.single_schedule:
                     scheduler = self.generate_new_scheduler()
-                    ts = self.generate_time_series(
-                        scheduler.process_list,
-                        scheduler.generate_schedule(
-                            stable_parameters=self.stable_parameters
-                        ),
-                    )
-                ts_array[i] = ts.get_values()
-                ts_list.append(ts)
-            else:
-                process_list, schedule = self.get_point_schedule(i)
                 ts = self.generate_time_series(
-                    process_list,
-                    schedule,
+                    scheduler.process_list,
+                    scheduler.generate_schedule(
+                        stable_parameters=self.stable_parameters
+                    ),
                 )
-                ts_array[i] = ts.get_values()
-                ts_list.append(ts)
+            else:
+                aggregated_data = AggregatedData(
+                    source_data=self.scheduler_storage.points[i]
+                )
+                process_list, schedule = self.get_point_schedule(i, aggregated_data)
+                ts = self.generate_time_series(
+                    process_list=process_list,
+                    schedule=schedule,
+                    aggregated_data=aggregated_data,
+                )
+            ts_array[i] = ts.get_values()
+            ts_list.append(ts)
         return ts_array, ts_list
 
 

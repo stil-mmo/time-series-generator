@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 
 from src.main.generator_linspace import GeneratorLinspace
-from src.main.specific_processes.white_noise_process import WhiteNoiseProcess
+from src.main.process.white_noise_process import WhiteNoiseProcess
 
 GENERATOR_LINSPACE = GeneratorLinspace(0.0, 1.0, 100)
 

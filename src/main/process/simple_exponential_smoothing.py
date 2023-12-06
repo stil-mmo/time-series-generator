@@ -1,19 +1,24 @@
-from numpy import array, sqrt
+from numpy import array
 from numpy.random import uniform
 from numpy.typing import NDArray
+
 from src.main.generator_linspace import GeneratorLinspace
-from src.main.process import Process
-from src.main.specific_processes.ets_process_resources.ets_process_builder import (
-    ETSProcessBuilder,
-)
+from src.main.process.ets_process_resources.ets_process_builder import \
+    ETSProcessBuilder
+from src.main.process.process import Process
+from src.main.source_data_processing.aggregated_data import AggregatedData
 from src.main.time_series import TimeSeries
-from src.main.utils.parameters_approximation import weighted_mean
 from src.main.utils.utils import draw_process_plot
 
 
 class SimpleExponentialSmoothing(Process):
-    def __init__(self, generator_linspace: GeneratorLinspace, lag: int = 1):
-        super().__init__(lag, generator_linspace)
+    def __init__(
+        self,
+        generator_linspace: GeneratorLinspace,
+        lag: int = 1,
+        aggregated_data: AggregatedData | None = None,
+    ):
+        super().__init__(lag, generator_linspace, aggregated_data)
 
     @property
     def name(self) -> str:
@@ -23,23 +28,23 @@ class SimpleExponentialSmoothing(Process):
     def num_parameters(self) -> int:
         return 2
 
-    def calculate_data(
-        self, source_values: NDArray | None = None
-    ) -> tuple[tuple[float, ...], NDArray]:
-        if source_values is None:
-            return self.generate_parameters(), self.generate_init_values()
-        mean = weighted_mean(source_values)
-        error_coefficient = mean / self.generator_linspace.stop
-        std = self.generator_linspace.calculate_std(mean)
-        return (error_coefficient, sqrt(std)), array([mean])
-
     def generate_parameters(self) -> tuple[float, ...]:
-        std = self.generator_linspace.generate_std()
-        error_coefficient = uniform(0.0, 1.0)
+        if self.aggregated_data is None:
+            std = self.generator_linspace.generate_std()
+            error_coefficient = uniform(0.0, 1.0)
+        else:
+            std = self.generator_linspace.generate_std(
+                source_value=self.aggregated_data.fraction
+            )
+            error_coefficient = self.aggregated_data.fraction
         return error_coefficient, std
 
     def generate_init_values(self) -> NDArray:
-        return self.generator_linspace.generate_values(is_normal=False)
+        if self.aggregated_data is None:
+            values = self.generator_linspace.generate_values(is_normal=False)
+        else:
+            values = array([self.aggregated_data.mean_value])
+        return values
 
     def generate_time_series(
         self,

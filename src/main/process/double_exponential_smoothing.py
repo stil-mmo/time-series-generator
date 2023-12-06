@@ -1,19 +1,24 @@
-from numpy import array, sqrt
+from numpy import array
 from numpy.random import uniform
 from numpy.typing import NDArray
+
 from src.main.generator_linspace import GeneratorLinspace
-from src.main.process import Process
-from src.main.specific_processes.ets_process_resources.ets_process_builder import (
-    ETSProcessBuilder,
-)
+from src.main.process.ets_process_resources.ets_process_builder import \
+    ETSProcessBuilder
+from src.main.process.process import Process
+from src.main.source_data_processing.aggregated_data import AggregatedData
 from src.main.time_series import TimeSeries
-from src.main.utils.parameters_approximation import weighted_mean
 from src.main.utils.utils import draw_process_plot
 
 
 class DoubleExponentialSmoothing(Process):
-    def __init__(self, generator_linspace: GeneratorLinspace, lag: int = 1):
-        super().__init__(lag, generator_linspace)
+    def __init__(
+        self,
+        generator_linspace: GeneratorLinspace,
+        lag: int = 1,
+        aggregated_data: AggregatedData | None = None,
+    ):
+        super().__init__(lag, generator_linspace, aggregated_data)
 
     @property
     def name(self) -> str:
@@ -23,28 +28,27 @@ class DoubleExponentialSmoothing(Process):
     def num_parameters(self) -> int:
         return 3
 
-    def calculate_data(
-        self, source_values: NDArray | None = None
-    ) -> tuple[tuple[float, ...], NDArray]:
-        if source_values is None:
-            return self.generate_parameters(), self.generate_init_values()
-        mean = weighted_mean(source_values)
-        long_term_coefficient = mean / self.generator_linspace.stop
-        trend_coefficient = long_term_coefficient / 10.0
-        std = self.generator_linspace.calculate_std(mean)
-        return (long_term_coefficient, trend_coefficient, sqrt(std)), array([mean])
-
     def generate_parameters(self) -> tuple[float, ...]:
-        std = self.generator_linspace.generate_std()
-        long_term_coefficient = uniform(0.0, 1.0)
-        trend_coefficient = uniform(0.0, 0.05)
+        if self.aggregated_data is None:
+            std = self.generator_linspace.generate_std()
+            long_term_coefficient = uniform(0.0, 1.0)
+            trend_coefficient = uniform(0.0, 0.05)
+        else:
+            std = self.generator_linspace.generate_std(
+                source_value=self.aggregated_data.fraction
+            )
+            long_term_coefficient = self.aggregated_data.fraction
+            trend_coefficient = long_term_coefficient / 20.0
         return long_term_coefficient, trend_coefficient, std
 
     def generate_init_values(self) -> NDArray:
-        init_values = self.generator_linspace.generate_values(
-            num_values=2, is_normal=False
-        )
-        init_values[1] = 0.0
+        if self.aggregated_data is None:
+            init_values = self.generator_linspace.generate_values(
+                num_values=2, is_normal=False
+            )
+            init_values[1] = 0.0
+        else:
+            init_values = array([self.aggregated_data.mean_value, 0.0])
         return init_values
 
     def generate_time_series(

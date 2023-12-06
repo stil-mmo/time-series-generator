@@ -2,6 +2,7 @@ from unittest import TestCase, main
 
 from numpy import array
 from numpy.testing import assert_array_equal
+
 from src.main.time_series import TimeSeries
 
 EMPTY_SAMPLE = ("", (0, ()))

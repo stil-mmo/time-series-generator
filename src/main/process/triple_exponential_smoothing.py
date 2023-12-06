@@ -1,19 +1,24 @@
-from numpy import array, max, min, sqrt, sum, zeros
+from numpy import array, sum, zeros
 from numpy.random import normal, uniform
 from numpy.typing import NDArray
+
 from src.main.generator_linspace import GeneratorLinspace
-from src.main.process import Process
-from src.main.specific_processes.ets_process_resources.ets_process_builder import (
-    ETSProcessBuilder,
-)
+from src.main.process.ets_process_resources.ets_process_builder import \
+    ETSProcessBuilder
+from src.main.process.process import Process
+from src.main.source_data_processing.aggregated_data import AggregatedData
 from src.main.time_series import TimeSeries
-from src.main.utils.parameters_approximation import moving_average, weighted_mean
 from src.main.utils.utils import draw_process_plot
 
 
 class TripleExponentialSmoothing(Process):
-    def __init__(self, generator_linspace: GeneratorLinspace, lag: int):
-        super().__init__(lag, generator_linspace)
+    def __init__(
+        self,
+        generator_linspace: GeneratorLinspace,
+        lag: int,
+        aggregated_data: AggregatedData | None = None,
+    ):
+        super().__init__(lag, generator_linspace, aggregated_data)
 
     @property
     def name(self) -> str:
@@ -23,47 +28,40 @@ class TripleExponentialSmoothing(Process):
     def num_parameters(self) -> int:
         return 4
 
-    def calculate_data(
-        self, source_values: NDArray | None = None
-    ) -> tuple[tuple[float, ...], NDArray]:
-        if source_values is None:
-            return self.generate_parameters(), self.generate_init_values()
-        mean = weighted_mean(source_values)
-        long_term_coefficient = mean / self.generator_linspace.stop
-        trend_coefficient = long_term_coefficient / 10.0
-        seasonality_coefficient = long_term_coefficient / 2.0
-        std = self.generator_linspace.calculate_std(mean)
-        init_values = zeros(self.lag)
-        values = moving_average(source_values, 2)
-        max_value = max(values)
-        min_value = min(values)
-        if values.shape[0] <= self.lag:
-            init_values[: values.shape[0]] = values
-            for i in range(values.shape[0], self.lag):
-                init_values[i] = uniform(min_value, max_value)
-        else:
-            init_values = values[: self.lag]
-        return (
-            long_term_coefficient,
-            trend_coefficient,
-            seasonality_coefficient,
-            sqrt(std),
-        ), init_values
-
     def generate_parameters(self) -> tuple[float, ...]:
-        std = self.generator_linspace.generate_std()
-        long_term_coefficient = uniform(0.0, 1.0)
-        trend_coefficient = uniform(0.0, 0.05)
-        seasonality_coefficient = uniform(0.0, 1.0)
+        if self.aggregated_data is None:
+            std = self.generator_linspace.generate_std()
+            long_term_coefficient = uniform(0.0, 1.0)
+            trend_coefficient = uniform(0.0, 0.05)
+            seasonality_coefficient = uniform(0.0, 1.0)
+        else:
+            std = self.generator_linspace.generate_std(
+                source_value=self.aggregated_data.fraction
+            )
+            long_term_coefficient = self.aggregated_data.fraction
+            trend_coefficient = long_term_coefficient / 20.0
+            seasonality_coefficient = (
+                self.aggregated_data.min_value / self.aggregated_data.sum_values
+            )
         return long_term_coefficient, trend_coefficient, seasonality_coefficient, std
 
     def generate_init_values(self) -> NDArray:
-        init_values = zeros((3, self.lag))
-        init_values[0][0] = self.generator_linspace.generate_values()
-        init_values[1][0] = 0.0
-        init_values[2] = self.generator_linspace.generate_values(
-            num_values=self.lag, center_shift=0.25
-        )
+        if self.aggregated_data is None:
+            init_values = zeros((3, self.lag))
+            init_values[0][0] = self.generator_linspace.generate_values()
+            init_values[1][0] = 0.0
+            init_values[2] = self.generator_linspace.generate_values(
+                num_values=self.lag
+            )
+        else:
+            init_values = zeros((3, self.lag))
+            init_values[0][0] = self.aggregated_data.mean_value
+            init_values[1][0] = 0.0
+            init_values[2][0] = 0.0
+            for i in range(1, self.lag):
+                init_values[2][i] = init_values[2][i - 1] + normal(
+                    0.0, self.generator_linspace.step
+                )
         return init_values
 
     def generate_time_series(

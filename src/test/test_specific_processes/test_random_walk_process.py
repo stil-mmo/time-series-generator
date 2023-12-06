@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 
 from src.main.generator_linspace import GeneratorLinspace
-from src.main.specific_processes.simple_random_walk import SimpleRandomWalk
+from src.main.process.simple_random_walk import SimpleRandomWalk
 
 GENERATOR_LINSPACE = GeneratorLinspace(0.0, 1.0, 100)
 
