@@ -52,7 +52,7 @@ class TESParametersGenerator(BaseParametersGenerator):
             init_values[2][0] = 0.0
             for i in range(1, self.lag):
                 init_values[2][i] = init_values[2][i - 1] + np.random.normal(
-                    0.0, self.generator_linspace.step / 2
+                    0.0, self.generator_linspace.step
                 )
         return init_values
 
@@ -110,10 +110,9 @@ class TripleExponentialSmoothing(Process):
             long_term_init_value = previous_values[-1]
             trend_init_value = 0.0
             seasonality_init_values = previous_values[-self.lag :]
-            seasonality_init_values /= np.sum(seasonality_init_values)
         ets_values.set_seasonal(
             lag=self.lag,
-            init_values=seasonality_init_values,
+            init_values=seasonality_init_values / sum(seasonality_init_values),
             parameter=data[1][2],
         )
         trend_index = ets_values.set_trend(

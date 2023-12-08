@@ -49,7 +49,7 @@ class TimeSeriesGenerator:
             cluster=cluster, aggregated_data=aggregated_data
         )
         return scheduler.process_list, scheduler.generate_schedule(
-            stable_parameters=True
+            stable_parameters=self.stable_parameters
         )
 
     def generate_time_series(
@@ -114,7 +114,7 @@ class TimeSeriesGenerator:
         return ts_array, ts_list
 
 
-def show_result(coordinates, clusters, border_values, shift, time_series_array):
+def get_result_plot(coordinates, clusters, border_values, shift, time_series_array, to_show=False):
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle("Generated time series with parameters clustering")
 
@@ -149,7 +149,10 @@ def show_result(coordinates, clusters, border_values, shift, time_series_array):
             color=colors[clusters[i]],
         )
     ax.set_zlim(border_values[0], border_values[1])
-    plt.show()
+    if to_show:
+        plt.show()
+    else:
+        plt.savefig("plots/plot.png")
 
 
 if __name__ == "__main__":
@@ -177,7 +180,7 @@ if __name__ == "__main__":
         num_steps=100,
         generator_linspace=test_generator_linspace,
         scheduler_storage=storage,
-        stable_parameters=False,
+        stable_parameters=True,
         single_schedule=False,
     )
     pl = ProcessList()
@@ -188,4 +191,4 @@ if __name__ == "__main__":
     for i in range(len(time_series_list)):
         ts = time_series_list[i]
         ts.dump_logs(pl, "logs/generation.txt", i)
-    show_result(coordinates, clusters, border_values, shift, time_series_array)
+    get_result_plot(coordinates, clusters, border_values, shift, time_series_array)
