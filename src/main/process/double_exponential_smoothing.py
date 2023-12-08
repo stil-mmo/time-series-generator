@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
+from src.main.process.base_parameters_generator import BaseParametersGenerator
 from src.main.process.ets_process_resources.ets_process_builder import ETSProcessBuilder
 from src.main.process.process import Process
 from src.main.source_data_processing.aggregated_data import AggregatedData
@@ -8,22 +9,18 @@ from src.main.time_series import TimeSeries
 from src.main.utils.utils import draw_process_plot
 
 
-class DoubleExponentialSmoothing(Process):
+class DESParametersGenerator(BaseParametersGenerator):
     def __init__(
         self,
+        lag: int,
         generator_linspace: GeneratorLinspace,
-        lag: int = 1,
         aggregated_data: AggregatedData | None = None,
     ):
-        super().__init__(lag, generator_linspace, aggregated_data)
-
-    @property
-    def name(self) -> str:
-        return "double_exponential_smoothing"
-
-    @property
-    def num_parameters(self) -> int:
-        return 3
+        super().__init__(
+            lag=lag,
+            generator_linspace=generator_linspace,
+            aggregated_data=aggregated_data,
+        )
 
     def generate_parameters(self) -> tuple[float, ...]:
         if self.aggregated_data is None:
@@ -48,6 +45,34 @@ class DoubleExponentialSmoothing(Process):
             init_values = np.array([self.aggregated_data.mean_value, 0.0])
         return init_values
 
+
+class DoubleExponentialSmoothing(Process):
+    def __init__(
+        self,
+        generator_linspace: GeneratorLinspace,
+        lag: int = 1,
+        aggregated_data: AggregatedData | None = None,
+    ):
+        parameters_generator = DESParametersGenerator(
+            lag=lag,
+            generator_linspace=generator_linspace,
+            aggregated_data=aggregated_data,
+        )
+        super().__init__(
+            lag=lag,
+            generator_linspace=generator_linspace,
+            parameters_generator=parameters_generator,
+            aggregated_data=aggregated_data,
+        )
+
+    @property
+    def name(self) -> str:
+        return "double_exponential_smoothing"
+
+    @property
+    def num_parameters(self) -> int:
+        return 3
+
     def generate_time_series(
         self,
         data: tuple[int, tuple[float, ...]],
@@ -56,10 +81,13 @@ class DoubleExponentialSmoothing(Process):
         ets_values = ETSProcessBuilder(data[0])
         ets_values.set_normal_error(mean=0.0, std=data[1][2])
         if previous_values is None:
-            long_term_init_value, trend_init_value = self.generate_init_values()
+            (
+                long_term_init_value,
+                trend_init_value,
+            ) = self.parameters_generator.generate_init_values()
         else:
             long_term_init_value = previous_values[-1]
-            trend_init_value = self.generate_init_values()[1]
+            trend_init_value = self.parameters_generator.generate_init_values()[1]
         trend_index = ets_values.set_trend(
             init_value=trend_init_value, parameter=data[1][1]
         )
@@ -78,6 +106,6 @@ class DoubleExponentialSmoothing(Process):
 if __name__ == "__main__":
     test_generator_linspace = GeneratorLinspace(0.0, 100.0, 100)
     proc = DoubleExponentialSmoothing(test_generator_linspace)
-    test_sample = (100, proc.generate_parameters())
+    test_sample = (100, proc.parameters_generator.generate_parameters())
     ts, info = proc.generate_time_series(test_sample)
     draw_process_plot(ts, info)

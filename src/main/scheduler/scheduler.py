@@ -95,7 +95,9 @@ class Scheduler:
             process.aggregated_data = self.aggregated_data
             process_data = (process_name, [])
             if stable_parameters or steps == 1:
-                process_data[1].append((steps, process.generate_parameters()))
+                process_data[1].append(
+                    (steps, process.parameters_generator.generate_parameters())
+                )
             else:
                 parameters_steps = self.generate_steps_number(
                     steps, np.random.randint(1, steps)
@@ -105,7 +107,7 @@ class Scheduler:
                     process_data[1].append(
                         (
                             parameters_steps[i],
-                            process.generate_parameters(),
+                            process.parameters_generator.generate_parameters(),
                         )
                     )
             schedule.append(process_data)

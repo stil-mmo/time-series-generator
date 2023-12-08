@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
+from src.main.process.base_parameters_generator import BaseParametersGenerator
 from src.main.source_data_processing.aggregated_data import AggregatedData
 from src.main.time_series import TimeSeries
 
@@ -11,10 +12,12 @@ class Process(ABC):
         self,
         lag: int,
         generator_linspace: GeneratorLinspace,
+        parameters_generator: BaseParametersGenerator,
         aggregated_data: AggregatedData | None = None,
     ):
         self._lag = lag
         self._generator_linspace = generator_linspace
+        self._parameters_generator = parameters_generator
         self._aggregated_data = aggregated_data
 
     @property
@@ -44,20 +47,22 @@ class Process(ABC):
         self._generator_linspace = generator_linspace
 
     @property
+    def parameters_generator(self) -> BaseParametersGenerator:
+        return self._parameters_generator
+
+    @parameters_generator.setter
+    def parameters_generator(
+        self, parameters_generator: BaseParametersGenerator
+    ) -> None:
+        self._parameters_generator = parameters_generator
+
+    @property
     def aggregated_data(self) -> AggregatedData | None:
         return self._aggregated_data
 
     @aggregated_data.setter
     def aggregated_data(self, aggregated_data: AggregatedData | None) -> None:
         self._aggregated_data = aggregated_data
-
-    @abstractmethod
-    def generate_parameters(self) -> tuple[float, ...]:
-        pass
-
-    @abstractmethod
-    def generate_init_values(self) -> NDArray:
-        pass
 
     @abstractmethod
     def generate_time_series(
