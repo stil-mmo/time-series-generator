@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
+from src.main.process.base_parameters_generator import BaseParametersGenerator
 from src.main.process.ets_process_resources.ets_process_builder import ETSProcessBuilder
 from src.main.process.process import Process
 from src.main.source_data_processing.aggregated_data import AggregatedData
@@ -8,22 +9,18 @@ from src.main.time_series import TimeSeries
 from src.main.utils.utils import draw_process_plot
 
 
-class TripleExponentialSmoothing(Process):
+class TESParametersGenerator(BaseParametersGenerator):
     def __init__(
         self,
-        generator_linspace: GeneratorLinspace,
         lag: int,
+        generator_linspace: GeneratorLinspace,
         aggregated_data: AggregatedData | None = None,
     ):
-        super().__init__(lag, generator_linspace, aggregated_data)
-
-    @property
-    def name(self) -> str:
-        return "triple_exponential_smoothing"
-
-    @property
-    def num_parameters(self) -> int:
-        return 4
+        super().__init__(
+            lag=lag,
+            generator_linspace=generator_linspace,
+            aggregated_data=aggregated_data,
+        )
 
     def generate_parameters(self) -> tuple[float, ...]:
         if self.aggregated_data is None:
@@ -61,6 +58,34 @@ class TripleExponentialSmoothing(Process):
                 )
         return init_values
 
+
+class TripleExponentialSmoothing(Process):
+    def __init__(
+        self,
+        generator_linspace: GeneratorLinspace,
+        lag: int,
+        aggregated_data: AggregatedData | None = None,
+    ):
+        parameters_generator = TESParametersGenerator(
+            lag=lag,
+            generator_linspace=generator_linspace,
+            aggregated_data=aggregated_data,
+        )
+        super().__init__(
+            lag=lag,
+            generator_linspace=generator_linspace,
+            parameters_generator=parameters_generator,
+            aggregated_data=aggregated_data,
+        )
+
+    @property
+    def name(self) -> str:
+        return "triple_exponential_smoothing"
+
+    @property
+    def num_parameters(self) -> int:
+        return 4
+
     def generate_time_series(
         self,
         data: tuple[int, tuple[float, ...]],
@@ -69,12 +94,12 @@ class TripleExponentialSmoothing(Process):
         ets_values = ETSProcessBuilder(data[0])
         ets_values.set_normal_error(mean=0.0, std=data[1][3])
         if previous_values is None or len(previous_values) < 1:
-            init_values = self.generate_init_values()
+            init_values = self.parameters_generator.generate_init_values()
             long_term_init_value = init_values[0][0]
             trend_init_value = init_values[1][0]
             seasonality_init_values = init_values[2]
         elif len(previous_values) < self.lag:
-            init_values = self.generate_init_values()
+            init_values = self.parameters_generator.generate_init_values()
             long_term_init_value = previous_values[-1]
             trend_init_value = init_values[1][0]
             seasonality_init_values = np.array([0.0 for _ in range(self.lag)])
@@ -110,6 +135,6 @@ class TripleExponentialSmoothing(Process):
 if __name__ == "__main__":
     test_generator_linspace = GeneratorLinspace(0.0, 100.0, 100)
     proc = TripleExponentialSmoothing(test_generator_linspace, 12)
-    test_sample = (100, proc.generate_parameters())
+    test_sample = (100, proc.parameters_generator.generate_parameters())
     test_time_series, test_info = proc.generate_time_series(test_sample)
     draw_process_plot(test_time_series, test_info)

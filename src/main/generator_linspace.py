@@ -14,8 +14,8 @@ class GeneratorLinspace:
     ) -> NDArray:
         if is_normal:
             center = (self.start + self.stop) / 2
-            return np.normal(center_shift * center, self.step, num_values)
-        return np.uniform(self.start, self.stop, num_values)
+            return np.random.normal(center_shift * center, self.step, num_values)
+        return np.random.uniform(self.start, self.stop, num_values)
 
     def generate_std(self, source_value: float | None = None) -> float:
         if source_value is None:

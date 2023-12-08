@@ -1,28 +1,25 @@
 import numpy as np
 from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
+from src.main.process.base_parameters_generator import BaseParametersGenerator
 from src.main.process.process import Process
 from src.main.source_data_processing.aggregated_data import AggregatedData
 from src.main.time_series import TimeSeries
 from src.main.utils.utils import draw_process_plot
 
 
-class WhiteNoiseProcess(Process):
+class WNParametersGenerator(BaseParametersGenerator):
     def __init__(
         self,
+        lag: int,
         generator_linspace: GeneratorLinspace,
-        lag: int = 0,
         aggregated_data: AggregatedData | None = None,
     ):
-        super().__init__(lag, generator_linspace, aggregated_data)
-
-    @property
-    def name(self) -> str:
-        return "white_noise"
-
-    @property
-    def num_parameters(self) -> int:
-        return 2
+        super().__init__(
+            lag=lag,
+            generator_linspace=generator_linspace,
+            aggregated_data=aggregated_data,
+        )
 
     def generate_parameters(self) -> tuple[float, ...]:
         if self.aggregated_data is None:
@@ -37,6 +34,32 @@ class WhiteNoiseProcess(Process):
 
     def generate_init_values(self) -> NDArray:
         return np.array([])
+
+
+class WhiteNoiseProcess(Process):
+    def __init__(
+        self,
+        generator_linspace: GeneratorLinspace,
+        lag: int = 0,
+        aggregated_data: AggregatedData | None = None,
+    ):
+        parameters_generator = WNParametersGenerator(
+            lag, generator_linspace, aggregated_data
+        )
+        super().__init__(
+            lag=lag,
+            generator_linspace=generator_linspace,
+            parameters_generator=parameters_generator,
+            aggregated_data=aggregated_data,
+        )
+
+    @property
+    def name(self) -> str:
+        return "white_noise"
+
+    @property
+    def num_parameters(self) -> int:
+        return 2
 
     def generate_time_series(
         self,
@@ -56,8 +79,7 @@ class WhiteNoiseProcess(Process):
 if __name__ == "__main__":
     test_generator_linspace = GeneratorLinspace(0.0, 100.0, 100)
     white_noise_process = WhiteNoiseProcess(test_generator_linspace)
-    white_noise_process.generate_parameters()
     time_series, info = white_noise_process.generate_time_series(
-        (100, white_noise_process.generate_parameters())
+        (100, white_noise_process.parameters_generator.generate_parameters())
     )
     draw_process_plot(time_series, info)
