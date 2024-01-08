@@ -114,7 +114,9 @@ class TimeSeriesGenerator:
         return ts_array, ts_list
 
 
-def get_result_plot(coordinates, clusters, border_values, shift, time_series_array, to_show=False):
+def get_result_plot(
+    coordinates, clusters, border_values, shift, time_series_array, to_show=False
+):
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle("Generated time series with parameters clustering")
 
