@@ -8,7 +8,7 @@
 
 Запуск:
 
-  `pip install -r requirements.txt`
-  `python src/main/time_series_generator.py`
+    pip install -r requirements.txt
+    python src/main/time_series_generator.py
 
 Программа проведет сэмплирование набора точек на сфере, сгенерирует временные ряды по точкам и отобразит все результаты на графике в src/main/plots/plot.png.
