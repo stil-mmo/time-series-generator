@@ -25,13 +25,13 @@ class DESParametersGenerator(BaseParametersGenerator):
     def generate_parameters(self) -> tuple[float, ...]:
         if self.aggregated_data is None:
             std = self.generator_linspace.generate_std()
-            long_term_coefficient = np.random.uniform(0.0, 1.0)
+            long_term_coefficient = np.random.uniform(0.0, 0.3)
             trend_coefficient = np.random.uniform(0.0, 0.05)
         else:
             std = self.generator_linspace.generate_std(
                 source_value=self.aggregated_data.fraction
             )
-            long_term_coefficient = self.aggregated_data.fraction
+            long_term_coefficient = self.aggregated_data.fraction / 3
             trend_coefficient = long_term_coefficient / 20.0
         return long_term_coefficient, trend_coefficient, std
 
@@ -42,7 +42,7 @@ class DESParametersGenerator(BaseParametersGenerator):
             )
             init_values[1] = 0.0
         else:
-            init_values = np.array([self.aggregated_data.mean_value, 0.0])
+            init_values = np.array([self.aggregated_data.mean_value / 2, 0.0])
         return init_values
 
 

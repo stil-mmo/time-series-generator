@@ -27,3 +27,22 @@ class TimeSeries:
             return self.values[start_index : self.last_index]
         else:
             return self.values[start_index:end_index]
+
+    def dump_logs(self, process_list, log_path: str, ts_number: int):
+        with open(log_path, "a") as log_file:
+            log_file.write("\n")
+            log_file.write(f"TS {ts_number}\n")
+            last_steps = 0
+            for i in range(len(self.metadata)):
+                current_process_data = self.metadata[i]
+                current_process = process_list.get_processes([current_process_data[0]])[
+                    0
+                ]
+                log_file.write(f"Process {i}: {current_process_data[0]}\n")
+                sample = current_process_data[1]
+                log_file.write(
+                    f"Starts at {last_steps}, ends at {sample[0] + last_steps - 1}, all={sample[0]}\n"
+                )
+                log_file.write(str(current_process.get_info(data=sample)))
+                log_file.write("\n")
+                last_steps = sample[0] + last_steps

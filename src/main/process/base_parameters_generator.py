@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from numpy._typing import NDArray
+from numpy.typing import NDArray
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.source_data_processing.aggregated_data import AggregatedData
 
@@ -14,7 +14,15 @@ class BaseParametersGenerator(ABC):
     ):
         self.lag = lag
         self.generator_linspace = generator_linspace
-        self.aggregated_data = aggregated_data
+        self._aggregated_data = aggregated_data
+
+    @property
+    def aggregated_data(self) -> AggregatedData | None:
+        return self._aggregated_data
+
+    @aggregated_data.setter
+    def aggregated_data(self, aggregated_data: AggregatedData | None) -> None:
+        self._aggregated_data = aggregated_data
 
     @abstractmethod
     def generate_parameters(self) -> tuple[float, ...]:

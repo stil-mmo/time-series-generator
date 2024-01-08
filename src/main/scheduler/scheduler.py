@@ -3,12 +3,7 @@ from math import sqrt
 import numpy as np
 from src.main.generator_linspace import GeneratorLinspace
 from src.main.generator_typing import ProcessDataType, ProcessOrderType
-from src.main.process.double_exponential_smoothing import DoubleExponentialSmoothing
 from src.main.process.process_list import ProcessList
-from src.main.process.random_walk import RandomWalk
-from src.main.process.simple_exponential_smoothing import SimpleExponentialSmoothing
-from src.main.process.triple_exponential_smoothing import TripleExponentialSmoothing
-from src.main.process.white_noise_process import WhiteNoiseProcess
 from src.main.source_data_processing.aggregated_data import AggregatedData
 
 
@@ -63,17 +58,7 @@ class Scheduler:
 
     def generate_process_list(self) -> ProcessList:
         process_list = ProcessList()
-        process_list.add_processes(
-            [
-                WhiteNoiseProcess(generator_linspace=self.generator_linspace),
-                RandomWalk(generator_linspace=self.generator_linspace),
-                SimpleExponentialSmoothing(generator_linspace=self.generator_linspace),
-                DoubleExponentialSmoothing(generator_linspace=self.generator_linspace),
-                TripleExponentialSmoothing(
-                    generator_linspace=self.generator_linspace, lag=12
-                ),
-            ]
-        )
+        process_list.add_all_processes(self.generator_linspace)
         return process_list
 
     def generate_process_order(self) -> ProcessOrderType:

@@ -25,18 +25,16 @@ class TESParametersGenerator(BaseParametersGenerator):
     def generate_parameters(self) -> tuple[float, ...]:
         if self.aggregated_data is None:
             std = self.generator_linspace.generate_std()
-            long_term_coefficient = np.random.uniform(0.0, 1.0)
+            long_term_coefficient = np.random.uniform(0.0, 0.3)
             trend_coefficient = np.random.uniform(0.0, 0.05)
-            seasonality_coefficient = np.random.uniform(0.0, 1.0)
+            seasonality_coefficient = np.random.uniform(0.5, 1.0)
         else:
             std = self.generator_linspace.generate_std(
                 source_value=self.aggregated_data.fraction
             )
-            long_term_coefficient = self.aggregated_data.fraction
+            long_term_coefficient = self.aggregated_data.fraction / 3
             trend_coefficient = long_term_coefficient / 20.0
-            seasonality_coefficient = (
-                self.aggregated_data.min_value / self.aggregated_data.sum_values
-            )
+            seasonality_coefficient = 1 - (self.aggregated_data.fraction / 2)
         return long_term_coefficient, trend_coefficient, seasonality_coefficient, std
 
     def generate_init_values(self) -> NDArray:
@@ -54,7 +52,7 @@ class TESParametersGenerator(BaseParametersGenerator):
             init_values[2][0] = 0.0
             for i in range(1, self.lag):
                 init_values[2][i] = init_values[2][i - 1] + np.random.normal(
-                    0.0, self.generator_linspace.step
+                    0.0, self.generator_linspace.step / 2
                 )
         return init_values
 
@@ -112,9 +110,10 @@ class TripleExponentialSmoothing(Process):
             long_term_init_value = previous_values[-1]
             trend_init_value = 0.0
             seasonality_init_values = previous_values[-self.lag :]
+            seasonality_init_values /= np.sum(seasonality_init_values)
         ets_values.set_seasonal(
             lag=self.lag,
-            init_values=seasonality_init_values / sum(seasonality_init_values),
+            init_values=seasonality_init_values,
             parameter=data[1][2],
         )
         trend_index = ets_values.set_trend(

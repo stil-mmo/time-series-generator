@@ -26,7 +26,7 @@ class WNParametersGenerator(BaseParametersGenerator):
             mean = self.generator_linspace.generate_values(is_normal=False)[0]
             std = self.generator_linspace.generate_std()
         else:
-            mean = self.aggregated_data.mean_value
+            mean = np.random.normal(self.aggregated_data.mean_value)
             std = self.generator_linspace.generate_std(
                 source_value=self.aggregated_data.fraction
             )

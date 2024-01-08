@@ -18,8 +18,11 @@ class GeneratorLinspace:
         return np.random.uniform(self.start, self.stop, num_values)
 
     def generate_std(self, source_value: float | None = None) -> float:
+        k = np.random.normal(0, self.step / 2)
+        if k <= -self.step:
+            k = 0
         if source_value is None:
-            std = abs(np.random.normal(self.step, self.step))
+            std = self.step + k
         else:
-            std = self.step * (1.0 + source_value)
+            std = self.step * (1 + source_value) + k
         return std

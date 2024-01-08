@@ -44,7 +44,7 @@ class SRWParametersGenerator(BaseParametersGenerator):
         if self.aggregated_data is None:
             values = self.generator_linspace.generate_values(is_normal=False)
         else:
-            values = np.array([self.aggregated_data.mean_value])
+            values = np.array([self.aggregated_data.mean_value / 2])
         return values
 
 
