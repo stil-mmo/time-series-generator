@@ -24,3 +24,6 @@ jobs:
     - name: Lint with Isort
       run: |
         isort . -c -v --settings-path config/
+    - name: Test with Pytest
+      run: |
+        pytest src/test
