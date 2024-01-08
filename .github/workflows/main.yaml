@@ -26,4 +26,4 @@ jobs:
         isort . -c -v --settings-path config/
     - name: Test with Pytest
       run: |
-        pytest tests
+        pytest src/test
