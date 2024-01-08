@@ -62,6 +62,7 @@ class Process(ABC):
 
     @aggregated_data.setter
     def aggregated_data(self, aggregated_data: AggregatedData | None) -> None:
+        self.parameters_generator.aggregated_data = aggregated_data
         self._aggregated_data = aggregated_data
 
     @abstractmethod

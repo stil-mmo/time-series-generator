@@ -1,14 +1,15 @@
+import matplotlib.pyplot as plt
 import numpy as np
-from generator_linspace import GeneratorLinspace
 from numpy.typing import NDArray
+from src.main.generator_linspace import GeneratorLinspace
 from src.main.generator_typing import ProcessDataType, ProcessOrderType
 from src.main.process.process_list import ProcessList
 from src.main.scheduler.scheduler import Scheduler
 from src.main.scheduler.scheduler_storage import SchedulerStorage
 from src.main.source_data_processing.aggregated_data import AggregatedData
-from src.main.source_data_processing.point_clustering import get_blobs
+from src.main.source_data_processing.point_clustering import cluster_points
+from src.main.source_data_processing.point_sampling import sample_points
 from src.main.time_series import TimeSeries
-from src.main.utils.utils import show_plot
 
 
 class TimeSeriesGenerator:
@@ -48,7 +49,7 @@ class TimeSeriesGenerator:
             cluster=cluster, aggregated_data=aggregated_data
         )
         return scheduler.process_list, scheduler.generate_schedule(
-            self.stable_parameters
+            stable_parameters=True
         )
 
     def generate_time_series(
@@ -113,12 +114,57 @@ class TimeSeriesGenerator:
         return ts_array, ts_list
 
 
+def show_result(coordinates, clusters, border_values, shift, time_series_array):
+    fig = plt.figure(figsize=(12, 5))
+    fig.suptitle("Generated time series with parameters clustering")
+
+    ax = fig.add_subplot(1, 2, 1)
+    colors = ["blue", "red", "green"]
+    for i in range(5):
+        time_series = time_series_array[i]
+        ax.text(100, time_series[-1], f"TS {i}")
+        ax.plot(time_series, color=colors[clusters[i]])
+    ax.grid(True)
+    ax.set_xlabel("time")
+    ax.set_ylabel("values")
+
+    # Second subplot
+    ax = fig.add_subplot(1, 2, 2, projection="3d")
+
+    phi = np.linspace(0, np.pi, 20)
+    theta = np.linspace(0, 2 * np.pi, 40)
+    x = np.outer(np.sin(theta), np.cos(phi))
+    y = np.outer(np.sin(theta), np.sin(phi))
+    z = np.outer(np.cos(theta), np.ones_like(phi))
+    x += shift
+    y += shift
+    z += shift
+
+    surf = ax.plot_wireframe(x, y, z, color="grey", alpha=0.3)
+    for i in range(5):
+        ax.scatter(
+            coordinates[i][0],
+            coordinates[i][1],
+            coordinates[i][2],
+            color=colors[clusters[i]],
+        )
+    ax.set_zlim(border_values[0], border_values[1])
+    plt.show()
+
+
 if __name__ == "__main__":
-    coordinates, clusters, border_values = get_blobs(num_samples=5, centers=3)
+    coordinates, border_values, shift = sample_points(5)
+    clusters = cluster_points(coordinates, 2)
     print(coordinates)
     print(f"Clusters: {clusters}")
+    print(shift)
     test_generator_linspace = GeneratorLinspace(
         start=border_values[0], stop=border_values[1], parts=100
+    )
+    print(
+        test_generator_linspace.start,
+        test_generator_linspace.stop,
+        test_generator_linspace.step,
     )
     storage = SchedulerStorage(
         num_steps=100,
@@ -134,6 +180,12 @@ if __name__ == "__main__":
         stable_parameters=False,
         single_schedule=False,
     )
-
+    pl = ProcessList()
+    pl.add_all_processes(test_generator_linspace)
     time_series_array, time_series_list = ts_generator.generate_all()
-    show_plot(time_series_array)
+    with open("logs/generation.txt", "w") as logs:
+        logs.write("TS generation logs\n\n")
+    for i in range(len(time_series_list)):
+        ts = time_series_list[i]
+        ts.dump_logs(pl, "logs/generation.txt", i)
+    show_result(coordinates, clusters, border_values, shift, time_series_array)

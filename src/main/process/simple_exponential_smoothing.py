@@ -25,19 +25,19 @@ class SESParametersGenerator(BaseParametersGenerator):
     def generate_parameters(self) -> tuple[float, ...]:
         if self.aggregated_data is None:
             std = self.generator_linspace.generate_std()
-            error_coefficient = np.random.uniform(0.0, 1.0)
+            error_coefficient = np.random.uniform(0.0, 0.3)
         else:
             std = self.generator_linspace.generate_std(
                 source_value=self.aggregated_data.fraction
             )
-            error_coefficient = self.aggregated_data.fraction
+            error_coefficient = self.aggregated_data.fraction / 3
         return error_coefficient, std
 
     def generate_init_values(self) -> NDArray:
         if self.aggregated_data is None:
             values = self.generator_linspace.generate_values(is_normal=False)
         else:
-            values = np.array([self.aggregated_data.mean_value])
+            values = np.array([self.aggregated_data.mean_value / 2])
         return values
 
 
