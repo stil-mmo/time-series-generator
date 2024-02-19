@@ -1,0 +1,46 @@
+[project]
+name = "tsg"
+description = "Time Series Generator"
+authors = [
+    {name = "Kropacheva Alena", email = "al.kropach@gmail.com"},
+    {name = "Girdyuk Dmitry", email = "girdyuk.dmitry@huawei.com"},
+    {name = "Iov Illarion", email = "iov.illarion@huawei-partners.com"},
+    {name = "Pershin Anton", email = ""},
+]
+readme = "README.md"
+requires-python = ">= 3.10, < 4.0"
+dependencies = [
+    "numpy",
+    "scikit-learn",
+    "matplotlib >= 3.6.1, < 4.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "build",
+    "black",
+    "isort",
+    "pytest",
+    "pipreqs",
+]
+
+[tool.setuptools]
+packages = [
+    "tss",
+    "tss.process",
+    "tss.sampling",
+    "tss.scheduler",
+    "tss.utils",
+]
+
+# Development configurations
+
+# isort
+[tool.isort]
+profile = "black"
+
+# mypy
+[tool.mypy]
+ignore_missing_imports = true
+exclude = ['venv', '.venv']
+plugins = ["numpy.typing.mypy_plugin"]
