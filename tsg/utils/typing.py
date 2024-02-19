@@ -1,0 +1,5 @@
+ParametersStepsType = tuple[int, tuple[float, ...]]
+ProcessParametersType = list[ParametersStepsType]
+ProcessOrderType = list[tuple[int, str]]
+ProcessDataType = tuple[str, ProcessParametersType]
+ProcessConfigType = tuple[str, ParametersStepsType]
