@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
 
 from tsg.process.process_list import ProcessList
 from tsg.time_series import TimeSeries
@@ -31,18 +32,17 @@ def save_plot(
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle("Generated time series with parameters clustering")
 
-    ax = fig.add_subplot(1, 2, 1)
+    ax_graph = fig.add_subplot(1, 2, 1)
     colors = ["blue", "red", "green"]
     for i in range(5):
         time_series = time_series_array[i]
-        ax.text(100, time_series[-1], f"TS {i}")
-        ax.plot(time_series, color=colors[clusters[i]])
-    ax.grid(True)
-    ax.set_xlabel("time")
-    ax.set_ylabel("values")
+        ax_graph.text(100, time_series[-1], f"TS {i}")
+        ax_graph.plot(time_series, color=colors[clusters[i]])
+    ax_graph.grid(True)
+    ax_graph.set_xlabel("time")
+    ax_graph.set_ylabel("values")
 
-    # Second subplot
-    ax = fig.add_subplot(1, 2, 2, projection="3d")
+    ax_sphere: Axes3D = fig.add_subplot(1, 2, 2, projection="3d")
 
     phi = np.linspace(0, np.pi, 20)
     theta = np.linspace(0, 2 * np.pi, 40)
@@ -53,15 +53,15 @@ def save_plot(
     y += shift
     z += shift
 
-    ax.plot_wireframe(x, y, z, color="grey", alpha=0.3)
+    ax_sphere.plot_wireframe(x, y, z, color="grey", alpha=0.3)
     for i in range(5):
-        ax.scatter(
+        ax_sphere.scatter(
             coordinates[i][0],
             coordinates[i][1],
             coordinates[i][2],
             color=colors[clusters[i]],
         )
-    ax.set_zlim(border_values[0], border_values[1])
+    ax_sphere.set_zlim(border_values[0], border_values[1])
     if save_plot_path is None:
         plt.show()
     else:
