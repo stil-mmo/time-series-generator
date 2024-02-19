@@ -29,4 +29,4 @@ jobs:
         mypy . --check
     - name: Test with Pytest
       run: |
-        pytest src/test
+        pytest test
