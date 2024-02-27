@@ -6,13 +6,7 @@ from tsg.sampling.point_clustering import cluster_points
 from tsg.sampling.point_sampling import sample_points
 from tsg.scheduler.scheduler_storage import SchedulerStorage
 from tsg.time_series_generator import TimeSeriesGenerator
-from tsg.utils.result_writer import (
-    load_parameters,
-    load_values,
-    save_parameters,
-    save_plot,
-    save_values,
-)
+from tsg.utils.result_writer import save_parameters, save_plot, save_values
 
 if __name__ == "__main__":
     coordinates, border_values, shift = sample_points(5)
