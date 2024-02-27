@@ -1,29 +1,51 @@
+import json
+from typing import List
+
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
+from numpy.typing import NDArray
 
-from tsg.process.process_list import ProcessList
 from tsg.time_series import TimeSeries
 
 
-def save_data(
-    time_series: TimeSeries, process_list: ProcessList, log_path: str, ts_number: int
-):
-    with open(log_path, "a") as log_file:
-        log_file.write("\n")
-        log_file.write(f"TS {ts_number}\n")
-        last_steps = 0
-        for i in range(len(time_series.metadata)):
-            current_process_data = time_series.metadata[i]
-            current_process = process_list.get_processes([current_process_data[0]])[0]
-            log_file.write(f"Process {i}: {current_process_data[0]}\n")
-            sample = current_process_data[1]
-            log_file.write(
-                f"Starts at {last_steps}, ends at {sample[0] + last_steps - 1}, all={sample[0]}\n"
-            )
-            log_file.write(str(current_process.get_info(data=sample)))
-            log_file.write("\n")
-            last_steps = sample[0] + last_steps
+def save_parameters(ts_list: List[TimeSeries], json_path: str) -> None:
+    with open(json_path, "w") as json_file:
+        json_data = {}
+        for i in range(len(ts_list)):
+            last_steps = 0
+            time_series = ts_list[i]
+            ts_json_data = []
+            ts_name = f"ts_{i + 1}"
+            for i in range(len(time_series.metadata)):
+                current_metadata = time_series.metadata[i]
+                current_process_data = current_metadata[1]
+                current_process_name = current_metadata[0]
+                process_json_data = {
+                    "name": current_process_name,
+                    "start": last_steps,
+                    "end": current_process_data[0] + last_steps - 1,
+                    "params": current_process_data[1],
+                }
+                ts_json_data.append(process_json_data)
+                last_steps = current_process_data[0] + last_steps
+            json_data[ts_name] = ts_json_data
+        json_file.write(json.dumps(json_data, indent=4))
+
+
+def load_parameters(json_path: str):
+    with open(json_path, "r") as json_file:
+        json_data = json.load(json_file)
+    return json_data
+
+
+def save_values(array: NDArray, csv_path: str) -> None:
+    with open(csv_path, "w") as csv_file:
+        np.savetxt(csv_file, array)
+
+
+def load_values(csv_path: str):
+    return np.genfromtxt(csv_path)
 
 
 def save_plot(

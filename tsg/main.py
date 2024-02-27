@@ -6,7 +6,13 @@ from tsg.sampling.point_clustering import cluster_points
 from tsg.sampling.point_sampling import sample_points
 from tsg.scheduler.scheduler_storage import SchedulerStorage
 from tsg.time_series_generator import TimeSeriesGenerator
-from tsg.utils.result_writer import save_data, save_plot
+from tsg.utils.result_writer import (
+    load_parameters,
+    load_values,
+    save_parameters,
+    save_plot,
+    save_values,
+)
 
 if __name__ == "__main__":
     coordinates, border_values, shift = sample_points(5)
@@ -41,13 +47,11 @@ if __name__ == "__main__":
     time_series_array, time_series_list = ts_generator.generate_all()
     os.makedirs("saved_data", exist_ok=True)
     os.makedirs("plots", exist_ok=True)
-    save_data_path = os.path.join("saved_data", "generation.txt")
+    save_data_path = os.path.join("saved_data", "generation.json")
+    save_values_path = os.path.join("saved_data", "values.csv")
     save_plot_path = os.path.join("plots", "plot.png")
-    with open(save_data_path, "w") as logs:
-        logs.write("TS generation logs\n\n")
-    for i in range(len(time_series_list)):
-        ts = time_series_list[i]
-        save_data(ts, pl, save_data_path, i)
+    save_parameters(time_series_list, save_data_path)
+    save_values(time_series_array, save_values_path)
     save_plot(
         coordinates, clusters, border_values, shift, time_series_array, save_plot_path
     )
