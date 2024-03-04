@@ -22,7 +22,7 @@ class SESParametersGenerator(ParametersGenerator):
             aggregated_data=aggregated_data,
         )
 
-    def generate_parameters(self) -> tuple[float, ...]:
+    def generate_parameters(self) -> NDArray[np.float64]:
         if self.aggregated_data is None:
             std = self.linspace_info.generate_std()
             error_coefficient = np.random.uniform(0.0, 0.3)
@@ -31,9 +31,9 @@ class SESParametersGenerator(ParametersGenerator):
                 source_value=self.aggregated_data.fraction
             )
             error_coefficient = self.aggregated_data.fraction / 3
-        return error_coefficient, std
+        return np.array([error_coefficient, std])
 
-    def generate_init_values(self) -> NDArray:
+    def generate_init_values(self) -> NDArray[np.float64]:
         if self.aggregated_data is None:
             values = self.linspace_info.generate_values(is_normal=False)
         else:
@@ -70,8 +70,8 @@ class SimpleExponentialSmoothing(Process):
 
     def generate_time_series(
         self,
-        data: tuple[int, tuple[float, ...]],
-        previous_values: NDArray | None = None,
+        data: tuple[int, NDArray[np.float64]],
+        previous_values: NDArray[np.float64] | None = None,
     ) -> tuple[TimeSeries, dict]:
         ets_values = ETSProcessBuilder(data[0])
         ets_values.set_normal_error(mean=0.0, std=data[1][1])
@@ -86,7 +86,7 @@ class SimpleExponentialSmoothing(Process):
 
 
 if __name__ == "__main__":
-    test_generator_linspace = LinspaceInfo(0.0, 100.0, 100)
+    test_generator_linspace = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
     proc = SimpleExponentialSmoothing(test_generator_linspace)
     test_sample = (100, proc.parameters_generator.generate_parameters())
     ts, info = proc.generate_time_series(test_sample)

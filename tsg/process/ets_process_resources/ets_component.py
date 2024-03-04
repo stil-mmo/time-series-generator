@@ -1,3 +1,4 @@
+import numpy as np
 from numpy import array, transpose
 from numpy.typing import NDArray
 
@@ -32,10 +33,10 @@ class ETSComponent:
     def __init__(
         self,
         lag: int,
-        init_values: NDArray,
+        init_values: NDArray[np.float64],
         parameter: float,
-        error: NDArray,
-        additional_values: NDArray | None = None,
+        error: NDArray[np.float64],
+        additional_values: NDArray[np.float64] | None = None,
     ):
         self.num_samples = len(error)
         self.lag = lag

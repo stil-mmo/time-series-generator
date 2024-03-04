@@ -21,16 +21,16 @@ class RWParametersGenerator(ParametersGenerator):
             aggregated_data=aggregated_data,
         )
 
-    def generate_parameters(self) -> tuple[float, ...]:
+    def generate_parameters(self) -> NDArray[np.float64]:
         if self.aggregated_data is None:
             std = self.linspace_info.generate_std()
         else:
             std = self.linspace_info.generate_std(
                 source_value=self.aggregated_data.fraction
             )
-        return (std,)
+        return np.array([std])
 
-    def generate_init_values(self) -> NDArray:
+    def generate_init_values(self) -> NDArray[np.float64]:
         if self.aggregated_data is None:
             values = self.linspace_info.generate_values(is_normal=False)
         else:
@@ -67,8 +67,8 @@ class RandomWalk(Process):
 
     def generate_time_series(
         self,
-        data: tuple[int, tuple[float, ...]],
-        previous_values: NDArray | None = None,
+        data: tuple[int, NDArray[np.float64]],
+        previous_values: NDArray[np.float64] | None = None,
     ) -> tuple[TimeSeries, dict]:
         values = np.array([0.0 for _ in range(0, data[0])])
         values_to_add = data[0]
@@ -85,14 +85,14 @@ class RandomWalk(Process):
         rw_time_series.add_values(values, (self.name, data))
         if previous_values is None:
             return rw_time_series, self.get_info(
-                data, values[0 : data[0] - values_to_add]
+                data, np.array(values[0 : data[0] - values_to_add])
             )
         else:
             return rw_time_series, self.get_info(data, np.array([previous_values[-1]]))
 
 
 if __name__ == "__main__":
-    test_generator_linspace = LinspaceInfo(0.0, 100.0, 100)
+    test_generator_linspace = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
     proc = RandomWalk(test_generator_linspace)
     test_sample = (100, proc.parameters_generator.generate_parameters())
     test_time_series, test_info = proc.generate_time_series(test_sample)

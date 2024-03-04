@@ -25,7 +25,7 @@ def save_parameters(ts_list: List[TimeSeries], json_path: str) -> None:
                     "name": current_process_name,
                     "start": last_steps,
                     "end": current_process_data[0] + last_steps - 1,
-                    "params": current_process_data[1],
+                    "params": current_process_data[1].tolist(),
                 }
                 ts_json_data.append(process_json_data)
                 last_steps = current_process_data[0] + last_steps
@@ -33,23 +33,28 @@ def save_parameters(ts_list: List[TimeSeries], json_path: str) -> None:
         json_file.write(json.dumps(json_data, indent=4))
 
 
-def load_parameters(json_path: str):
+def load_parameters(json_path: str) -> dict:
     with open(json_path, "r") as json_file:
         json_data = json.load(json_file)
     return json_data
 
 
-def save_values(array: NDArray, csv_path: str) -> None:
+def save_values(array: NDArray[np.float64], csv_path: str) -> None:
     with open(csv_path, "w") as csv_file:
         np.savetxt(csv_file, array)
 
 
-def load_values(csv_path: str):
+def load_values(csv_path: str) -> NDArray[np.float64]:
     return np.genfromtxt(csv_path)
 
 
 def save_plot(
-    coordinates, clusters, border_values, shift, time_series_array, save_plot_path=None
+    coordinates: NDArray[np.float64],
+    clusters: NDArray[np.float64],
+    border_values: tuple[np.float64, np.float64],
+    shift: np.float64,
+    time_series_array: NDArray[np.float64],
+    save_plot_path=None,
 ):
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle("Generated time series with parameters clustering")

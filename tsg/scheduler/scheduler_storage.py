@@ -11,8 +11,8 @@ class SchedulerStorage:
         self,
         num_steps: int,
         generator_linspace: LinspaceInfo,
-        points: NDArray,
-        clusters: NDArray,
+        points: NDArray[np.float64],
+        clusters: NDArray[np.float64],
     ):
         self.num_steps = num_steps
         self.generator_linspace = generator_linspace

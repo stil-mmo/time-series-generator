@@ -1,3 +1,4 @@
+import numpy as np
 from numpy import array, vstack, zeros
 from numpy.random import normal, triangular, uniform
 from numpy.typing import NDArray
@@ -75,7 +76,9 @@ class ETSProcessBuilder:
         self.components = vstack([self.components, trend.values])
         return self.components.shape[0] - 1
 
-    def set_seasonal(self, lag: int, init_values: NDArray, parameter: float) -> int:
+    def set_seasonal(
+        self, lag: int, init_values: NDArray[np.float64], parameter: float
+    ) -> int:
         seasonal = ETSComponent(
             lag=lag,
             init_values=init_values,
@@ -85,5 +88,5 @@ class ETSProcessBuilder:
         self.components = vstack([self.components, seasonal.values])
         return self.components.shape[0] - 1
 
-    def generate_values(self) -> NDArray:
+    def generate_values(self) -> NDArray[np.float64]:
         return self.components.sum(axis=0)

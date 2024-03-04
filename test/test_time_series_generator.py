@@ -1,9 +1,10 @@
+import numpy as np
 import pytest
 
 from tsg.linspace_info import LinspaceInfo
 from tsg.time_series_generator import TimeSeriesGenerator
 
-GENERATOR_LINSPACE = LinspaceInfo(0.0, 1.0, 100)
+GENERATOR_LINSPACE = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
 
 
 def test_generate_all():

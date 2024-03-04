@@ -1,5 +1,6 @@
 from typing import List
 
+import numpy as np
 from numpy import array
 from numpy.typing import NDArray
 
@@ -15,7 +16,7 @@ class TimeSeries:
 
     def add_values(
         self,
-        new_values: NDArray,
+        new_values: NDArray[np.float64],
         new_metadata: ProcessConfigType,
     ) -> None:
         if self.last_index + len(new_values) > self.num_steps:
