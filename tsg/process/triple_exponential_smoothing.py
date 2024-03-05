@@ -22,7 +22,7 @@ class TESParametersGenerator(ParametersGenerator):
             aggregated_data=aggregated_data,
         )
 
-    def generate_parameters(self) -> tuple[float, ...]:
+    def generate_parameters(self) -> NDArray[np.float64]:
         if self.aggregated_data is None:
             std = self.linspace_info.generate_std()
             long_term_coefficient = np.random.uniform(0.0, 0.3)
@@ -35,9 +35,11 @@ class TESParametersGenerator(ParametersGenerator):
             long_term_coefficient = self.aggregated_data.fraction / 3
             trend_coefficient = long_term_coefficient / 20.0
             seasonality_coefficient = 1 - (self.aggregated_data.fraction / 2)
-        return long_term_coefficient, trend_coefficient, seasonality_coefficient, std
+        return np.array(
+            [long_term_coefficient, trend_coefficient, seasonality_coefficient, std]
+        )
 
-    def generate_init_values(self) -> NDArray:
+    def generate_init_values(self) -> NDArray[np.float64]:
         if self.aggregated_data is None:
             init_values = np.zeros((3, self.lag))
             init_values[0][0] = self.linspace_info.generate_values()
@@ -84,8 +86,8 @@ class TripleExponentialSmoothing(Process):
 
     def generate_time_series(
         self,
-        data: tuple[int, tuple[float, ...]],
-        previous_values: NDArray | None = None,
+        data: tuple[int, NDArray[np.float64]],
+        previous_values: NDArray[np.float64] | None = None,
     ) -> tuple[TimeSeries, dict]:
         ets_values = ETSProcessBuilder(data[0])
         ets_values.set_normal_error(mean=0.0, std=data[1][3])
@@ -129,7 +131,7 @@ class TripleExponentialSmoothing(Process):
 
 
 if __name__ == "__main__":
-    test_generator_linspace = LinspaceInfo(0.0, 100.0, 100)
+    test_generator_linspace = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
     proc = TripleExponentialSmoothing(test_generator_linspace, 12)
     test_sample = (100, proc.parameters_generator.generate_parameters())
     test_time_series, test_info = proc.generate_time_series(test_sample)

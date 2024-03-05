@@ -33,8 +33,10 @@ class TimeSeriesGenerator:
 
     def generate_all(
         self,
-    ) -> tuple[NDArray, list[TimeSeries]]:
-        ts_array: NDArray = np.ndarray((self.num_time_series, self.num_steps))
+    ) -> tuple[NDArray[np.float64], list[TimeSeries]]:
+        ts_array: NDArray[np.float64] = np.ndarray(
+            (self.num_time_series, self.num_steps)
+        )
         ts_list = []
         scheduler = self.generate_new_scheduler()
         iterations = (

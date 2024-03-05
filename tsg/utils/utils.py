@@ -1,13 +1,6 @@
 import matplotlib.pyplot as plt
 
 
-def show_plot(samples):
-    for sample in samples:
-        plt.plot(sample)
-    plt.show(block=True)
-    plt.close()
-
-
 def info_to_string(info: dict) -> str:
     line = ""
     for key, value in info.items():

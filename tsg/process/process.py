@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+import numpy as np
 from numpy.typing import NDArray
 
 from tsg.linspace_info import LinspaceInfo
@@ -27,11 +28,11 @@ class ParametersGenerator(ABC):
         self._aggregated_data = aggregated_data
 
     @abstractmethod
-    def generate_parameters(self) -> tuple[float, ...]:
+    def generate_parameters(self) -> NDArray[np.float64]:
         pass
 
     @abstractmethod
-    def generate_init_values(self) -> NDArray:
+    def generate_init_values(self) -> NDArray[np.float64]:
         pass
 
 
@@ -94,15 +95,15 @@ class Process(ABC):
     @abstractmethod
     def generate_time_series(
         self,
-        data: tuple[int, tuple[float, ...]],
-        previous_values: NDArray | None = None,
+        data: tuple[int, NDArray[np.float64]],
+        previous_values: NDArray[np.float64] | None = None,
     ) -> tuple[TimeSeries, dict]:
         pass
 
     def get_info(
         self,
-        data: tuple[int, tuple[float, ...]],
-        init_values: NDArray | None = None,
+        data: tuple[int, NDArray[np.float64]],
+        init_values: NDArray[np.float64] | None = None,
     ) -> dict:
         info = {
             "name": self.name,

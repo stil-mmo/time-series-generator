@@ -6,7 +6,7 @@ from sklearn.datasets import make_blobs
 from tsg.sampling.point_sampling import get_border_value, move_points
 
 
-def cluster_points(points: NDArray[np.float32], n_clusters: int) -> NDArray[np.float32]:
+def cluster_points(points: NDArray[np.float64], n_clusters: int) -> NDArray[np.float64]:
     model = KMeans(n_clusters=n_clusters)
     model.fit(points)
     yhat = model.predict(points)
@@ -15,7 +15,9 @@ def cluster_points(points: NDArray[np.float32], n_clusters: int) -> NDArray[np.f
 
 def get_blobs(
     num_samples: int, centers: int
-) -> tuple[NDArray[np.float32], NDArray[np.float32], tuple[float, float], float]:
+) -> tuple[
+    NDArray[np.float64], NDArray[np.float64], tuple[np.float64, np.float64], np.float64
+]:
     X, y = make_blobs(
         n_samples=num_samples, n_features=3, centers=centers, center_box=(-1.0, 1.0)
     )

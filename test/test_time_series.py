@@ -4,7 +4,7 @@ from numpy.testing import assert_array_equal
 
 from tsg.time_series import TimeSeries
 
-EMPTY_SAMPLE = ("", (0, ()))
+EMPTY_SAMPLE = ("", (0, array([])))
 
 
 def test_add_values():

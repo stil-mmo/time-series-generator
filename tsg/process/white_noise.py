@@ -21,7 +21,7 @@ class WNParametersGenerator(ParametersGenerator):
             aggregated_data=aggregated_data,
         )
 
-    def generate_parameters(self) -> tuple[float, ...]:
+    def generate_parameters(self) -> NDArray[np.float64]:
         if self.aggregated_data is None:
             mean = self.linspace_info.generate_values(is_normal=False)[0]
             std = self.linspace_info.generate_std()
@@ -30,9 +30,9 @@ class WNParametersGenerator(ParametersGenerator):
             std = self.linspace_info.generate_std(
                 source_value=self.aggregated_data.fraction
             )
-        return mean, std
+        return np.array([mean, std])
 
-    def generate_init_values(self) -> NDArray:
+    def generate_init_values(self) -> NDArray[np.float64]:
         return np.array([])
 
 
@@ -63,8 +63,8 @@ class WhiteNoise(Process):
 
     def generate_time_series(
         self,
-        data: tuple[int, tuple[float, ...]],
-        previous_values: NDArray | None = None,
+        data: tuple[int, NDArray[np.float64]],
+        previous_values: NDArray[np.float64] | None = None,
     ) -> tuple[TimeSeries, dict]:
         if previous_values is None:
             wn_values = np.random.normal(data[1][0], data[1][1], size=data[0])
@@ -77,7 +77,7 @@ class WhiteNoise(Process):
 
 
 if __name__ == "__main__":
-    test_generator_linspace = LinspaceInfo(0.0, 100.0, 100)
+    test_generator_linspace = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
     white_noise_process = WhiteNoise(test_generator_linspace)
     time_series, info = white_noise_process.generate_time_series(
         (100, white_noise_process.parameters_generator.generate_parameters())
