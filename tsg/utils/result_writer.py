@@ -11,25 +11,7 @@ from tsg.time_series import TimeSeries
 
 def save_parameters(ts_list: List[TimeSeries], json_path: str) -> None:
     with open(json_path, "w") as json_file:
-        json_data = {}
-        for i in range(len(ts_list)):
-            last_steps = 0
-            time_series = ts_list[i]
-            ts_json_data = []
-            ts_name = f"ts_{i + 1}"
-            for i in range(len(time_series.metadata)):
-                current_metadata = time_series.metadata[i]
-                current_process_data = current_metadata[1]
-                current_process_name = current_metadata[0]
-                process_json_data = {
-                    "name": current_process_name,
-                    "start": last_steps,
-                    "end": current_process_data[0] + last_steps - 1,
-                    "params": current_process_data[1].tolist(),
-                }
-                ts_json_data.append(process_json_data)
-                last_steps = current_process_data[0] + last_steps
-            json_data[ts_name] = ts_json_data
+        json_data = get_json_data(ts_list)
         json_file.write(json.dumps(json_data, indent=4))
 
 
@@ -46,6 +28,29 @@ def save_values(array: NDArray[np.float64], csv_path: str) -> None:
 
 def load_values(csv_path: str) -> NDArray[np.float64]:
     return np.genfromtxt(csv_path)
+
+
+def get_json_data(ts_list: List[TimeSeries]) -> dict:
+    json_data = {}
+    for i in range(len(ts_list)):
+        last_steps = 0
+        time_series = ts_list[i]
+        ts_json_data = []
+        ts_name = f"ts_{i + 1}"
+        for j in range(len(time_series.metadata)):
+            current_metadata = time_series.metadata[j]
+            current_process_data = current_metadata[1]
+            current_process_name = current_metadata[0]
+            process_json_data = {
+                "name": current_process_name,
+                "start": last_steps,
+                "end": current_process_data[0] + last_steps - 1,
+                "params": current_process_data[1].tolist(),
+            }
+            ts_json_data.append(process_json_data)
+            last_steps = current_process_data[0] + last_steps
+        json_data[ts_name] = ts_json_data
+    return json_data
 
 
 def save_plot(
