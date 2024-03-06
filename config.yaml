@@ -1,0 +1,41 @@
+generation:
+  ts_number: 5
+  ts_size: 100
+  linspace_parts: 100
+  linspace_borders: [0, 1]
+  sample_points: True
+  stable_parameters: True
+  single_schedule: False
+  save_data_folder: "../saved_data"
+  json_name: "generation.json"
+  csv_name: "values.csv"
+  plot_name: "plot.png"
+
+clustering:
+  clusters: 2
+
+linspace_info:
+  center_shift: 1.0
+  step_coeff: 0.5
+  use_k: True
+
+scheduler:
+  process_list: null
+  process_order: null
+  strict_num_parts: False
+
+aggregated_data:
+  weighted_values: True
+  use_max: False
+
+process:
+  init_values_coeff: 0.5
+  simple_random_walk:
+    fixed_walk: 1.0
+    fixed_up_probability: 0.5
+  exponential_smoothing:
+    seasonal_lag: 12
+    long_term_coeff_range: [ 0.0, 0.3 ]
+    trend_coeff_range: [ 0.0, 0.05 ]
+    seasonal_coeff_range: [ 0.5, 1.0 ]
+

@@ -42,18 +42,10 @@ class RandomWalk(Process):
     def __init__(
         self,
         linspace_info: LinspaceInfo,
-        lag: int = 1,
         aggregated_data: AggregatedData | None = None,
     ):
-        parameters_generator = RWParametersGenerator(
-            lag=lag,
-            linspace_info=linspace_info,
-            aggregated_data=aggregated_data,
-        )
         super().__init__(
-            lag=lag,
             linspace_info=linspace_info,
-            parameters_generator=parameters_generator,
             aggregated_data=aggregated_data,
         )
 
@@ -64,6 +56,18 @@ class RandomWalk(Process):
     @property
     def num_parameters(self) -> int:
         return 1
+
+    @property
+    def lag(self) -> int:
+        return 1
+
+    @property
+    def parameters_generator(self) -> ParametersGenerator:
+        return RWParametersGenerator(
+            lag=self.lag,
+            linspace_info=self.linspace_info,
+            aggregated_data=self.aggregated_data,
+        )
 
     def generate_time_series(
         self,

@@ -1,5 +1,7 @@
+import hydra
 import numpy as np
 from numpy.typing import NDArray
+from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
 from tsg.process.process import ParametersGenerator, Process
@@ -21,11 +23,21 @@ class SRWParametersGenerator(ParametersGenerator):
             linspace_info=linspace_info,
             aggregated_data=aggregated_data,
         )
-        self.fixed_walk = fixed_walk
+        self.fixed_walk = Process.cfg.simple_random_walk.fixed_walk
+        fixed_up_probability = Process.cfg.simple_random_walk.fixed_up_probability
+        self.fixed_up_probability = (
+            fixed_up_probability
+            if (fixed_up_probability is not None and 0 <= fixed_up_probability <= 1)
+            else None
+        )
 
     def generate_parameters(self) -> NDArray[np.float64]:
         if self.aggregated_data is None:
-            up_probability = np.random.uniform(0.0, 1.0)
+            up_probability = (
+                np.random.uniform(0.0, 1.0)
+                if self.fixed_up_probability is None
+                else self.fixed_up_probability
+            )
             down_probability = 1 - up_probability
             walk = (
                 self.linspace_info.generate_std()
@@ -44,7 +56,9 @@ class SRWParametersGenerator(ParametersGenerator):
         if self.aggregated_data is None:
             values = self.linspace_info.generate_values(is_normal=False)
         else:
-            values = np.array([self.aggregated_data.mean_value / 2])
+            values = np.array(
+                [self.aggregated_data.mean_value * Process.cfg.init_values_coeff]
+            )
         return values
 
 
@@ -52,20 +66,12 @@ class SimpleRandomWalk(Process):
     def __init__(
         self,
         linspace_info: LinspaceInfo,
-        lag: int = 1,
         aggregated_data: AggregatedData | None = None,
         fixed_walk: float | None = None,
     ):
-        parameters_generator = SRWParametersGenerator(
-            lag=lag,
-            linspace_info=linspace_info,
-            aggregated_data=aggregated_data,
-            fixed_walk=fixed_walk,
-        )
+        self.fixed_walk = fixed_walk
         super().__init__(
-            lag=lag,
             linspace_info=linspace_info,
-            parameters_generator=parameters_generator,
             aggregated_data=aggregated_data,
         )
 
@@ -76,6 +82,19 @@ class SimpleRandomWalk(Process):
     @property
     def num_parameters(self) -> int:
         return 3
+
+    @property
+    def lag(self) -> int:
+        return 1
+
+    @property
+    def parameters_generator(self) -> ParametersGenerator:
+        return SRWParametersGenerator(
+            lag=self.lag,
+            linspace_info=self.linspace_info,
+            aggregated_data=self.aggregated_data,
+            fixed_walk=self.fixed_walk,
+        )
 
     def generate_time_series(
         self,
@@ -108,10 +127,16 @@ class SimpleRandomWalk(Process):
             return rw_time_series, self.get_info(data, np.array([previous_values[-1]]))
 
 
-if __name__ == "__main__":
+@hydra.main(version_base=None, config_path="../..", config_name="config")
+def show_plot(cfg: DictConfig):
+    Process.cfg = cfg.process
     test_generator_linspace = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
     proc = SimpleRandomWalk(test_generator_linspace)
     test_sample = (100, proc.parameters_generator.generate_parameters())
     test_time_series, test_info = proc.generate_time_series(test_sample)
     print(test_time_series.get_values())
     draw_process_plot(test_time_series, test_info)
+
+
+if __name__ == "__main__":
+    show_plot()

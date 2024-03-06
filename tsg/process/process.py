@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 from numpy.typing import NDArray
+from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
 from tsg.sampling.aggregated_data import AggregatedData
@@ -37,16 +38,14 @@ class ParametersGenerator(ABC):
 
 
 class Process(ABC):
+    cfg: DictConfig = DictConfig({})
+
     def __init__(
         self,
-        lag: int,
         linspace_info: LinspaceInfo,
-        parameters_generator: ParametersGenerator,
         aggregated_data: AggregatedData | None = None,
     ):
-        self._lag = lag
         self._linspace_info = linspace_info
-        self._parameters_generator = parameters_generator
         self._aggregated_data = aggregated_data
 
     @property
@@ -60,12 +59,14 @@ class Process(ABC):
         pass
 
     @property
+    @abstractmethod
     def lag(self) -> int:
-        return self._lag
+        pass
 
-    @lag.setter
-    def lag(self, lag: int) -> None:
-        self._lag = lag
+    @property
+    @abstractmethod
+    def parameters_generator(self) -> ParametersGenerator:
+        pass
 
     @property
     def linspace_info(self) -> LinspaceInfo:
@@ -74,14 +75,6 @@ class Process(ABC):
     @linspace_info.setter
     def linspace_info(self, linspace_info: LinspaceInfo) -> None:
         self._linspace_info = linspace_info
-
-    @property
-    def parameters_generator(self) -> ParametersGenerator:
-        return self._parameters_generator
-
-    @parameters_generator.setter
-    def parameters_generator(self, parameters_generator: ParametersGenerator) -> None:
-        self._parameters_generator = parameters_generator
 
     @property
     def aggregated_data(self) -> AggregatedData | None:

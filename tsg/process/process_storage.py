@@ -1,3 +1,6 @@
+from random import choice
+from typing import List
+
 import numpy as np
 
 from tsg.linspace_info import LinspaceInfo
@@ -9,29 +12,35 @@ from tsg.process.simple_random_walk import SimpleRandomWalk
 from tsg.process.triple_exponential_smoothing import TripleExponentialSmoothing
 from tsg.process.white_noise import WhiteNoise
 
+ALL_PROCESSES = {
+    "white_noise": WhiteNoise,
+    "simple_random_walk": SimpleRandomWalk,
+    "random_walk": RandomWalk,
+    "simple_exponential_smoothing": SimpleExponentialSmoothing,
+    "double_exponential_smoothing": DoubleExponentialSmoothing,
+    "triple_exponential_smoothing": TripleExponentialSmoothing,
+}
 
-class ProcessList:
-    def __init__(self):
-        self.processes = {}
+
+class ProcessStorage:
+    def __init__(
+        self, linspace_info: LinspaceInfo, process_list: List[str] | None = None
+    ):
+        self.linspace_info = linspace_info
+        self.processes: dict[str, Process] = {}
         self.num_processes = 0
+        if process_list is not None:
+            self.add_processes(process_list)
+        else:
+            self.add_processes(list(ALL_PROCESSES.keys()))
 
-    def add_processes(self, processes: list[Process]) -> None:
-        for process in processes:
-            if process.name not in self.processes.keys():
-                self.processes[process.name] = process
+    def add_processes(self, process_list: list[str]) -> None:
+        for process_name in process_list:
+            if process_name not in self.processes.keys():
+                self.processes[process_name] = ALL_PROCESSES[process_name](
+                    linspace_info=self.linspace_info
+                )
                 self.num_processes += 1
-
-    def add_all_processes(self, linspace_info: LinspaceInfo) -> None:
-        self.add_processes(
-            [
-                WhiteNoise(linspace_info=linspace_info),
-                SimpleRandomWalk(linspace_info=linspace_info),
-                RandomWalk(linspace_info=linspace_info),
-                SimpleExponentialSmoothing(linspace_info=linspace_info),
-                DoubleExponentialSmoothing(linspace_info=linspace_info),
-                TripleExponentialSmoothing(linspace_info=linspace_info, lag=12),
-            ]
-        )
 
     def remove_processes(self, process_names: list[str]) -> None:
         for process_name in process_names:
@@ -51,10 +60,8 @@ class ProcessList:
         return processes
 
     def get_random_processes(self, num_processes: int) -> list[Process]:
-        return [
-            np.random.choice(list(self.processes.values()))
-            for _ in range(num_processes)
-        ]
+        processes: List[Process] = list(self.processes.values())
+        return [choice(processes) for _ in range(num_processes)]
 
     def contains(self, process_name: str) -> bool:
         return process_name in self.processes.keys()

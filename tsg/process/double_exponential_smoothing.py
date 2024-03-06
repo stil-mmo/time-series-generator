@@ -1,5 +1,7 @@
+import hydra
 import numpy as np
 from numpy.typing import NDArray
+from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
 from tsg.process.ets_process_resources.ets_process_builder import ETSProcessBuilder
@@ -23,16 +25,20 @@ class DESParametersGenerator(ParametersGenerator):
         )
 
     def generate_parameters(self) -> NDArray[np.float64]:
+        lt_coeff_range = Process.cfg.exponential_smoothing.long_term_coeff_range
+        t_coeff_range = Process.cfg.exponential_smoothing.trend_coeff_range
         if self.aggregated_data is None:
             std = self.linspace_info.generate_std()
-            long_term_coefficient = np.random.uniform(0.0, 0.3)
-            trend_coefficient = np.random.uniform(0.0, 0.05)
+            long_term_coefficient = np.random.uniform(
+                lt_coeff_range[0], lt_coeff_range[1]
+            )
+            trend_coefficient = np.random.uniform(t_coeff_range[0], t_coeff_range[1])
         else:
             std = self.linspace_info.generate_std(
                 source_value=self.aggregated_data.fraction
             )
-            long_term_coefficient = self.aggregated_data.fraction / 3
-            trend_coefficient = long_term_coefficient / 20.0
+            long_term_coefficient = self.aggregated_data.fraction * lt_coeff_range[1]
+            trend_coefficient = long_term_coefficient * t_coeff_range[1]
         return np.array([long_term_coefficient, trend_coefficient, std])
 
     def generate_init_values(self) -> NDArray[np.float64]:
@@ -42,7 +48,9 @@ class DESParametersGenerator(ParametersGenerator):
             )
             init_values[1] = 0.0
         else:
-            init_values = np.array([self.aggregated_data.mean_value / 2, 0.0])
+            init_values = np.array(
+                [self.aggregated_data.mean_value * Process.cfg.init_values_coeff, 0.0]
+            )
         return init_values
 
 
@@ -50,18 +58,10 @@ class DoubleExponentialSmoothing(Process):
     def __init__(
         self,
         linspace_info: LinspaceInfo,
-        lag: int = 1,
         aggregated_data: AggregatedData | None = None,
     ):
-        parameters_generator = DESParametersGenerator(
-            lag=lag,
-            linspace_info=linspace_info,
-            aggregated_data=aggregated_data,
-        )
         super().__init__(
-            lag=lag,
             linspace_info=linspace_info,
-            parameters_generator=parameters_generator,
             aggregated_data=aggregated_data,
         )
 
@@ -72,6 +72,18 @@ class DoubleExponentialSmoothing(Process):
     @property
     def num_parameters(self) -> int:
         return 3
+
+    @property
+    def lag(self) -> int:
+        return 1
+
+    @property
+    def parameters_generator(self) -> ParametersGenerator:
+        return DESParametersGenerator(
+            lag=self.lag,
+            linspace_info=self.linspace_info,
+            aggregated_data=self.aggregated_data,
+        )
 
     def generate_time_series(
         self,
@@ -103,9 +115,15 @@ class DoubleExponentialSmoothing(Process):
         )
 
 
-if __name__ == "__main__":
+@hydra.main(version_base=None, config_path="../..", config_name="config")
+def show_plot(cfg: DictConfig):
+    Process.cfg = cfg.process
     test_generator_linspace = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
     proc = DoubleExponentialSmoothing(test_generator_linspace)
     test_sample = (100, proc.parameters_generator.generate_parameters())
     ts, info = proc.generate_time_series(test_sample)
     draw_process_plot(ts, info)
+
+
+if __name__ == "__main__":
+    show_plot()
