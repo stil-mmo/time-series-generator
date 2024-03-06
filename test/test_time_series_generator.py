@@ -1,17 +1,22 @@
 import numpy as np
 import pytest
+from hydra import compose, initialize
 
 from tsg.linspace_info import LinspaceInfo
+from tsg.process.process import Process
 from tsg.time_series_generator import TimeSeriesGenerator
 
 GENERATOR_LINSPACE = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
 
 
 def test_generate_all():
-    ts_generator = TimeSeriesGenerator(3, 10, GENERATOR_LINSPACE)
-    ts_array, ts_list = ts_generator.generate_all()
-    assert len(ts_list) == 3
-    assert ts_array.shape == (3, 10)
+    with initialize(version_base=None, config_path=".."):
+        cfg = compose(config_name="config")
+        Process.cfg = cfg.process
+        ts_generator = TimeSeriesGenerator(cfg, GENERATOR_LINSPACE)
+        ts_array, ts_list = ts_generator.generate_all()
+        assert len(ts_list) == cfg.generation.ts_number
+        assert ts_array.shape == (cfg.generation.ts_number, cfg.generation.ts_size)
 
 
 if __name__ == "__main__":
