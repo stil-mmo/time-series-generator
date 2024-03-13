@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import hydra
 import numpy as np
 from numpy.typing import NDArray
@@ -17,28 +19,36 @@ class DESParametersGenerator(ParametersGenerator):
         lag: int,
         linspace_info: LinspaceInfo,
         aggregated_data: AggregatedData | None = None,
+        init_values_coeff: float = 0.5,
+        long_term_coeff_range: Tuple[float, float] = (0.0, 0.3),
+        trend_coeff_range: Tuple[float, float] = (0.0, 0.05),
     ):
         super().__init__(
             lag=lag,
             linspace_info=linspace_info,
             aggregated_data=aggregated_data,
         )
+        self.init_values_coeff = init_values_coeff
+        self.long_term_coeff_range = long_term_coeff_range
+        self.trend_coeff_range = trend_coeff_range
 
     def generate_parameters(self) -> NDArray[np.float64]:
-        lt_coeff_range = Process.cfg.exponential_smoothing.long_term_coeff_range
-        t_coeff_range = Process.cfg.exponential_smoothing.trend_coeff_range
         if self.aggregated_data is None:
             std = self.linspace_info.generate_std()
             long_term_coefficient = np.random.uniform(
-                lt_coeff_range[0], lt_coeff_range[1]
+                self.long_term_coeff_range[0], self.long_term_coeff_range[1]
             )
-            trend_coefficient = np.random.uniform(t_coeff_range[0], t_coeff_range[1])
+            trend_coefficient = np.random.uniform(
+                self.trend_coeff_range[0], self.trend_coeff_range[1]
+            )
         else:
             std = self.linspace_info.generate_std(
                 source_value=self.aggregated_data.fraction
             )
-            long_term_coefficient = self.aggregated_data.fraction * lt_coeff_range[1]
-            trend_coefficient = long_term_coefficient * t_coeff_range[1]
+            long_term_coefficient = (
+                self.aggregated_data.fraction * self.long_term_coeff_range[1]
+            )
+            trend_coefficient = long_term_coefficient * self.trend_coeff_range[1]
         return np.array([long_term_coefficient, trend_coefficient, std])
 
     def generate_init_values(self) -> NDArray[np.float64]:
@@ -49,7 +59,7 @@ class DESParametersGenerator(ParametersGenerator):
             init_values[1] = 0.0
         else:
             init_values = np.array(
-                [self.aggregated_data.mean_value * Process.cfg.init_values_coeff, 0.0]
+                [self.aggregated_data.mean_value * self.init_values_coeff, 0.0]
             )
         return init_values
 
@@ -59,10 +69,21 @@ class DoubleExponentialSmoothing(Process):
         self,
         linspace_info: LinspaceInfo,
         aggregated_data: AggregatedData | None = None,
+        init_values_coeff: float = 0.5,
+        long_term_coeff_range: Tuple[float, float] = (0.0, 0.3),
+        trend_coeff_range: Tuple[float, float] = (0.0, 0.05),
     ):
         super().__init__(
             linspace_info=linspace_info,
             aggregated_data=aggregated_data,
+        )
+        self._parameters_generator = DESParametersGenerator(
+            lag=self.lag,
+            linspace_info=self.linspace_info,
+            aggregated_data=self.aggregated_data,
+            init_values_coeff=init_values_coeff,
+            long_term_coeff_range=long_term_coeff_range,
+            trend_coeff_range=trend_coeff_range,
         )
 
     @property
@@ -79,11 +100,7 @@ class DoubleExponentialSmoothing(Process):
 
     @property
     def parameters_generator(self) -> ParametersGenerator:
-        return DESParametersGenerator(
-            lag=self.lag,
-            linspace_info=self.linspace_info,
-            aggregated_data=self.aggregated_data,
-        )
+        return self._parameters_generator
 
     def generate_time_series(
         self,
@@ -115,9 +132,7 @@ class DoubleExponentialSmoothing(Process):
         )
 
 
-@hydra.main(version_base=None, config_path="../..", config_name="config")
-def show_plot(cfg: DictConfig):
-    Process.cfg = cfg.process
+def show_plot():
     test_generator_linspace = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
     proc = DoubleExponentialSmoothing(test_generator_linspace)
     test_sample = (100, proc.parameters_generator.generate_parameters())

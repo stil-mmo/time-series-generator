@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 from numpy.typing import NDArray
-from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
 from tsg.sampling.aggregated_data import AggregatedData
@@ -38,8 +37,6 @@ class ParametersGenerator(ABC):
 
 
 class Process(ABC):
-    cfg: DictConfig = DictConfig({})
-
     def __init__(
         self,
         linspace_info: LinspaceInfo,

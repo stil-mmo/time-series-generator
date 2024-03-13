@@ -1,7 +1,7 @@
 from math import sqrt
-from typing import List
 
 import numpy as np
+from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
 from tsg.process.process_storage import ProcessStorage
@@ -12,23 +12,17 @@ from tsg.utils.typing import ProcessDataType, ProcessOrderType
 class Scheduler:
     def __init__(
         self,
-        ts_size: int,
+        cfg: DictConfig,
         linspace_info: LinspaceInfo,
-        process_list: List[str] | None = None,
-        process_order: list[tuple[int, str]] | None = None,
-        stable_parameters: bool = False,
-        strict_num_parts: bool = False,
     ):
-        self.num_steps = ts_size
+        self.num_steps = cfg.generation.ts_size
         self.linspace_info = linspace_info
-        self.strict_num_parts = strict_num_parts
-        self.stable_parameters = stable_parameters
-        self.process_storage = ProcessStorage(
-            linspace_info=linspace_info, process_list=process_list
-        )
+        self.strict_num_parts = cfg.scheduler.strict_num_parts
+        self.stable_parameters = cfg.scheduler.stable_parameters
+        self.process_storage = ProcessStorage(cfg=cfg, linspace_info=linspace_info)
         self.process_order = (
-            process_order
-            if process_order is not None
+            cfg.scheduler.process_order
+            if cfg.scheduler.process_order is not None
             else self.generate_process_order()
         )
         self.aggregated_data: AggregatedData | None = None

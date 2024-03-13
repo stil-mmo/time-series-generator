@@ -14,12 +14,14 @@ class RWParametersGenerator(ParametersGenerator):
         lag: int,
         linspace_info: LinspaceInfo,
         aggregated_data: AggregatedData | None = None,
+        init_values_coeff: float = 0.5,
     ):
         super().__init__(
             lag=lag,
             linspace_info=linspace_info,
             aggregated_data=aggregated_data,
         )
+        self.init_values_coeff = init_values_coeff
 
     def generate_parameters(self) -> NDArray[np.float64]:
         if self.aggregated_data is None:
@@ -34,7 +36,9 @@ class RWParametersGenerator(ParametersGenerator):
         if self.aggregated_data is None:
             values = self.linspace_info.generate_values(is_normal=False)
         else:
-            values = np.array([self.aggregated_data.mean_value / 2])
+            values = np.array(
+                [self.aggregated_data.mean_value * self.init_values_coeff]
+            )
         return values
 
 
@@ -43,10 +47,17 @@ class RandomWalk(Process):
         self,
         linspace_info: LinspaceInfo,
         aggregated_data: AggregatedData | None = None,
+        init_values_coeff: float = 0.5,
     ):
         super().__init__(
             linspace_info=linspace_info,
             aggregated_data=aggregated_data,
+        )
+        self._parameters_generator = RWParametersGenerator(
+            lag=self.lag,
+            linspace_info=self.linspace_info,
+            aggregated_data=self.aggregated_data,
+            init_values_coeff=init_values_coeff,
         )
 
     @property
@@ -63,11 +74,7 @@ class RandomWalk(Process):
 
     @property
     def parameters_generator(self) -> ParametersGenerator:
-        return RWParametersGenerator(
-            lag=self.lag,
-            linspace_info=self.linspace_info,
-            aggregated_data=self.aggregated_data,
-        )
+        return self._parameters_generator
 
     def generate_time_series(
         self,

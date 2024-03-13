@@ -23,10 +23,7 @@ class TimeSeriesGenerator:
         self.ts_size = cfg.generation.ts_size
         self.linspace_info = linspace_info
         self.scheduler_storage = scheduler_storage
-        self.process_list = cfg.scheduler.process_list
-        self.process_order = cfg.scheduler.process_order
-        self.stable_parameters = cfg.generation.stable_parameters
-        self.single_schedule = cfg.generation.single_schedule
+        self.single_schedule = cfg.scheduler.single_schedule
 
     def generate_all(
         self,
@@ -91,10 +88,8 @@ class TimeSeriesGenerator:
 
     def generate_new_scheduler(self) -> Scheduler:
         return Scheduler(
-            ts_size=self.ts_size,
+            cfg=self.cfg,
             linspace_info=self.linspace_info,
-            process_list=self.process_list,
-            process_order=self.process_order,
         )
 
     def get_point_schedule(
