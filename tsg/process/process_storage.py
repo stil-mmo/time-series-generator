@@ -48,8 +48,12 @@ class ProcessStorage:
                         self.cfg.process[process_name], _partial_=True
                     )
                     process = process_partial(linspace_info=self.linspace_info)
-                    self.processes[process_name] = process
-                    self.num_processes += 1
+                else:
+                    process = ALL_PROCESSES[process_name](
+                        linspace_info=self.linspace_info
+                    )
+                self.processes[process_name] = process
+                self.num_processes += 1
 
     def remove_processes(self, process_names: list[str]) -> None:
         for process_name in process_names:
