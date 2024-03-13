@@ -1,3 +1,5 @@
+import os.path
+
 import numpy as np
 import pytest
 from hydra import compose, initialize
@@ -13,7 +15,7 @@ GENERATOR_LINSPACE = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
 
 @pytest.fixture
 def process_list():
-    with initialize(version_base=None, config_path="../.."):
+    with initialize(version_base=None, config_path=os.path.join("..", "..")):
         cfg = compose(config_name="config")
         process_list = ProcessStorage(cfg=cfg, linspace_info=GENERATOR_LINSPACE)
         return process_list
