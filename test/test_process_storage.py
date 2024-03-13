@@ -3,7 +3,6 @@ import pytest
 from hydra import compose, initialize
 
 from tsg.linspace_info import LinspaceInfo
-from tsg.process.process import Process
 from tsg.process.process_storage import ProcessStorage
 
 GENERATOR_LINSPACE = LinspaceInfo(np.float64(0.0), np.float64(1.0), 100)
@@ -12,8 +11,8 @@ GENERATOR_LINSPACE = LinspaceInfo(np.float64(0.0), np.float64(1.0), 100)
 def test_add_processes():
     with initialize(version_base=None, config_path=".."):
         cfg = compose(config_name="config")
-        Process.cfg = cfg.process
-        process_list = ProcessStorage(linspace_info=GENERATOR_LINSPACE, process_list=[])
+        cfg.scheduler.process_list = []
+        process_list = ProcessStorage(cfg=cfg, linspace_info=GENERATOR_LINSPACE)
         process_list.add_processes(["white_noise"])
         assert len(process_list.processes) == 1
         process_list.add_processes(["white_noise"])
@@ -23,18 +22,14 @@ def test_add_processes():
 def test_get_processes():
     with initialize(version_base=None, config_path=".."):
         cfg = compose(config_name="config")
-        Process.cfg = cfg.process
-        process_list = ProcessStorage(linspace_info=GENERATOR_LINSPACE, process_list=[])
-        process_list.add_processes(["white_noise"])
+        process_list = ProcessStorage(cfg=cfg, linspace_info=GENERATOR_LINSPACE)
         assert process_list.get_processes(["white_noise"])[0].name == "white_noise"
 
 
 def test_get_random_processes():
     with initialize(version_base=None, config_path=".."):
         cfg = compose(config_name="config")
-        Process.cfg = cfg.process
-        process_list = ProcessStorage(linspace_info=GENERATOR_LINSPACE, process_list=[])
-        process_list.add_processes(["white_noise"])
+        process_list = ProcessStorage(cfg=cfg, linspace_info=GENERATOR_LINSPACE)
         assert len(process_list.get_random_processes(5)) == 5
 
 

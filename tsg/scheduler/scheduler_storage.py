@@ -26,10 +26,8 @@ class SchedulerStorage:
         for cluster in self.clusters:
             if cluster not in storage.keys():
                 scheduler = Scheduler(
-                    ts_size=self.cfg.generation.ts_size,
+                    cfg=self.cfg,
                     linspace_info=self.linspace_info,
-                    process_list=self.cfg.scheduler.process_list,
-                    process_order=self.cfg.scheduler.process_order,
                 )
                 storage[cluster] = scheduler
         return storage

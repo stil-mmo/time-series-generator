@@ -15,7 +15,6 @@ from tsg.utils.result_writer import save_parameters, save_plot, save_values
 
 @hydra.main(version_base=None, config_path="..", config_name="config")
 def main(cfg: DictConfig):
-    Process.cfg = cfg.process
     if cfg.generation.sample_points:
         coordinates, border_values, shift = sample_points(cfg.generation.ts_number)
         clusters = cluster_points(coordinates, cfg.clustering.clusters)
@@ -25,7 +24,7 @@ def main(cfg: DictConfig):
         linspace_info = LinspaceInfo(
             start=border_values[0],
             stop=border_values[1],
-            parts=cfg.generation.linspace_parts,
+            parts=cfg.linspace_info.linspace_parts,
             center_shift=cfg.linspace_info.center_shift,
             step_coeff=cfg.linspace_info.step_coeff,
             use_k=cfg.linspace_info.use_k,
@@ -47,9 +46,9 @@ def main(cfg: DictConfig):
         shift = np.float64(0.0)
         clusters = np.array([])
         linspace_info = LinspaceInfo(
-            start=cfg.generation.linspace_borders[0],
-            stop=cfg.generation.linspace_borders[1],
-            parts=cfg.generation.linspace_parts,
+            start=cfg.linspace_info.linspace_borders[0],
+            stop=cfg.linspace_info.linspace_borders[1],
+            parts=cfg.linspace_info.linspace_parts,
             center_shift=cfg.linspace_info.center_shift,
             step_coeff=cfg.linspace_info.step_coeff,
             use_k=cfg.linspace_info.use_k,

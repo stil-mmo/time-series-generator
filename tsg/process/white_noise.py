@@ -46,6 +46,11 @@ class WhiteNoise(Process):
             linspace_info=linspace_info,
             aggregated_data=aggregated_data,
         )
+        self._parameters_generator = WNParametersGenerator(
+            lag=self.lag,
+            linspace_info=self.linspace_info,
+            aggregated_data=self.aggregated_data,
+        )
 
     @property
     def name(self) -> str:
@@ -61,11 +66,7 @@ class WhiteNoise(Process):
 
     @property
     def parameters_generator(self) -> ParametersGenerator:
-        return WNParametersGenerator(
-            lag=self.lag,
-            linspace_info=self.linspace_info,
-            aggregated_data=self.aggregated_data,
-        )
+        return self._parameters_generator
 
     def generate_time_series(
         self,

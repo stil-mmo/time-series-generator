@@ -3,18 +3,19 @@ import pytest
 from hydra import compose, initialize
 
 from tsg.linspace_info import LinspaceInfo
-from tsg.process.process import Process
 from tsg.scheduler.scheduler import Scheduler
 
 GENERATOR_LINSPACE = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
 
 
 def test_generate_process_list():
-    schedule = Scheduler(100, linspace_info=GENERATOR_LINSPACE)
-    assert (
-        schedule.process_storage.processes["white_noise"] is not None
-        and schedule.process_storage.processes["random_walk"]
-    )
+    with initialize(version_base=None, config_path=".."):
+        cfg = compose(config_name="config")
+        schedule = Scheduler(cfg=cfg, linspace_info=GENERATOR_LINSPACE)
+        assert (
+            schedule.process_storage.processes["white_noise"] is not None
+            and schedule.process_storage.processes["random_walk"] is not None
+        )
 
 
 def test_generate_steps_number():
@@ -29,23 +30,24 @@ def test_generate_steps_number():
 
 
 def test_generate_process_order():
-    schedule = Scheduler(100, linspace_info=GENERATOR_LINSPACE)
-    process_order = schedule.generate_process_order()
-    assert sum([steps for steps, _ in process_order]) == 100
-    assert len(process_order) <= 10
-    assert all(
-        [
-            process_name in schedule.process_storage.processes.keys()
-            for _, process_name in process_order
-        ]
-    )
+    with initialize(version_base=None, config_path=".."):
+        cfg = compose(config_name="config")
+        schedule = Scheduler(cfg=cfg, linspace_info=GENERATOR_LINSPACE)
+        process_order = schedule.generate_process_order()
+        assert sum([steps for steps, _ in process_order]) == 100
+        assert len(process_order) <= 10
+        assert all(
+            [
+                process_name in schedule.process_storage.processes.keys()
+                for _, process_name in process_order
+            ]
+        )
 
 
 def test_generate_schedule():
     with initialize(version_base=None, config_path=".."):
         cfg = compose(config_name="config")
-        Process.cfg = cfg.process
-        scheduler = Scheduler(100, linspace_info=GENERATOR_LINSPACE)
+        scheduler = Scheduler(cfg=cfg, linspace_info=GENERATOR_LINSPACE)
         schedule = scheduler.generate_schedule()
         assert len(schedule) == len(scheduler.process_order)
         steps_sum = []

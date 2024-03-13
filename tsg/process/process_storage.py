@@ -2,6 +2,8 @@ from random import choice
 from typing import List
 
 import numpy as np
+from hydra.utils import instantiate
+from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
 from tsg.process.double_exponential_smoothing import DoubleExponentialSmoothing
@@ -24,11 +26,15 @@ ALL_PROCESSES = {
 
 class ProcessStorage:
     def __init__(
-        self, linspace_info: LinspaceInfo, process_list: List[str] | None = None
+        self,
+        cfg: DictConfig,
+        linspace_info: LinspaceInfo,
     ):
+        self.cfg = cfg
         self.linspace_info = linspace_info
         self.processes: dict[str, Process] = {}
         self.num_processes = 0
+        process_list = cfg.scheduler.process_list
         if process_list is not None:
             self.add_processes(process_list)
         else:
@@ -37,9 +43,16 @@ class ProcessStorage:
     def add_processes(self, process_list: list[str]) -> None:
         for process_name in process_list:
             if process_name not in self.processes.keys():
-                self.processes[process_name] = ALL_PROCESSES[process_name](
-                    linspace_info=self.linspace_info
-                )
+                if self.cfg.process.get(process_name) is not None:
+                    process_partial = instantiate(
+                        self.cfg.process[process_name], _partial_=True
+                    )
+                    process = process_partial(linspace_info=self.linspace_info)
+                else:
+                    process = ALL_PROCESSES[process_name](
+                        linspace_info=self.linspace_info
+                    )
+                self.processes[process_name] = process
                 self.num_processes += 1
 
     def remove_processes(self, process_names: list[str]) -> None:
