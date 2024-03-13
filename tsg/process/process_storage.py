@@ -1,7 +1,6 @@
 from random import choice
 from typing import List
 
-import numpy as np
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 

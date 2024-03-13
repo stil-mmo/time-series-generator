@@ -5,7 +5,6 @@ import numpy as np
 from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
-from tsg.process.process import Process
 from tsg.sampling.point_clustering import cluster_points
 from tsg.sampling.point_sampling import sample_points
 from tsg.scheduler.scheduler_storage import SchedulerStorage
