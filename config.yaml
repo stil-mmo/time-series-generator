@@ -24,9 +24,10 @@ scheduler:
   process_order: null
   strict_num_parts: False
 
-aggregated_data:
-  weighted_values: True
-  use_max: False
+parameters_generation_method:
+  aggregation_method:
+    weighted_values: True
+    use_max: False
 
 process:
   simple_random_walk:
