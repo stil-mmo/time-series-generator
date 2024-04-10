@@ -3,7 +3,7 @@ from numpy.typing import NDArray
 from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
-from tsg.parameters_generation.parameter_types import ParameterType, CoefficientType, StdType, MeanType
+from tsg.parameters_generation.parameter_types import CoefficientType, StdType, MeanType
 from tsg.parameters_generation.parameters_generation_method import ParametersGenerationMethod
 
 
@@ -13,15 +13,12 @@ class RandomMethod(ParametersGenerationMethod):
             parameters_generation_cfg: DictConfig,
             linspace_info: LinspaceInfo,
             source_data: NDArray[np.float64],
-            parameters_required: list[ParameterType],
     ):
         super().__init__(
             parameters_generation_cfg=parameters_generation_cfg,
             linspace_info=linspace_info,
             source_data=source_data,
-            parameters_required=parameters_required,
         )
-        self.generate_all_parameters()
 
     def name(self) -> str:
         return "random_method"

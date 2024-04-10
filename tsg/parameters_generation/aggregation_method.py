@@ -3,7 +3,7 @@ from numpy.typing import NDArray
 from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
-from tsg.parameters_generation.parameter_types import CoefficientType, ParameterType, StdType, MeanType
+from tsg.parameters_generation.parameter_types import CoefficientType, StdType, MeanType
 from tsg.parameters_generation.parameters_generation_method import ParametersGenerationMethod
 
 
@@ -13,13 +13,11 @@ class AggregationMethod(ParametersGenerationMethod):
             parameters_generation_cfg: DictConfig,
             linspace_info: LinspaceInfo,
             source_data: NDArray[np.float64],
-            parameters_required: list[ParameterType],
     ):
         super().__init__(
             parameters_generation_cfg=parameters_generation_cfg,
             linspace_info=linspace_info,
             source_data=source_data,
-            parameters_required=parameters_required,
         )
         weights = self.calculate_weights(source_data.shape[0]) if \
             parameters_generation_cfg.aggregation_method.weighted_values else None
@@ -29,7 +27,6 @@ class AggregationMethod(ParametersGenerationMethod):
             if parameters_generation_cfg.aggregation_method.use_max
             else self.mean_value / source_data.sum()
         )
-        self.generate_all_parameters()
 
     def name(self) -> str:
         return "aggregation_method"

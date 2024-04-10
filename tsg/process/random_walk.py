@@ -65,7 +65,7 @@ class RandomWalk(Process):
         return "random_walk"
 
     @property
-    def num_parameters(self) -> int:
+    def parameters(self) -> int:
         return 1
 
     @property

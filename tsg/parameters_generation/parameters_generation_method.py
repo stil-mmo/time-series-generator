@@ -14,20 +14,25 @@ class ParametersGenerationMethod(ABC):
             parameters_generation_cfg: DictConfig,
             linspace_info: LinspaceInfo,
             source_data: NDArray[np.float64],
-            parameters_required: list[ParameterType],
     ):
         self.parameters_generation_cfg = parameters_generation_cfg
         self.linspace_info = linspace_info
         self.source_data = source_data
-        self.parameters_required = parameters_required
-        self.parameters = np.zeros(shape=(1, len(parameters_required)))[0]
 
-    def generate_all_parameters(self, set_source_data: bool = False):
-        for i in range(len(self.parameters_required)):
-            parameter_type = self.parameters_required[i]
+    def generate_all_parameters(
+            self,
+            parameters_required: list[ParameterType],
+            set_source_data: bool = False
+    ) -> NDArray[np.float64]:
+        if set_source_data and len(self.source_data) != len(parameters_required):
+            self.source_data = self.match_parameters_number(new_size=len(parameters_required))
+        parameters = np.zeros(shape=(1, len(parameters_required)))[0]
+        for i in range(len(parameters_required)):
+            parameter_type = parameters_required[i]
             if set_source_data:
                 parameter_type.source_value = self.source_data[i]
-            self.parameters[i] = self.generation_functions[parameter_type.name](parameter_type)
+            parameters[i] = self.generation_functions[parameter_type.name](parameter_type)
+        return parameters
 
     @property
     @abstractmethod
@@ -49,10 +54,24 @@ class ParametersGenerationMethod(ABC):
     @property
     def generation_functions(self):
         return {
-            "std": self.generate_std,
-            "mean": self.generate_mean,
+            "std_type": self.generate_std,
+            "mean_type": self.generate_mean,
             "coefficient_type": self.generate_coefficient
         }
+
+    def match_parameters_number(self, new_size: int) -> NDArray[np.float64]:
+        old_size = len(self.source_data)
+        new_source_data = np.zeros(shape=(1, new_size))[0]
+        for i in range(min(old_size, new_size)):
+            new_source_data[i] = self.source_data[i]
+        if old_size < new_size:
+            for j in range(old_size, new_size):
+                average = np.average(new_source_data[:j])
+                new_source_data[j] = average
+        else:
+            for j in range(new_size, old_size):
+                new_source_data[(j - new_size) % new_size] += self.source_data[j]
+        return new_source_data
 
     @staticmethod
     def generate_value_in_range(source_value: np.float64, start: np.float64, stop: np.float64) -> np.float64:
@@ -61,6 +80,3 @@ class ParametersGenerationMethod(ABC):
         if value < start:
             value = stop - value
         return value
-
-    def get_parameters(self):
-        return self.parameters

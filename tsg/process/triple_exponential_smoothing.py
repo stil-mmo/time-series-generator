@@ -105,7 +105,7 @@ class TripleExponentialSmoothing(Process):
         return "triple_exponential_smoothing"
 
     @property
-    def num_parameters(self) -> int:
+    def parameters(self) -> int:
         return 4
 
     @property

@@ -78,7 +78,7 @@ class SimpleExponentialSmoothing(Process):
         return "simple_exponential_smoothing"
 
     @property
-    def num_parameters(self) -> int:
+    def parameters(self) -> int:
         return 2
 
     @property
