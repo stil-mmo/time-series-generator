@@ -29,6 +29,11 @@ class ParametersGenerationMethod(ABC):
                 parameter_type.source_value = self.source_data[i]
             self.parameters[i] = self.generation_functions[parameter_type.name](parameter_type)
 
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        pass
+
     @abstractmethod
     def generate_std(self, std_type: StdType) -> np.float64:
         pass

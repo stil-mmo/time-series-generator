@@ -27,6 +27,9 @@ class ParametrizationMethod(ParametersGenerationMethod):
         )
         self.generate_all_parameters(set_source_data=True)
 
+    def name(self) -> str:
+        return "parametrization_method"
+
     def generate_std(self, std_type: StdType) -> np.float64:
         source_value = std_type.source_value
         high_border = 10 ** (np.log10(abs(source_value)) + 1)

@@ -31,6 +31,9 @@ class AggregationMethod(ParametersGenerationMethod):
         )
         self.generate_all_parameters()
 
+    def name(self) -> str:
+        return "aggregation_method"
+
     def generate_std(self, std_type: StdType) -> np.float64:
         return self.linspace_info.generate_std(source_value=self.fraction)
 
