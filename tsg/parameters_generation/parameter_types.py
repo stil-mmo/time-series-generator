@@ -1,28 +1,59 @@
-import math
+from abc import ABC, abstractmethod
 
 import numpy as np
 from numpy.typing import NDArray
-from math import log10
-
-from tsg.linspace_info import LinspaceInfo
 
 
-def increase_dimension(values: NDArray[np.float64], params_num: int):
-    values_num = len(values)
-    new_values = np.array([0. for _ in range(params_num)])
+class ParameterType(ABC):
+    def __init__(
+            self,
+            constraints: NDArray[np.float64] | None = None,
+            source_value: np.float64 | None = None,
+    ):
+        self._source_value = source_value
+        self._constraints = constraints
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        pass
+
+    @property
+    def source_value(self) -> np.float64:
+        return self._source_value
+
+    @source_value.setter
+    def source_value(self, source_value: np.float64):
+        self._source_value = source_value
+
+    @property
+    def constraints(self) -> NDArray[np.float64]:
+        return self._constraints
+
+    @constraints.setter
+    def constraints(self, constraints: NDArray[np.float64]):
+        self._constraints = constraints
 
 
-def convert_to_range(values: NDArray[np.float64], ranges: NDArray[np.float64]) -> NDArray[np.float64]:
-    converted_values = values.copy()
-    min_value = np.min(values)
-    max_value = np.max(values)
-    low_border = 10 ** (int(log10(min_value)))
-    high_border = 10 ** (int(log10(max_value)) + 1)
-    for i in range(len(values)):
-        value = values[i]
-        start = ranges[i][0]
-        end = ranges[i][1]
-        converted_value_coeff = (value - low_border) / (high_border - low_border)
-        converted_value = (end - start) * converted_value_coeff + start
-        converted_values[i] = converted_value
-    return converted_values
+class StdType(ParameterType):
+    def __init__(self, source_value: np.float64 | None = None):
+        super().__init__(source_value=source_value)
+
+    def name(self) -> str:
+        return "std"
+
+
+class MeanType(ParameterType):
+    def __init__(self, source_value: np.float64 | None = None):
+        super().__init__(source_value=source_value)
+
+    def name(self) -> str:
+        return "mean"
+
+
+class CoefficientType(ParameterType):
+    def __init__(self, constraints: NDArray[np.float64], source_value: np.float64 | None = None):
+        super().__init__(constraints=constraints, source_value=source_value)
+
+    def name(self) -> str:
+        return "coefficient_type"
