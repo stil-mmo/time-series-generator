@@ -32,7 +32,7 @@ class ParametersGenerationMethod(ABC):
         self.mean_value = self.get_mean_value() if mean_value is None else mean_value
 
     def generate_all_parameters(
-        self, parameters_required: list[ParameterType], set_source_data: bool = False
+        self, parameters_required: list[ParameterType], set_source_data: bool = True
     ) -> NDArray[np.float64]:
         if set_source_data and len(self.source_data) != len(parameters_required):
             self.source_data = self.match_parameters_number(
