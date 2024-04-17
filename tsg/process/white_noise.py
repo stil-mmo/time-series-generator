@@ -3,8 +3,10 @@ from numpy.typing import NDArray
 from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
-from tsg.parameters_generation.parameter_types import MeanType, StdType, ParameterType
-from tsg.parameters_generation.parameters_generation_method import ParametersGenerationMethod
+from tsg.parameters_generation.parameter_types import MeanType, ParameterType, StdType
+from tsg.parameters_generation.parameters_generation_method import (
+    ParametersGenerationMethod,
+)
 from tsg.parameters_generation.random_method import RandomMethod
 from tsg.process.process import ParametersGenerator, Process
 from tsg.time_series import TimeSeries
@@ -23,7 +25,7 @@ class WNParametersGenerator(ParametersGenerator):
             lag=lag,
             linspace_info=linspace_info,
             parameters_generation_method=parameters_generation_method,
-            parameters_required=parameters_required
+            parameters_required=parameters_required,
         )
 
     def generate_parameters(self) -> NDArray[np.float64]:
@@ -85,9 +87,7 @@ class WhiteNoise(Process):
 
 if __name__ == "__main__":
     test_generator_linspace = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
-    method = RandomMethod(
-        DictConfig(dict()), test_generator_linspace, np.array([])
-    )
+    method = RandomMethod(DictConfig(dict()), test_generator_linspace)
     white_noise_process = WhiteNoise(test_generator_linspace, method)
     time_series, info = white_noise_process.generate_time_series(
         (100, white_noise_process.parameters_generator.generate_parameters())

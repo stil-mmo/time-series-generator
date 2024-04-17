@@ -1,12 +1,23 @@
+import os
 from typing import Tuple
 
+import hydra
 import numpy as np
 from numpy.typing import NDArray
+from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
+from tsg.parameters_generation.parameter_types import (
+    CoefficientType,
+    ParameterType,
+    StdType,
+)
+from tsg.parameters_generation.parameters_generation_method import (
+    ParametersGenerationMethod,
+)
+from tsg.parameters_generation.random_method import RandomMethod
 from tsg.process.ets_process_resources.ets_process_builder import ETSProcessBuilder
 from tsg.process.process import ParametersGenerator, Process
-from tsg.sampling.aggregated_data import AggregatedData
 from tsg.time_series import TimeSeries
 from tsg.utils.utils import draw_process_plot
 
@@ -16,7 +27,8 @@ class TESParametersGenerator(ParametersGenerator):
         self,
         lag: int,
         linspace_info: LinspaceInfo,
-        aggregated_data: AggregatedData | None = None,
+        parameters_generation_method: ParametersGenerationMethod,
+        parameters_required: list[ParameterType],
         long_term_coeff_range: Tuple[float, float] = (0.0, 0.3),
         trend_coeff_range: Tuple[float, float] = (0.0, 0.05),
         seasonal_coeff_range: Tuple[float, float] = (0.0, 0.05),
@@ -24,7 +36,8 @@ class TESParametersGenerator(ParametersGenerator):
         super().__init__(
             lag=lag,
             linspace_info=linspace_info,
-            aggregated_data=aggregated_data,
+            parameters_generation_method=parameters_generation_method,
+            parameters_required=parameters_required,
         )
 
         self.long_term_coeff_range = long_term_coeff_range
@@ -32,47 +45,17 @@ class TESParametersGenerator(ParametersGenerator):
         self.seasonal_coeff_range = seasonal_coeff_range
 
     def generate_parameters(self) -> NDArray[np.float64]:
-        if self.aggregated_data is None:
-            std = self.linspace_info.generate_std()
-            long_term_coefficient = np.random.uniform(
-                self.long_term_coeff_range[0], self.long_term_coeff_range[1]
-            )
-            trend_coefficient = np.random.uniform(
-                self.trend_coeff_range[0], self.trend_coeff_range[1]
-            )
-            seasonality_coefficient = np.random.uniform(
-                self.seasonal_coeff_range[0], self.seasonal_coeff_range[1]
-            )
-        else:
-            std = self.linspace_info.generate_std(
-                source_value=self.aggregated_data.fraction
-            )
-            long_term_coefficient = (
-                self.aggregated_data.fraction * self.long_term_coeff_range[1]
-            )
-            trend_coefficient = long_term_coefficient * self.trend_coeff_range[1]
-            seasonality_coefficient = 1 - (
-                self.aggregated_data.fraction * self.seasonal_coeff_range[0]
-            )
-        return np.array(
-            [long_term_coefficient, trend_coefficient, seasonality_coefficient, std]
+        return self.parameters_generation_method.generate_all_parameters(
+            parameters_required=self.parameters_required
         )
 
     def generate_init_values(self) -> NDArray[np.float64]:
-        if self.aggregated_data is None:
-            init_values = np.zeros((3, self.lag))
-            init_values[0][0] = self.linspace_info.generate_values()
-            init_values[1][0] = 0.0
-            init_values[2] = self.linspace_info.generate_values(num_values=self.lag)
-        else:
-            init_values = np.zeros((3, self.lag))
-            init_values[0][0] = self.aggregated_data.mean_value
-            init_values[1][0] = 0.0
-            init_values[2][0] = 0.0
-            for i in range(1, self.lag):
-                init_values[2][i] = init_values[2][i - 1] + np.random.normal(
-                    0.0, self.linspace_info.step
-                )
+        init_values = np.zeros((3, self.lag))
+        init_values[0][0] = self.parameters_generation_method.mean_value
+        for i in range(1, self.lag):
+            init_values[2][i] = init_values[2][i - 1] + np.random.normal(
+                0.0, self.linspace_info.step
+            )
         return init_values
 
 
@@ -80,21 +63,25 @@ class TripleExponentialSmoothing(Process):
     def __init__(
         self,
         linspace_info: LinspaceInfo,
-        aggregated_data: AggregatedData | None = None,
+        parameters_generation_method: ParametersGenerationMethod,
         lag: int = 12,
         long_term_coeff_range: Tuple[float, float] = (0.0, 0.3),
         trend_coeff_range: Tuple[float, float] = (0.0, 0.05),
         seasonal_coeff_range: Tuple[float, float] = (0.0, 0.05),
     ):
+        self.long_term_coeff_range = long_term_coeff_range
+        self.trend_coeff_range = trend_coeff_range
+        self.seasonal_coeff_range = seasonal_coeff_range
         self._lag = lag
         super().__init__(
             linspace_info=linspace_info,
-            aggregated_data=aggregated_data,
+            parameters_generation_method=parameters_generation_method,
         )
         self._parameters_generator = TESParametersGenerator(
             lag=self.lag,
             linspace_info=self.linspace_info,
-            aggregated_data=self.aggregated_data,
+            parameters_generation_method=parameters_generation_method,
+            parameters_required=self.parameters,
             long_term_coeff_range=long_term_coeff_range,
             trend_coeff_range=trend_coeff_range,
             seasonal_coeff_range=seasonal_coeff_range,
@@ -105,8 +92,13 @@ class TripleExponentialSmoothing(Process):
         return "triple_exponential_smoothing"
 
     @property
-    def parameters(self) -> int:
-        return 4
+    def parameters(self) -> list[ParameterType]:
+        return [
+            StdType(),
+            CoefficientType(constraints=np.array(self.long_term_coeff_range)),
+            CoefficientType(constraints=np.array(self.trend_coeff_range)),
+            CoefficientType(constraints=np.array(self.seasonal_coeff_range)),
+        ]
 
     @property
     def lag(self) -> int:
@@ -162,9 +154,13 @@ class TripleExponentialSmoothing(Process):
         )
 
 
-def show_plot():
+@hydra.main(
+    version_base="1.2", config_path=os.path.join("..", ".."), config_name="config"
+)
+def show_plot(cfg: DictConfig):
     test_generator_linspace = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
-    proc = TripleExponentialSmoothing(test_generator_linspace)
+    method = RandomMethod(cfg.parameters_generation_method, test_generator_linspace)
+    proc = TripleExponentialSmoothing(test_generator_linspace, method)
     test_sample = (100, proc.parameters_generator.generate_parameters())
     test_time_series, test_info = proc.generate_time_series(test_sample)
     draw_process_plot(test_time_series, test_info)

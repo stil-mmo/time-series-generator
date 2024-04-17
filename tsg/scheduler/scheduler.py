@@ -4,8 +4,10 @@ import numpy as np
 from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
+from tsg.parameters_generation.parameters_generation_method import (
+    ParametersGenerationMethod,
+)
 from tsg.process.process_storage import ProcessStorage
-from tsg.sampling.aggregated_data import AggregatedData
 from tsg.utils.typing import ProcessDataType, ProcessOrderType
 
 
@@ -14,6 +16,7 @@ class Scheduler:
         self,
         cfg: DictConfig,
         linspace_info: LinspaceInfo,
+        parameters_generation_method: ParametersGenerationMethod | None = None,
     ):
         self.num_steps = cfg.generation.ts_size
         self.linspace_info = linspace_info
@@ -25,13 +28,14 @@ class Scheduler:
             if cfg.scheduler.process_order is not None
             else self.generate_process_order()
         )
-        self.aggregated_data: AggregatedData | None = None
+        self.parameters_generation_method = parameters_generation_method
 
     def generate_schedule(self) -> list[ProcessDataType]:
         schedule = []
         for steps, process_name in self.process_order:
             process = self.process_storage.get_processes([process_name])[0]
-            process.aggregated_data = self.aggregated_data
+            if self.parameters_generation_method is not None:
+                process.parameters_generation_method = self.parameters_generation_method
             process_data: ProcessDataType = (process_name, [])
             if self.stable_parameters or steps == 1:
                 process_data[1].append(
@@ -63,9 +67,6 @@ class Scheduler:
         for i in range(actual_num_parts):
             process_schedule.append((processes_steps[i], random_processes[i].name))
         return process_schedule
-
-    def set_aggregated_data(self, aggregated_data: AggregatedData) -> None:
-        self.aggregated_data = aggregated_data
 
     def set_process_order(self, process_order: ProcessOrderType) -> None:
         self.process_order = process_order

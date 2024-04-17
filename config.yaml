@@ -2,6 +2,7 @@ generation:
   ts_number: 5
   ts_size: 100
   sample_points: True
+  generation_method: "aggregation_method"
   save_data_folder: "../saved_data"
   json_name: "generation.json"
   csv_name: "values.csv"

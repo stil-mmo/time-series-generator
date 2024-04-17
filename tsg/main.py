@@ -12,7 +12,7 @@ from tsg.time_series_generator import TimeSeriesGenerator
 from tsg.utils.result_writer import save_parameters, save_plot, save_values
 
 
-@hydra.main(version_base=None, config_path="..", config_name="config")
+@hydra.main(version_base="1.2", config_path="..", config_name="config")
 def main(cfg: DictConfig):
     if cfg.generation.sample_points:
         coordinates, border_values, shift = sample_points(cfg.generation.ts_number)

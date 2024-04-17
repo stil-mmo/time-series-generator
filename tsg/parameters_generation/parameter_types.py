@@ -6,9 +6,9 @@ from numpy.typing import NDArray
 
 class ParameterType(ABC):
     def __init__(
-            self,
-            constraints: NDArray[np.float64] | None = None,
-            source_value: np.float64 | None = None,
+        self,
+        constraints: NDArray[np.float64] = np.array([]),
+        source_value: np.float64 = np.float64(0.0),
     ):
         self._source_value = source_value
         self._constraints = constraints
@@ -36,7 +36,7 @@ class ParameterType(ABC):
 
 
 class StdType(ParameterType):
-    def __init__(self, source_value: np.float64 | None = None):
+    def __init__(self, source_value: np.float64 = np.float64(0.0)):
         super().__init__(source_value=source_value)
 
     @property
@@ -45,7 +45,7 @@ class StdType(ParameterType):
 
 
 class MeanType(ParameterType):
-    def __init__(self, source_value: np.float64 | None = None):
+    def __init__(self, source_value: np.float64 = np.float64(0.0)):
         super().__init__(source_value=source_value)
 
     @property
@@ -54,7 +54,11 @@ class MeanType(ParameterType):
 
 
 class CoefficientType(ParameterType):
-    def __init__(self, constraints: NDArray[np.float64], source_value: np.float64 | None = None):
+    def __init__(
+        self,
+        constraints: NDArray[np.float64] = np.array([]),
+        source_value: np.float64 = np.float64(0.0),
+    ):
         super().__init__(constraints=constraints, source_value=source_value)
 
     @property

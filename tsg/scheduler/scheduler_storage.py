@@ -3,7 +3,9 @@ from numpy.typing import NDArray
 from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
-from tsg.sampling.aggregated_data import AggregatedData
+from tsg.parameters_generation.parameters_generation_method import (
+    ParametersGenerationMethod,
+)
 from tsg.scheduler.scheduler import Scheduler
 
 
@@ -36,8 +38,11 @@ class SchedulerStorage:
         return self.clusters[point_index]
 
     def get_scheduler(
-        self, cluster: int, aggregated_data: AggregatedData | None = None
+        self,
+        cluster: int,
+        parameters_generation_method: ParametersGenerationMethod,
     ) -> Scheduler:
-        if aggregated_data is not None:
-            self.scheduler_storage[cluster].set_aggregated_data(aggregated_data)
+        self.scheduler_storage[
+            cluster
+        ].parameters_generation_method = parameters_generation_method
         return self.scheduler_storage[cluster]

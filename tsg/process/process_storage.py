@@ -5,6 +5,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
+from tsg.parameters_generation.random_method import RandomMethod
 from tsg.process.double_exponential_smoothing import DoubleExponentialSmoothing
 from tsg.process.process import Process
 from tsg.process.random_walk import RandomWalk
@@ -34,6 +35,10 @@ class ProcessStorage:
         self.processes: dict[str, Process] = {}
         self.num_processes = 0
         process_list = cfg.scheduler.process_list
+        self.generation_method = RandomMethod(
+            parameters_generation_cfg=cfg.parameters_generation_method,
+            linspace_info=linspace_info,
+        )
         if process_list is not None:
             self.add_processes(process_list)
         else:
@@ -46,10 +51,14 @@ class ProcessStorage:
                     process_partial = instantiate(
                         self.cfg.process[process_name], _partial_=True
                     )
-                    process = process_partial(linspace_info=self.linspace_info)
+                    process = process_partial(
+                        linspace_info=self.linspace_info,
+                        parameters_generation_method=self.generation_method,
+                    )
                 else:
                     process = ALL_PROCESSES[process_name](
-                        linspace_info=self.linspace_info
+                        linspace_info=self.linspace_info,
+                        parameters_generation_method=self.generation_method,
                     )
                 self.processes[process_name] = process
                 self.num_processes += 1

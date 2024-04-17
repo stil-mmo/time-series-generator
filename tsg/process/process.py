@@ -5,7 +5,9 @@ from numpy.typing import NDArray
 
 from tsg.linspace_info import LinspaceInfo
 from tsg.parameters_generation.parameter_types import ParameterType
-from tsg.parameters_generation.parameters_generation_method import ParametersGenerationMethod
+from tsg.parameters_generation.parameters_generation_method import (
+    ParametersGenerationMethod,
+)
 from tsg.time_series import TimeSeries
 
 
@@ -28,7 +30,7 @@ class ParametersGenerator(ABC):
 
     @parameters_generation_method.setter
     def parameters_generation_method(
-            self, parameters_generation_method: ParametersGenerationMethod
+        self, parameters_generation_method: ParametersGenerationMethod
     ) -> None:
         self._parameters_generation_method = parameters_generation_method
 
@@ -84,9 +86,11 @@ class Process(ABC):
 
     @parameters_generation_method.setter
     def parameters_generation_method(
-            self, parameters_generation_method: ParametersGenerationMethod
+        self, parameters_generation_method: ParametersGenerationMethod
     ) -> None:
-        self.parameters_generator.parameters_generation_method = parameters_generation_method
+        self.parameters_generator.parameters_generation_method = (
+            parameters_generation_method
+        )
         self._parameters_generation_method = parameters_generation_method
 
     @abstractmethod

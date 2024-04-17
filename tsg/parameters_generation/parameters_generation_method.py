@@ -5,33 +5,47 @@ from numpy.typing import NDArray
 from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
-from tsg.parameters_generation.parameter_types import ParameterType, CoefficientType, StdType, MeanType
+from tsg.parameters_generation.parameter_types import (
+    CoefficientType,
+    MeanType,
+    ParameterType,
+    StdType,
+)
 
 
 class ParametersGenerationMethod(ABC):
     def __init__(
-            self,
-            parameters_generation_cfg: DictConfig,
-            linspace_info: LinspaceInfo,
-            source_data: NDArray[np.float64],
+        self,
+        parameters_generation_cfg: DictConfig,
+        linspace_info: LinspaceInfo,
+        source_data: NDArray[np.float64],
+        mean_value: np.float64 | None = None,
     ):
         self.parameters_generation_cfg = parameters_generation_cfg
         self.linspace_info = linspace_info
         self.source_data = source_data
+        self.weights = (
+            self.calculate_weights(source_data.shape[0])
+            if parameters_generation_cfg.aggregation_method.weighted_values
+            else None
+        )
+        self.mean_value = self.get_mean_value() if mean_value is None else mean_value
 
     def generate_all_parameters(
-            self,
-            parameters_required: list[ParameterType],
-            set_source_data: bool = False
+        self, parameters_required: list[ParameterType], set_source_data: bool = False
     ) -> NDArray[np.float64]:
         if set_source_data and len(self.source_data) != len(parameters_required):
-            self.source_data = self.match_parameters_number(new_size=len(parameters_required))
+            self.source_data = self.match_parameters_number(
+                new_size=len(parameters_required)
+            )
         parameters = np.zeros(shape=(1, len(parameters_required)))[0]
         for i in range(len(parameters_required)):
             parameter_type = parameters_required[i]
             if set_source_data:
                 parameter_type.source_value = self.source_data[i]
-            parameters[i] = self.generation_functions[parameter_type.name](parameter_type)
+            parameters[i] = self.generation_functions[parameter_type.name](
+                parameter_type
+            )
         return parameters
 
     @property
@@ -56,7 +70,7 @@ class ParametersGenerationMethod(ABC):
         return {
             "std_type": self.generate_std,
             "mean_type": self.generate_mean,
-            "coefficient_type": self.generate_coefficient
+            "coefficient_type": self.generate_coefficient,
         }
 
     def match_parameters_number(self, new_size: int) -> NDArray[np.float64]:
@@ -73,10 +87,21 @@ class ParametersGenerationMethod(ABC):
                 new_source_data[(j - new_size) % new_size] += self.source_data[j]
         return new_source_data
 
+    def get_mean_value(self) -> np.float64:
+        return np.average(self.source_data, weights=self.weights)
+
     @staticmethod
-    def generate_value_in_range(source_value: np.float64, start: np.float64, stop: np.float64) -> np.float64:
+    def generate_value_in_range(
+        source_value: np.float64, start: np.float64, stop: np.float64
+    ) -> np.float64:
         high_border = 10 ** (np.log10(abs(source_value)) + 1)
         value = stop * (source_value / high_border)
         if value < start:
             value = stop - value
         return value
+
+    @staticmethod
+    def calculate_weights(num_values: int) -> NDArray[np.float64]:
+        progression_sum = (1 + num_values) * num_values / 2
+        values = np.array([i + 1 for i in range(num_values)])
+        return np.flip(values) / progression_sum
