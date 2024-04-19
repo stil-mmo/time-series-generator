@@ -33,6 +33,6 @@ def move_points(coordinates: NDArray[np.float64]) -> np.float64:
     min_coordinate = get_border_value(coordinates)
     shift = np.float64(0)
     if min_coordinate < 0:
-        coordinates += abs(min_coordinate)
-        shift = np.abs(min_coordinate)
+        coordinates += np.abs(min_coordinate) * 2
+        shift = np.abs(min_coordinate) * 2
     return shift
