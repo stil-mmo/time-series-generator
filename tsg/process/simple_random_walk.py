@@ -46,9 +46,12 @@ class SRWParametersGenerator(ParametersGenerator):
         )
 
     def generate_parameters(self) -> NDArray[np.float64]:
-        return self.parameters_generation_method.generate_all_parameters(
+        parameters = self.parameters_generation_method.generate_all_parameters(
             parameters_required=self.parameters_required
         )
+        if self.fixed_walk is not None:
+            parameters[1] = self.fixed_walk
+        return parameters
 
     def generate_init_values(self) -> NDArray[np.float64]:
         return np.array(
