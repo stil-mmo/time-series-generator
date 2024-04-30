@@ -19,7 +19,7 @@ class ParametersGenerationMethod(ABC):
         parameters_generation_cfg: DictConfig,
         linspace_info: LinspaceInfo,
         source_data: NDArray[np.float64],
-        mean_value: np.float64 | None = None,
+        mean_value: float | None = None,
     ):
         self.parameters_generation_cfg = parameters_generation_cfg
         self.linspace_info = linspace_info
@@ -54,15 +54,15 @@ class ParametersGenerationMethod(ABC):
         pass
 
     @abstractmethod
-    def generate_std(self, std_type: StdType) -> np.float64:
+    def generate_std(self, std_type: StdType) -> float:
         pass
 
     @abstractmethod
-    def generate_mean(self, mean_type: MeanType) -> np.float64:
+    def generate_mean(self, mean_type: MeanType) -> float:
         pass
 
     @abstractmethod
-    def generate_coefficient(self, coefficient_type: CoefficientType) -> np.float64:
+    def generate_coefficient(self, coefficient_type: CoefficientType) -> float:
         pass
 
     @property
@@ -87,13 +87,13 @@ class ParametersGenerationMethod(ABC):
                 new_source_data[(j - new_size) % new_size] += self.source_data[j]
         return new_source_data
 
-    def get_mean_value(self) -> np.float64:
-        return np.average(self.source_data, weights=self.weights)
+    def get_mean_value(self) -> float:
+        return float(np.average(self.source_data, weights=self.weights))
 
     @staticmethod
     def generate_value_in_range(
-        source_value: np.float64, start: np.float64, stop: np.float64
-    ) -> np.float64:
+        source_value: float, start: float, stop: float
+    ) -> float:
         high_border = 10 ** (np.log10(abs(source_value)) + 1)
         value = stop * (source_value / high_border)
         if value < start:

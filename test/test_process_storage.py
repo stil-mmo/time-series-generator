@@ -5,7 +5,7 @@ from hydra import compose, initialize
 from tsg.linspace_info import LinspaceInfo
 from tsg.process.process_storage import ProcessStorage
 
-GENERATOR_LINSPACE = LinspaceInfo(np.float64(0.0), np.float64(1.0), 100)
+GENERATOR_LINSPACE = LinspaceInfo(0.0, 100.0, 100)
 
 
 def test_add_processes():

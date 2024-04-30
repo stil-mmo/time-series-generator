@@ -26,21 +26,21 @@ class ParametrizationMethod(ParametersGenerationMethod):
     def name(self) -> str:
         return "parametrization_method"
 
-    def generate_std(self, std_type: StdType) -> np.float64:
+    def generate_std(self, std_type: StdType) -> float:
         source_value = std_type.source_value
         high_border = 10 ** (np.log10(abs(source_value)) + 1)
         return self.linspace_info.generate_std(
             source_value=(source_value / high_border)
         )
 
-    def generate_mean(self, mean_type: MeanType) -> np.float64:
+    def generate_mean(self, mean_type: MeanType) -> float:
         return self.generate_value_in_range(
             source_value=mean_type.source_value,
             start=self.linspace_info.start,
             stop=self.linspace_info.stop,
         )
 
-    def generate_coefficient(self, coefficient_type: CoefficientType) -> np.float64:
+    def generate_coefficient(self, coefficient_type: CoefficientType) -> float:
         return self.generate_value_in_range(
             source_value=coefficient_type.source_value,
             start=coefficient_type.constraints[0],

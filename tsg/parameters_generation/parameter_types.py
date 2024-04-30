@@ -8,7 +8,7 @@ class ParameterType(ABC):
     def __init__(
         self,
         constraints: NDArray[np.float64] = np.array([]),
-        source_value: np.float64 = np.float64(0.0),
+        source_value: float = 0.0,
     ):
         self._source_value = source_value
         self._constraints = constraints
@@ -19,11 +19,11 @@ class ParameterType(ABC):
         pass
 
     @property
-    def source_value(self) -> np.float64:
+    def source_value(self) -> float:
         return self._source_value
 
     @source_value.setter
-    def source_value(self, source_value: np.float64) -> None:
+    def source_value(self, source_value: float) -> None:
         self._source_value = source_value
 
     @property
@@ -36,7 +36,7 @@ class ParameterType(ABC):
 
 
 class StdType(ParameterType):
-    def __init__(self, source_value: np.float64 = np.float64(0.0)):
+    def __init__(self, source_value: float = 0.0):
         super().__init__(source_value=source_value)
 
     @property
@@ -45,7 +45,7 @@ class StdType(ParameterType):
 
 
 class MeanType(ParameterType):
-    def __init__(self, source_value: np.float64 = np.float64(0.0)):
+    def __init__(self, source_value: float = 0.0):
         super().__init__(source_value=source_value)
 
     @property
@@ -57,7 +57,7 @@ class CoefficientType(ParameterType):
     def __init__(
         self,
         constraints: NDArray[np.float64] = np.array([]),
-        source_value: np.float64 = np.float64(0.0),
+        source_value: float = 0.0,
     ):
         super().__init__(constraints=constraints, source_value=source_value)
 

@@ -28,12 +28,12 @@ class RandomMethod(ParametersGenerationMethod):
     def name(self) -> str:
         return "random_method"
 
-    def generate_std(self, std_type: StdType) -> np.float64:
+    def generate_std(self, std_type: StdType) -> float:
         return self.linspace_info.generate_std()
 
-    def generate_mean(self, mean_type: MeanType) -> np.float64:
+    def generate_mean(self, mean_type: MeanType) -> float:
         return self.linspace_info.generate_values(is_normal=False)[0]
 
-    def generate_coefficient(self, coefficient_type: CoefficientType) -> np.float64:
+    def generate_coefficient(self, coefficient_type: CoefficientType) -> float:
         constraints = coefficient_type.constraints
-        return np.float64(np.random.uniform(constraints[0], constraints[1]))
+        return np.random.uniform(constraints[0], constraints[1])

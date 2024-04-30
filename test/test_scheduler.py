@@ -5,7 +5,7 @@ from hydra import compose, initialize
 from tsg.linspace_info import LinspaceInfo
 from tsg.scheduler.scheduler import Scheduler
 
-GENERATOR_LINSPACE = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
+GENERATOR_LINSPACE = LinspaceInfo(0.0, 100.0, 100)
 
 
 def test_generate_process_list():

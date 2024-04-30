@@ -11,7 +11,7 @@ from tsg.process.process_storage import ProcessStorage
 from tsg.process.simple_random_walk import SimpleRandomWalk
 from tsg.time_series import TimeSeries
 
-GENERATOR_LINSPACE = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
+GENERATOR_LINSPACE = LinspaceInfo(0.0, 100.0, 100)
 
 
 @pytest.fixture

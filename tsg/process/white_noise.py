@@ -86,7 +86,7 @@ class WhiteNoise(Process):
 
 
 if __name__ == "__main__":
-    test_generator_linspace = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
+    test_generator_linspace = LinspaceInfo(0.0, 100.0, 100)
     method = RandomMethod(DictConfig(dict()), test_generator_linspace)
     white_noise_process = WhiteNoise(test_generator_linspace, method)
     time_series, info = white_noise_process.generate_time_series(

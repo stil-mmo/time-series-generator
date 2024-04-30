@@ -41,8 +41,8 @@ def main(cfg: DictConfig):
         )
     else:
         coordinates = np.array([])
-        border_values = (np.float64(0.0), np.float64(0.0))
-        shift = np.float64(0.0)
+        border_values = (0.0, 0.0)
+        shift = 0.0
         clusters = np.array([])
         linspace_info = LinspaceInfo(
             start=cfg.linspace_info.linspace_borders[0],

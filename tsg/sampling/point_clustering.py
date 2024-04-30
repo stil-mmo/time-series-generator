@@ -15,9 +15,7 @@ def cluster_points(points: NDArray[np.float64], n_clusters: int) -> NDArray[np.f
 
 def get_blobs(
     num_samples: int, centers: int
-) -> tuple[
-    NDArray[np.float64], NDArray[np.float64], tuple[np.float64, np.float64], np.float64
-]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64], tuple[float, float], float]:
     X, y = make_blobs(
         n_samples=num_samples, n_features=3, centers=centers, center_box=(-1.0, 1.0)
     )

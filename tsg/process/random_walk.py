@@ -109,7 +109,7 @@ class RandomWalk(Process):
     version_base="1.2", config_path=os.path.join("..", ".."), config_name="config"
 )
 def show_plot(cfg: DictConfig):
-    test_generator_linspace = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
+    test_generator_linspace = LinspaceInfo(0.0, 100.0, 100)
     method = RandomMethod(cfg.parameters_generation_method, test_generator_linspace)
     proc = RandomWalk(test_generator_linspace, method)
     test_sample = (100, proc.parameters_generator.generate_parameters())

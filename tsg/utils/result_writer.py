@@ -56,8 +56,8 @@ def get_json_data(ts_list: List[TimeSeries]) -> dict:
 def save_plot(
     coordinates: NDArray[np.float64],
     clusters: NDArray[np.float64],
-    border_values: tuple[np.float64, np.float64],
-    shift: np.float64,
+    border_values: tuple[float, float],
+    shift: float,
     time_series_array: NDArray[np.float64],
     save_plot_path=None,
 ):

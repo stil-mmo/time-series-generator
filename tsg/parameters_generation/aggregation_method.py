@@ -32,13 +32,13 @@ class AggregationMethod(ParametersGenerationMethod):
     def name(self) -> str:
         return "aggregation_method"
 
-    def generate_std(self, std_type: StdType) -> np.float64:
+    def generate_std(self, std_type: StdType) -> float:
         return self.linspace_info.generate_std(source_value=self.fraction)
 
-    def generate_mean(self, mean_type: MeanType) -> np.float64:
+    def generate_mean(self, mean_type: MeanType) -> float:
         return self.mean_value
 
-    def generate_coefficient(self, coefficient_type: CoefficientType) -> np.float64:
+    def generate_coefficient(self, coefficient_type: CoefficientType) -> float:
         coefficient = coefficient_type.constraints[1] * self.fraction
         if coefficient < coefficient_type.constraints[0]:
             coefficient = coefficient_type.constraints[1] - coefficient
