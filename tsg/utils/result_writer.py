@@ -3,6 +3,7 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
+from numpy._typing import NDArray
 
 from tsg.time_series import TimeSeries
 from tsg.utils.typing import NDArrayFloat64T
@@ -54,7 +55,7 @@ def get_json_data(ts_list: list[TimeSeries]) -> dict:
 
 def save_plot(
     coordinates: NDArrayFloat64T,
-    clusters: NDArrayFloat64T,
+    clusters: NDArray[np.int_],
     border_values: tuple[float, float],
     shift: float,
     time_series_array: NDArrayFloat64T,

@@ -1,3 +1,5 @@
+import numpy as np
+from numpy._typing import NDArray
 from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
@@ -14,7 +16,7 @@ class SchedulerStorage:
         linspace_info: LinspaceInfo,
         process_storage: ProcessStorage,
         source_points: NDArrayFloat64T,
-        clusters: NDArrayFloat64T,
+        clusters: NDArray[np.int_],
     ) -> None:
         self.num_steps = num_steps
         self.cfg_scheduler = cfg_scheduler
