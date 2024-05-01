@@ -14,6 +14,8 @@ from tsg.utils.typing import NDArrayFloat64T
 
 
 class ParametrizationMethod(ParametersGenerationMethod):
+    name = "parametrization_method"
+
     def __init__(
         self,
         linspace_info: LinspaceInfo,
@@ -21,10 +23,6 @@ class ParametrizationMethod(ParametersGenerationMethod):
         super().__init__(
             linspace_info=linspace_info,
         )
-
-    @property
-    def name(self) -> str:
-        return "parametrization_method"
 
     def change_source_data(
         self,

@@ -3,7 +3,7 @@ from tsg.parameters_generation.parametrization_method import ParametrizationMeth
 from tsg.parameters_generation.random_method import RandomMethod
 
 ALL_GENERATION_METHODS = {
-    "random_method": RandomMethod,
-    "aggregation_method": AggregationMethod,
-    "parametrization_method": ParametrizationMethod,
+    RandomMethod.name: RandomMethod,
+    AggregationMethod.name: AggregationMethod,
+    ParametrizationMethod.name: ParametrizationMethod,
 }

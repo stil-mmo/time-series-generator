@@ -14,6 +14,8 @@ from tsg.utils.typing import NDArrayFloat64T
 
 
 class RandomMethod(ParametersGenerationMethod):
+    name = "random_method"
+
     def __init__(
         self,
         linspace_info: LinspaceInfo,
@@ -21,10 +23,6 @@ class RandomMethod(ParametersGenerationMethod):
         super().__init__(
             linspace_info=linspace_info,
         )
-
-    @property
-    def name(self) -> str:
-        return "random_method"
 
     def change_source_data(
         self,

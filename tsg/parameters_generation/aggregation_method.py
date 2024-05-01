@@ -14,6 +14,8 @@ from tsg.utils.typing import NDArrayFloat64T
 
 
 class AggregationMethod(ParametersGenerationMethod):
+    name = "aggregation_method"
+
     def __init__(
         self,
         linspace_info: LinspaceInfo,
@@ -26,10 +28,6 @@ class AggregationMethod(ParametersGenerationMethod):
         super().__init__(
             linspace_info=linspace_info,
         )
-
-    @property
-    def name(self) -> str:
-        return "aggregation_method"
 
     def change_source_data(
         self,

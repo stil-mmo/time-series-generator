@@ -13,16 +13,13 @@ from tsg.utils.typing import NDArrayFloat64T
 
 
 class ParametersGenerationMethod(ABC):
+    name = ""
+
     def __init__(
         self,
         linspace_info: LinspaceInfo,
     ):
         self.linspace_info = linspace_info
-
-    @property
-    @abstractmethod
-    def name(self) -> str:
-        pass
 
     def generate_all_parameters(
         self,
