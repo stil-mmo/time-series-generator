@@ -37,14 +37,12 @@ class TimeSeriesGenerator:
             else self.scheduler_storage.points.shape[0]
         )
         for i in range(iterations):
-            if self.scheduler_storage is None:
-                source_data = None
-                if not self.single_schedule:
-                    scheduler = self.generate_new_scheduler()
-                schedule = scheduler.generate_schedule()
-            else:
-                source_data = self.scheduler_storage.points[i]
-                schedule = self.get_point_schedule(i)
+            source_data = (
+                self.scheduler_storage.points[i]
+                if self.scheduler_storage is not None
+                else None
+            )
+            schedule = self.get_point_schedule(i, scheduler)
             ts = self.generate_time_series(
                 process_storage=self.process_storage,
                 schedule=schedule,
@@ -93,7 +91,9 @@ class TimeSeriesGenerator:
             process_order=self.cfg.scheduler.process_order,
         )
 
-    def get_point_schedule(self, point_index: int) -> list[ProcessDataType]:
+    def get_point_schedule(
+        self, point_index: int, general_scheduler: Scheduler
+    ) -> list[ProcessDataType]:
         if self.scheduler_storage is not None:
             cluster = self.scheduler_storage.get_cluster(point_index)
             scheduler = self.scheduler_storage.get_scheduler(cluster=cluster)
@@ -101,6 +101,9 @@ class TimeSeriesGenerator:
                 source_data=self.scheduler_storage.points[point_index]
             )
         else:
-            scheduler = self.generate_new_scheduler()
+            if self.single_schedule:
+                scheduler = general_scheduler
+            else:
+                scheduler = self.generate_new_scheduler()
             schedule = scheduler.generate_schedule()
         return schedule
