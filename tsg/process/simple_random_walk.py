@@ -13,6 +13,7 @@ from tsg.parameters_generation.parameters_generation_method import (
 )
 from tsg.process.process import ParametersGenerator, Process
 from tsg.time_series import TimeSeries
+from tsg.utils.typing import NDArrayFloat64
 from tsg.utils.utils import draw_process_plot
 
 
@@ -41,9 +42,7 @@ class SRWParametersGenerator(ParametersGenerator):
             else None
         )
 
-    def generate_parameters(
-        self, source_data: NDArray | None = None
-    ) -> NDArray[np.float64]:
+    def generate_parameters(self, source_data: NDArray | None = None) -> NDArrayFloat64:
         parameters = self.parameters_generation_method.generate_all_parameters(
             parameters_required=self.parameters_required,
             source_data=source_data,
@@ -54,7 +53,7 @@ class SRWParametersGenerator(ParametersGenerator):
 
     def generate_init_values(
         self, source_data: NDArray | None = None
-    ) -> NDArray[np.float64]:
+    ) -> NDArrayFloat64:
         return np.array(
             [
                 self.parameters_generation_method.get_mean_value(source_data)
@@ -104,9 +103,9 @@ class SimpleRandomWalk(Process):
 
     def generate_time_series(
         self,
-        data: tuple[int, NDArray[np.float64]],
-        previous_values: NDArray[np.float64] | None = None,
-        source_data: NDArray[np.float64] | None = None,
+        data: tuple[int, NDArrayFloat64],
+        previous_values: NDArrayFloat64 | None = None,
+        source_data: NDArrayFloat64 | None = None,
     ) -> tuple[TimeSeries, dict]:
         up_probability, walk = data[1]
         values = np.array([0.0 for _ in range(0, data[0])])

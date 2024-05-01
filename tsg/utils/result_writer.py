@@ -4,9 +4,9 @@ from typing import List
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
-from numpy.typing import NDArray
 
 from tsg.time_series import TimeSeries
+from tsg.utils.typing import NDArrayFloat64
 
 
 def save_parameters(ts_list: List[TimeSeries], json_path: str) -> None:
@@ -21,12 +21,12 @@ def load_parameters(json_path: str) -> dict:
     return json_data
 
 
-def save_values(array: NDArray[np.float64], csv_path: str) -> None:
+def save_values(array: NDArrayFloat64, csv_path: str) -> None:
     with open(csv_path, "w") as csv_file:
         np.savetxt(csv_file, array)
 
 
-def load_values(csv_path: str) -> NDArray[np.float64]:
+def load_values(csv_path: str) -> NDArrayFloat64:
     return np.genfromtxt(csv_path)
 
 
@@ -54,11 +54,11 @@ def get_json_data(ts_list: List[TimeSeries]) -> dict:
 
 
 def save_plot(
-    coordinates: NDArray[np.float64],
-    clusters: NDArray[np.float64],
+    coordinates: NDArrayFloat64,
+    clusters: NDArrayFloat64,
     border_values: tuple[float, float],
     shift: float,
-    time_series_array: NDArray[np.float64],
+    time_series_array: NDArrayFloat64,
     save_plot_path=None,
 ):
     fig = plt.figure(figsize=(12, 5))

@@ -16,6 +16,7 @@ from tsg.parameters_generation.parameters_generation_method import (
 from tsg.process.ets_process_resources.ets_process_builder import ETSProcessBuilder
 from tsg.process.process import ParametersGenerator, Process
 from tsg.time_series import TimeSeries
+from tsg.utils.typing import NDArrayFloat64
 from tsg.utils.utils import draw_process_plot
 
 
@@ -41,16 +42,14 @@ class TESParametersGenerator(ParametersGenerator):
         self.trend_coeff_range = trend_coeff_range
         self.seasonal_coeff_range = seasonal_coeff_range
 
-    def generate_parameters(
-        self, source_data: NDArray | None = None
-    ) -> NDArray[np.float64]:
+    def generate_parameters(self, source_data: NDArray | None = None) -> NDArrayFloat64:
         return self.parameters_generation_method.generate_all_parameters(
             parameters_required=self.parameters_required
         )
 
     def generate_init_values(
         self, source_data: NDArray | None = None
-    ) -> NDArray[np.float64]:
+    ) -> NDArrayFloat64:
         init_values = np.zeros((3, self.lag))
         init_values[0][0] = self.parameters_generation_method.get_mean_value(
             source_data
@@ -113,9 +112,9 @@ class TripleExponentialSmoothing(Process):
 
     def generate_time_series(
         self,
-        data: tuple[int, NDArray[np.float64]],
-        previous_values: NDArray[np.float64] | None = None,
-        source_data: NDArray[np.float64] | None = None,
+        data: tuple[int, NDArrayFloat64],
+        previous_values: NDArrayFloat64 | None = None,
+        source_data: NDArrayFloat64 | None = None,
     ) -> tuple[TimeSeries, dict]:
         ets_values = ETSProcessBuilder(data[0])
         ets_values.set_normal_error(mean=0.0, std=data[1][3])

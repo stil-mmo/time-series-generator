@@ -1,5 +1,6 @@
 import numpy as np
-from numpy.typing import NDArray
+
+from tsg.utils.typing import NDArrayFloat64
 
 
 class LinspaceInfo:
@@ -20,7 +21,7 @@ class LinspaceInfo:
         self.step_coeff = step_coeff
         self.use_k = use_k
 
-    def generate_values(self, num_values=1, is_normal=True) -> NDArray[np.float64]:
+    def generate_values(self, num_values=1, is_normal=True) -> NDArrayFloat64:
         if is_normal:
             center = (self.start + self.stop) / 2
             return np.random.normal(self.center_shift * center, self.step, num_values)

@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.typing import NDArray
 
 from tsg.linspace_info import LinspaceInfo
 from tsg.parameters_generation.parameter_types import (
@@ -11,6 +10,7 @@ from tsg.parameters_generation.parameter_types import (
 from tsg.parameters_generation.parameters_generation_method import (
     ParametersGenerationMethod,
 )
+from tsg.utils.typing import NDArrayFloat64
 
 
 class ParametrizationMethod(ParametersGenerationMethod):
@@ -28,9 +28,9 @@ class ParametrizationMethod(ParametersGenerationMethod):
 
     def change_source_data(
         self,
-        source_data: NDArray[np.float64],
+        source_data: NDArrayFloat64,
         parameters_required: list[ParameterType],
-    ) -> NDArray[np.float64]:
+    ) -> NDArrayFloat64:
         return self.match_parameters_number(source_data, len(parameters_required))
 
     def generate_std(self, std_type: StdType) -> float:
@@ -56,8 +56,8 @@ class ParametrizationMethod(ParametersGenerationMethod):
 
     @staticmethod
     def match_parameters_number(
-        source_data: NDArray[np.float64], new_size: int
-    ) -> NDArray[np.float64]:
+        source_data: NDArrayFloat64, new_size: int
+    ) -> NDArrayFloat64:
         old_size = len(source_data)
         if old_size == new_size:
             return source_data

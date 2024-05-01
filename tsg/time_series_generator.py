@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.typing import NDArray
 from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
@@ -7,7 +6,7 @@ from tsg.process.process_storage import ProcessStorage
 from tsg.scheduler.scheduler import Scheduler
 from tsg.scheduler.scheduler_storage import SchedulerStorage
 from tsg.time_series import TimeSeries
-from tsg.utils.typing import ProcessDataType
+from tsg.utils.typing import NDArrayFloat64, ProcessDataType
 
 
 class TimeSeriesGenerator:
@@ -28,8 +27,8 @@ class TimeSeriesGenerator:
 
     def generate_all(
         self,
-    ) -> tuple[NDArray[np.float64], list[TimeSeries]]:
-        ts_array: NDArray[np.float64] = np.ndarray((self.ts_number, self.ts_size))
+    ) -> tuple[NDArrayFloat64, list[TimeSeries]]:
+        ts_array: NDArrayFloat64 = np.ndarray((self.ts_number, self.ts_size))
         ts_list = []
         scheduler = self.generate_new_scheduler()
         iterations = (
@@ -59,7 +58,7 @@ class TimeSeriesGenerator:
         self,
         process_storage: ProcessStorage,
         schedule: list[ProcessDataType],
-        source_data: NDArray[np.float64] | None = None,
+        source_data: NDArrayFloat64 | None = None,
     ) -> TimeSeries:
         current_time_series = TimeSeries(self.ts_size)
         for process_name, process_schedule in schedule:

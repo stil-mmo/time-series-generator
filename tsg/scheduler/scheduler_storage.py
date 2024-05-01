@@ -1,10 +1,9 @@
-import numpy as np
-from numpy.typing import NDArray
 from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
 from tsg.process.process_storage import ProcessStorage
 from tsg.scheduler.scheduler import Scheduler
+from tsg.utils.typing import NDArrayFloat64
 
 
 class SchedulerStorage:
@@ -14,8 +13,8 @@ class SchedulerStorage:
         cfg_scheduler: DictConfig,
         linspace_info: LinspaceInfo,
         process_storage: ProcessStorage,
-        points: NDArray[np.float64],
-        clusters: NDArray[np.float64],
+        points: NDArrayFloat64,
+        clusters: NDArrayFloat64,
     ):
         self.num_steps = num_steps
         self.cfg_scheduler = cfg_scheduler

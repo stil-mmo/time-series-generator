@@ -1,11 +1,10 @@
 from math import sqrt
 
 import numpy as np
-from numpy.typing import NDArray
 
 from tsg.linspace_info import LinspaceInfo
 from tsg.process.process_storage import ProcessStorage
-from tsg.utils.typing import ProcessDataType, ProcessOrderType
+from tsg.utils.typing import NDArrayFloat64, ProcessDataType, ProcessOrderType
 
 
 class Scheduler:
@@ -30,7 +29,7 @@ class Scheduler:
         )
 
     def generate_schedule(
-        self, source_data: NDArray[np.float64] | None = None
+        self, source_data: NDArrayFloat64 | None = None
     ) -> list[ProcessDataType]:
         schedule = []
         for steps, process_name in self.process_order:
