@@ -1,12 +1,10 @@
-import os
 from typing import Tuple
 
-import hydra
 import numpy as np
 from numpy.typing import NDArray
-from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
+from tsg.parameters_generation.aggregation_method import AggregationMethod
 from tsg.parameters_generation.parameter_types import (
     CoefficientType,
     ParameterType,
@@ -15,7 +13,6 @@ from tsg.parameters_generation.parameter_types import (
 from tsg.parameters_generation.parameters_generation_method import (
     ParametersGenerationMethod,
 )
-from tsg.parameters_generation.random_method import RandomMethod
 from tsg.process.ets_process_resources.ets_process_builder import ETSProcessBuilder
 from tsg.process.process import ParametersGenerator, Process
 from tsg.time_series import TimeSeries
@@ -44,14 +41,20 @@ class TESParametersGenerator(ParametersGenerator):
         self.trend_coeff_range = trend_coeff_range
         self.seasonal_coeff_range = seasonal_coeff_range
 
-    def generate_parameters(self) -> NDArray[np.float64]:
+    def generate_parameters(
+        self, source_data: NDArray | None = None
+    ) -> NDArray[np.float64]:
         return self.parameters_generation_method.generate_all_parameters(
             parameters_required=self.parameters_required
         )
 
-    def generate_init_values(self) -> NDArray[np.float64]:
+    def generate_init_values(
+        self, source_data: NDArray | None = None
+    ) -> NDArray[np.float64]:
         init_values = np.zeros((3, self.lag))
-        init_values[0][0] = self.parameters_generation_method.mean_value
+        init_values[0][0] = self.parameters_generation_method.get_mean_value(
+            source_data
+        )
         for i in range(1, self.lag):
             init_values[2][i] = init_values[2][i - 1] + np.random.normal(
                 0.0, self.linspace_info.step
@@ -112,16 +115,21 @@ class TripleExponentialSmoothing(Process):
         self,
         data: tuple[int, NDArray[np.float64]],
         previous_values: NDArray[np.float64] | None = None,
+        source_data: NDArray[np.float64] | None = None,
     ) -> tuple[TimeSeries, dict]:
         ets_values = ETSProcessBuilder(data[0])
         ets_values.set_normal_error(mean=0.0, std=data[1][3])
         if previous_values is None or len(previous_values) < 1:
-            init_values = self.parameters_generator.generate_init_values()
+            init_values = self.parameters_generator.generate_init_values(
+                source_data=source_data
+            )
             long_term_init_value = init_values[0][0]
             trend_init_value = init_values[1][0]
             seasonality_init_values = init_values[2]
         elif len(previous_values) < self.lag:
-            init_values = self.parameters_generator.generate_init_values()
+            init_values = self.parameters_generator.generate_init_values(
+                source_data=source_data
+            )
             long_term_init_value = previous_values[-1]
             trend_init_value = init_values[1][0]
             seasonality_init_values = np.array([0.0 for _ in range(self.lag)])
@@ -154,15 +162,18 @@ class TripleExponentialSmoothing(Process):
         )
 
 
-@hydra.main(
-    version_base="1.2", config_path=os.path.join("..", ".."), config_name="config"
-)
-def show_plot(cfg: DictConfig):
+def show_plot():
     test_generator_linspace = LinspaceInfo(0.0, 100.0, 100)
-    method = RandomMethod(cfg.parameters_generation_method, test_generator_linspace)
+    method = AggregationMethod(test_generator_linspace)
     proc = TripleExponentialSmoothing(test_generator_linspace, method)
-    test_sample = (100, proc.parameters_generator.generate_parameters())
-    test_time_series, test_info = proc.generate_time_series(test_sample)
+    source_data = np.array([10.0, 50.0])
+    test_sample = (
+        100,
+        proc.parameters_generator.generate_parameters(source_data=source_data),
+    )
+    test_time_series, test_info = proc.generate_time_series(
+        test_sample, source_data=source_data
+    )
     draw_process_plot(test_time_series, test_info)
 
 

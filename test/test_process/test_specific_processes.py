@@ -16,9 +16,16 @@ GENERATOR_LINSPACE = LinspaceInfo(0.0, 100.0, 100)
 
 @pytest.fixture
 def process_list():
-    with hydra.initialize(version_base="1.2", config_path=os.path.join("..", "..")):
+    with hydra.initialize(
+        version_base="1.2", config_path=os.path.join("..", "..", "config")
+    ):
         cfg = hydra.compose(config_name="config")
-        process_list = ProcessStorage(cfg=cfg, linspace_info=GENERATOR_LINSPACE)
+        process_list = ProcessStorage(
+            process_list=cfg.scheduler.process_list,
+            cfg_process=cfg.process,
+            linspace_info=GENERATOR_LINSPACE,
+            generation_method=RandomMethod(GENERATOR_LINSPACE),
+        )
         return process_list
 
 
@@ -42,10 +49,11 @@ def test_generate_ts_with_values(process_list):
 
 
 def test_random_walk():
-    with hydra.initialize(version_base="1.2", config_path=os.path.join("..", "..")):
+    with hydra.initialize(
+        version_base="1.2", config_path=os.path.join("..", "..", "config")
+    ):
         cfg = hydra.compose(config_name="config")
         generation_method = RandomMethod(
-            parameters_generation_cfg=cfg.parameters_generation_method,
             linspace_info=GENERATOR_LINSPACE,
         )
         simple_random_walk = SimpleRandomWalk(

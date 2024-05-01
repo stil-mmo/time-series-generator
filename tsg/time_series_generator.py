@@ -3,11 +3,6 @@ from numpy.typing import NDArray
 from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
-from tsg.parameters_generation.all_generation_methods import ALL_GENERATION_METHODS
-from tsg.parameters_generation.parameters_generation_method import (
-    ParametersGenerationMethod,
-)
-from tsg.parameters_generation.random_method import RandomMethod
 from tsg.process.process_storage import ProcessStorage
 from tsg.scheduler.scheduler import Scheduler
 from tsg.scheduler.scheduler_storage import SchedulerStorage
@@ -20,15 +15,16 @@ class TimeSeriesGenerator:
         self,
         cfg: DictConfig,
         linspace_info: LinspaceInfo,
+        process_storage: ProcessStorage,
         scheduler_storage: SchedulerStorage | None = None,
     ):
         self.cfg = cfg
         self.ts_number = cfg.generation.ts_number
         self.ts_size = cfg.generation.ts_size
         self.linspace_info = linspace_info
+        self.process_storage = process_storage
         self.scheduler_storage = scheduler_storage
         self.single_schedule = cfg.scheduler.single_schedule
-        self.generation_method_name = cfg.generation.generation_method
 
     def generate_all(
         self,
@@ -43,25 +39,17 @@ class TimeSeriesGenerator:
         )
         for i in range(iterations):
             if self.scheduler_storage is None:
-                generation_method = RandomMethod(
-                    parameters_generation_cfg=self.cfg.parameters_generation_method,
-                    linspace_info=self.linspace_info,
-                )
+                source_data = None
                 if not self.single_schedule:
                     scheduler = self.generate_new_scheduler()
-                process_list = scheduler.process_storage
                 schedule = scheduler.generate_schedule()
             else:
-                generation_method = ALL_GENERATION_METHODS[self.generation_method_name](
-                    parameters_generation_cfg=self.cfg.parameters_generation_method,
-                    linspace_info=self.linspace_info,
-                    source_data=self.scheduler_storage.points[i],
-                )
-                process_list, schedule = self.get_point_schedule(i, generation_method)
+                source_data = self.scheduler_storage.points[i]
+                schedule = self.get_point_schedule(i)
             ts = self.generate_time_series(
-                process_list=process_list,
+                process_storage=self.process_storage,
                 schedule=schedule,
-                generation_method=generation_method,
+                source_data=source_data,
             )
             ts_array[i] = ts.get_values()
             ts_list.append(ts)
@@ -69,18 +57,20 @@ class TimeSeriesGenerator:
 
     def generate_time_series(
         self,
-        process_list: ProcessStorage,
+        process_storage: ProcessStorage,
         schedule: list[ProcessDataType],
-        generation_method: ParametersGenerationMethod,
+        source_data: NDArray[np.float64] | None = None,
     ) -> TimeSeries:
         current_time_series = TimeSeries(self.ts_size)
         for process_name, process_schedule in schedule:
-            process = process_list.get_processes([process_name])[0]
-            process.parameters_generation_method = generation_method
+            process = process_storage.get_processes([process_name])[0]
             for process_data in process_schedule:
                 if current_time_series.last_index == 0:
                     current_time_series.add_values(
-                        process.generate_time_series(process_data)[0].get_values(),
+                        process.generate_time_series(
+                            data=process_data,
+                            source_data=source_data,
+                        )[0].get_values(),
                         (process.name, process_data),
                     )
                 else:
@@ -88,6 +78,7 @@ class TimeSeriesGenerator:
                         process.generate_time_series(
                             process_data,
                             previous_values=current_time_series.get_values(),
+                            source_data=source_data,
                         )[0].get_values(),
                         (process.name, process_data),
                     )
@@ -95,18 +86,22 @@ class TimeSeriesGenerator:
 
     def generate_new_scheduler(self) -> Scheduler:
         return Scheduler(
-            cfg=self.cfg,
+            num_steps=self.ts_size,
             linspace_info=self.linspace_info,
+            process_storage=self.process_storage,
+            strict_num_parts=self.cfg.scheduler.strict_num_parts,
+            stable_parameters=self.cfg.scheduler.stable_parameters,
+            process_order=self.cfg.scheduler.process_order,
         )
 
-    def get_point_schedule(
-        self, point_index: int, generation_method: ParametersGenerationMethod
-    ) -> tuple[ProcessStorage, list[ProcessDataType]]:
+    def get_point_schedule(self, point_index: int) -> list[ProcessDataType]:
         if self.scheduler_storage is not None:
             cluster = self.scheduler_storage.get_cluster(point_index)
-            scheduler = self.scheduler_storage.get_scheduler(
-                cluster=cluster, parameters_generation_method=generation_method
+            scheduler = self.scheduler_storage.get_scheduler(cluster=cluster)
+            schedule = scheduler.generate_schedule(
+                source_data=self.scheduler_storage.points[point_index]
             )
         else:
-            scheduler = Scheduler(self.ts_size, self.linspace_info)
-        return scheduler.process_storage, scheduler.generate_schedule()
+            scheduler = self.generate_new_scheduler()
+            schedule = scheduler.generate_schedule()
+        return schedule

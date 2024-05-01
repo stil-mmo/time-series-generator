@@ -1,11 +1,8 @@
-import os.path
-
-import hydra
 import numpy as np
 from numpy.typing import NDArray
-from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
+from tsg.parameters_generation.aggregation_method import AggregationMethod
 from tsg.parameters_generation.parameter_types import (
     CoefficientType,
     ParameterType,
@@ -14,7 +11,6 @@ from tsg.parameters_generation.parameter_types import (
 from tsg.parameters_generation.parameters_generation_method import (
     ParametersGenerationMethod,
 )
-from tsg.parameters_generation.random_method import RandomMethod
 from tsg.process.process import ParametersGenerator, Process
 from tsg.time_series import TimeSeries
 from tsg.utils.utils import draw_process_plot
@@ -45,17 +41,25 @@ class SRWParametersGenerator(ParametersGenerator):
             else None
         )
 
-    def generate_parameters(self) -> NDArray[np.float64]:
+    def generate_parameters(
+        self, source_data: NDArray | None = None
+    ) -> NDArray[np.float64]:
         parameters = self.parameters_generation_method.generate_all_parameters(
-            parameters_required=self.parameters_required
+            parameters_required=self.parameters_required,
+            source_data=source_data,
         )
         if self.fixed_walk is not None:
             parameters[1] = self.fixed_walk
         return parameters
 
-    def generate_init_values(self) -> NDArray[np.float64]:
+    def generate_init_values(
+        self, source_data: NDArray | None = None
+    ) -> NDArray[np.float64]:
         return np.array(
-            [self.parameters_generation_method.mean_value * self.init_values_coeff]
+            [
+                self.parameters_generation_method.get_mean_value(source_data)
+                * self.init_values_coeff
+            ]
         )
 
 
@@ -102,12 +106,15 @@ class SimpleRandomWalk(Process):
         self,
         data: tuple[int, NDArray[np.float64]],
         previous_values: NDArray[np.float64] | None = None,
+        source_data: NDArray[np.float64] | None = None,
     ) -> tuple[TimeSeries, dict]:
         up_probability, walk = data[1]
         values = np.array([0.0 for _ in range(0, data[0])])
         values_to_add = data[0]
         if previous_values is None:
-            init_values = self.parameters_generator.generate_init_values()
+            init_values = self.parameters_generator.generate_init_values(
+                source_data=source_data
+            )
             values[0 : len(init_values)] = init_values
             values_to_add -= len(init_values)
             previous_value = init_values[-1]
@@ -129,16 +136,18 @@ class SimpleRandomWalk(Process):
             return rw_time_series, self.get_info(data, np.array([previous_values[-1]]))
 
 
-@hydra.main(
-    version_base="1.2", config_path=os.path.join("..", ".."), config_name="config"
-)
-def show_plot(cfg: DictConfig):
+def show_plot():
     test_generator_linspace = LinspaceInfo(0.0, 100.0, 100)
-    method = RandomMethod(cfg.parameters_generation_method, test_generator_linspace)
+    method = AggregationMethod(test_generator_linspace)
     proc = SimpleRandomWalk(test_generator_linspace, method)
-    test_sample = (100, proc.parameters_generator.generate_parameters())
-    test_time_series, test_info = proc.generate_time_series(test_sample)
-    print(test_time_series.get_values())
+    source_data = np.array([10.0, 50.0])
+    test_sample = (
+        100,
+        proc.parameters_generator.generate_parameters(source_data=source_data),
+    )
+    test_time_series, test_info = proc.generate_time_series(
+        test_sample, source_data=source_data
+    )
     draw_process_plot(test_time_series, test_info)
 
 

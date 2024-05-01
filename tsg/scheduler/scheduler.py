@@ -1,12 +1,9 @@
 from math import sqrt
 
 import numpy as np
-from omegaconf import DictConfig
+from numpy.typing import NDArray
 
 from tsg.linspace_info import LinspaceInfo
-from tsg.parameters_generation.parameters_generation_method import (
-    ParametersGenerationMethod,
-)
 from tsg.process.process_storage import ProcessStorage
 from tsg.utils.typing import ProcessDataType, ProcessOrderType
 
@@ -14,32 +11,39 @@ from tsg.utils.typing import ProcessDataType, ProcessOrderType
 class Scheduler:
     def __init__(
         self,
-        cfg: DictConfig,
+        num_steps: int,
         linspace_info: LinspaceInfo,
-        parameters_generation_method: ParametersGenerationMethod | None = None,
+        process_storage: ProcessStorage,
+        strict_num_parts: bool = True,
+        stable_parameters: bool = False,
+        process_order: ProcessOrderType | None = None,
     ):
-        self.num_steps = cfg.generation.ts_size
+        self.num_steps = num_steps
         self.linspace_info = linspace_info
-        self.strict_num_parts = cfg.scheduler.strict_num_parts
-        self.stable_parameters = cfg.scheduler.stable_parameters
-        self.process_storage = ProcessStorage(cfg=cfg, linspace_info=linspace_info)
+        self.strict_num_parts = strict_num_parts
+        self.stable_parameters = stable_parameters
+        self.process_storage = process_storage
         self.process_order = (
-            cfg.scheduler.process_order
-            if cfg.scheduler.process_order is not None
+            process_order
+            if process_order is not None
             else self.generate_process_order()
         )
-        self.parameters_generation_method = parameters_generation_method
 
-    def generate_schedule(self) -> list[ProcessDataType]:
+    def generate_schedule(
+        self, source_data: NDArray[np.float64] | None = None
+    ) -> list[ProcessDataType]:
         schedule = []
         for steps, process_name in self.process_order:
             process = self.process_storage.get_processes([process_name])[0]
-            if self.parameters_generation_method is not None:
-                process.parameters_generation_method = self.parameters_generation_method
             process_data: ProcessDataType = (process_name, [])
             if self.stable_parameters or steps == 1:
                 process_data[1].append(
-                    (steps, process.parameters_generator.generate_parameters())
+                    (
+                        steps,
+                        process.parameters_generator.generate_parameters(
+                            source_data=source_data
+                        ),
+                    )
                 )
             else:
                 parameters_steps = self.generate_steps_number(
@@ -50,7 +54,9 @@ class Scheduler:
                     process_data[1].append(
                         (
                             parameters_steps[i],
-                            process.parameters_generator.generate_parameters(),
+                            process.parameters_generator.generate_parameters(
+                                source_data=source_data
+                            ),
                         )
                     )
             schedule.append(process_data)

@@ -27,8 +27,13 @@ scheduler:
 
 parameters_generation_method:
   aggregation_method:
+    _target_: tsg.parameters_generation.aggregation_method.AggregationMethod
     weighted_values: True
     use_max: False
+  parametrization_method:
+    _target_: tsg.parameters_generation.parametrization_method.ParametrizationMethod
+  random_method:
+    _target_: tsg.parameters_generation.random_method.RandomMethod
 
 process:
   simple_random_walk:

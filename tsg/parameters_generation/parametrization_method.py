@@ -1,9 +1,13 @@
 import numpy as np
 from numpy.typing import NDArray
-from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
-from tsg.parameters_generation.parameter_types import CoefficientType, MeanType, StdType
+from tsg.parameters_generation.parameter_types import (
+    CoefficientType,
+    MeanType,
+    ParameterType,
+    StdType,
+)
 from tsg.parameters_generation.parameters_generation_method import (
     ParametersGenerationMethod,
 )
@@ -12,19 +16,22 @@ from tsg.parameters_generation.parameters_generation_method import (
 class ParametrizationMethod(ParametersGenerationMethod):
     def __init__(
         self,
-        parameters_generation_cfg: DictConfig,
         linspace_info: LinspaceInfo,
-        source_data: NDArray[np.float64],
     ):
         super().__init__(
-            parameters_generation_cfg=parameters_generation_cfg,
             linspace_info=linspace_info,
-            source_data=source_data,
         )
 
     @property
     def name(self) -> str:
         return "parametrization_method"
+
+    def change_source_data(
+        self,
+        source_data: NDArray[np.float64],
+        parameters_required: list[ParameterType],
+    ) -> NDArray[np.float64]:
+        return self.match_parameters_number(source_data, len(parameters_required))
 
     def generate_std(self, std_type: StdType) -> float:
         source_value = std_type.source_value
@@ -46,3 +53,22 @@ class ParametrizationMethod(ParametersGenerationMethod):
             start=coefficient_type.constraints[0],
             stop=coefficient_type.constraints[1],
         )
+
+    @staticmethod
+    def match_parameters_number(
+        source_data: NDArray[np.float64], new_size: int
+    ) -> NDArray[np.float64]:
+        old_size = len(source_data)
+        if old_size == new_size:
+            return source_data
+        new_source_data = np.zeros(shape=(1, new_size))[0]
+        for i in range(min(old_size, new_size)):
+            new_source_data[i] = source_data[i]
+        if old_size < new_size:
+            for j in range(old_size, new_size):
+                average = np.average(new_source_data[:j])
+                new_source_data[j] = average
+        else:
+            for j in range(new_size, old_size):
+                new_source_data[(j - new_size) % new_size] += source_data[j]
+        return new_source_data

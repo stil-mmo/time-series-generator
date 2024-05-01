@@ -1,13 +1,12 @@
 import numpy as np
 from numpy.typing import NDArray
-from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
+from tsg.parameters_generation.aggregation_method import AggregationMethod
 from tsg.parameters_generation.parameter_types import MeanType, ParameterType, StdType
 from tsg.parameters_generation.parameters_generation_method import (
     ParametersGenerationMethod,
 )
-from tsg.parameters_generation.random_method import RandomMethod
 from tsg.process.process import ParametersGenerator, Process
 from tsg.time_series import TimeSeries
 from tsg.utils.utils import draw_process_plot
@@ -28,12 +27,17 @@ class WNParametersGenerator(ParametersGenerator):
             parameters_required=parameters_required,
         )
 
-    def generate_parameters(self) -> NDArray[np.float64]:
+    def generate_parameters(
+        self, source_data: NDArray | None = None
+    ) -> NDArray[np.float64]:
         return self.parameters_generation_method.generate_all_parameters(
-            parameters_required=self.parameters_required
+            parameters_required=self.parameters_required,
+            source_data=source_data,
         )
 
-    def generate_init_values(self) -> NDArray[np.float64]:
+    def generate_init_values(
+        self, source_data: NDArray | None = None
+    ) -> NDArray[np.float64]:
         return np.array([])
 
 
@@ -74,6 +78,7 @@ class WhiteNoise(Process):
         self,
         data: tuple[int, NDArray[np.float64]],
         previous_values: NDArray[np.float64] | None = None,
+        source_data: NDArray[np.float64] | None = None,
     ) -> tuple[TimeSeries, dict]:
         if previous_values is None:
             wn_values = np.random.normal(data[1][0], data[1][1], size=data[0])
@@ -87,9 +92,14 @@ class WhiteNoise(Process):
 
 if __name__ == "__main__":
     test_generator_linspace = LinspaceInfo(0.0, 100.0, 100)
-    method = RandomMethod(DictConfig(dict()), test_generator_linspace)
+    method = AggregationMethod(test_generator_linspace)
     white_noise_process = WhiteNoise(test_generator_linspace, method)
     time_series, info = white_noise_process.generate_time_series(
-        (100, white_noise_process.parameters_generator.generate_parameters())
+        (
+            100,
+            white_noise_process.parameters_generator.generate_parameters(
+                source_data=np.array([10.0, 50.0])
+            ),
+        )
     )
     draw_process_plot(time_series, info)

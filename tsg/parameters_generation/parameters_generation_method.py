@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 from numpy.typing import NDArray
-from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
 from tsg.parameters_generation.parameter_types import (
@@ -16,41 +15,39 @@ from tsg.parameters_generation.parameter_types import (
 class ParametersGenerationMethod(ABC):
     def __init__(
         self,
-        parameters_generation_cfg: DictConfig,
         linspace_info: LinspaceInfo,
-        source_data: NDArray[np.float64],
-        mean_value: float | None = None,
     ):
-        self.parameters_generation_cfg = parameters_generation_cfg
         self.linspace_info = linspace_info
-        self.source_data = source_data
-        self.weights = (
-            self.calculate_weights(source_data.shape[0])
-            if parameters_generation_cfg.aggregation_method.weighted_values
-            else None
-        )
-        self.mean_value = self.get_mean_value() if mean_value is None else mean_value
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        pass
 
     def generate_all_parameters(
-        self, parameters_required: list[ParameterType], set_source_data: bool = True
+        self,
+        parameters_required: list[ParameterType],
+        source_data: NDArray[np.float64] | None = None,
     ) -> NDArray[np.float64]:
-        if set_source_data and len(self.source_data) != len(parameters_required):
-            self.source_data = self.match_parameters_number(
-                new_size=len(parameters_required)
-            )
         parameters = np.zeros(shape=(1, len(parameters_required)))[0]
+        new_source_data = parameters.copy()
+        if source_data is not None:
+            new_source_data = self.change_source_data(source_data, parameters_required)
         for i in range(len(parameters_required)):
             parameter_type = parameters_required[i]
-            if set_source_data:
-                parameter_type.source_value = self.source_data[i]
+            if source_data is not None:
+                parameter_type.source_value = new_source_data[i]
             parameters[i] = self.generation_functions[parameter_type.name](
                 parameter_type
             )
         return parameters
 
-    @property
     @abstractmethod
-    def name(self) -> str:
+    def change_source_data(
+        self,
+        source_data: NDArray[np.float64],
+        parameters_required: list[ParameterType],
+    ) -> NDArray[np.float64]:
         pass
 
     @abstractmethod
@@ -73,22 +70,17 @@ class ParametersGenerationMethod(ABC):
             "coefficient_type": self.generate_coefficient,
         }
 
-    def match_parameters_number(self, new_size: int) -> NDArray[np.float64]:
-        old_size = len(self.source_data)
-        new_source_data = np.zeros(shape=(1, new_size))[0]
-        for i in range(min(old_size, new_size)):
-            new_source_data[i] = self.source_data[i]
-        if old_size < new_size:
-            for j in range(old_size, new_size):
-                average = np.average(new_source_data[:j])
-                new_source_data[j] = average
+    def get_mean_value(
+        self, source_data: NDArray[np.float64] | None, weighted: bool = True
+    ) -> float:
+        if source_data is not None:
+            weights = self.calculate_weights(len(source_data)) if weighted else None
+            mean_value = float(np.average(source_data, weights=weights))
         else:
-            for j in range(new_size, old_size):
-                new_source_data[(j - new_size) % new_size] += self.source_data[j]
-        return new_source_data
-
-    def get_mean_value(self) -> float:
-        return float(np.average(self.source_data, weights=self.weights))
+            mean_value = np.random.uniform(
+                self.linspace_info.start, self.linspace_info.stop
+            )
+        return mean_value
 
     @staticmethod
     def generate_value_in_range(

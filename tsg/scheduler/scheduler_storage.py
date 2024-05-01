@@ -3,22 +3,24 @@ from numpy.typing import NDArray
 from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
-from tsg.parameters_generation.parameters_generation_method import (
-    ParametersGenerationMethod,
-)
+from tsg.process.process_storage import ProcessStorage
 from tsg.scheduler.scheduler import Scheduler
 
 
 class SchedulerStorage:
     def __init__(
         self,
-        cfg: DictConfig,
+        num_steps: int,
+        cfg_scheduler: DictConfig,
         linspace_info: LinspaceInfo,
+        process_storage: ProcessStorage,
         points: NDArray[np.float64],
         clusters: NDArray[np.float64],
     ):
-        self.cfg = cfg
+        self.num_steps = num_steps
+        self.cfg_scheduler = cfg_scheduler
         self.linspace_info = linspace_info
+        self.process_storage = process_storage
         self.points = points
         self.clusters = clusters
         self.scheduler_storage = self.create_storage()
@@ -28,8 +30,12 @@ class SchedulerStorage:
         for cluster in self.clusters:
             if cluster not in storage.keys():
                 scheduler = Scheduler(
-                    cfg=self.cfg,
+                    num_steps=self.num_steps,
                     linspace_info=self.linspace_info,
+                    process_storage=self.process_storage,
+                    strict_num_parts=self.cfg_scheduler.strict_num_parts,
+                    stable_parameters=self.cfg_scheduler.stable_parameters,
+                    process_order=self.cfg_scheduler.process_order,
                 )
                 storage[cluster] = scheduler
         return storage
@@ -37,12 +43,5 @@ class SchedulerStorage:
     def get_cluster(self, point_index: int) -> int:
         return self.clusters[point_index]
 
-    def get_scheduler(
-        self,
-        cluster: int,
-        parameters_generation_method: ParametersGenerationMethod,
-    ) -> Scheduler:
-        self.scheduler_storage[
-            cluster
-        ].parameters_generation_method = parameters_generation_method
+    def get_scheduler(self, cluster: int) -> Scheduler:
         return self.scheduler_storage[cluster]
