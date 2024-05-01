@@ -3,7 +3,7 @@ from omegaconf import DictConfig
 from tsg.linspace_info import LinspaceInfo
 from tsg.process.process_storage import ProcessStorage
 from tsg.scheduler.scheduler import Scheduler
-from tsg.utils.typing import NDArrayFloat64
+from tsg.utils.typing import NDArrayFloat64T
 
 
 class SchedulerStorage:
@@ -13,8 +13,8 @@ class SchedulerStorage:
         cfg_scheduler: DictConfig,
         linspace_info: LinspaceInfo,
         process_storage: ProcessStorage,
-        points: NDArrayFloat64,
-        clusters: NDArrayFloat64,
+        points: NDArrayFloat64T,
+        clusters: NDArrayFloat64T,
     ):
         self.num_steps = num_steps
         self.cfg_scheduler = cfg_scheduler

@@ -9,7 +9,7 @@ from tsg.parameters_generation.parameter_types import (
     ParameterType,
     StdType,
 )
-from tsg.utils.typing import NDArrayFloat64
+from tsg.utils.typing import NDArrayFloat64T
 
 
 class ParametersGenerationMethod(ABC):
@@ -27,8 +27,8 @@ class ParametersGenerationMethod(ABC):
     def generate_all_parameters(
         self,
         parameters_required: list[ParameterType],
-        source_data: NDArrayFloat64 | None = None,
-    ) -> NDArrayFloat64:
+        source_data: NDArrayFloat64T | None = None,
+    ) -> NDArrayFloat64T:
         parameters = np.zeros(shape=(1, len(parameters_required)))[0]
         new_source_data = parameters.copy()
         if source_data is not None:
@@ -45,9 +45,9 @@ class ParametersGenerationMethod(ABC):
     @abstractmethod
     def change_source_data(
         self,
-        source_data: NDArrayFloat64,
+        source_data: NDArrayFloat64T,
         parameters_required: list[ParameterType],
-    ) -> NDArrayFloat64:
+    ) -> NDArrayFloat64T:
         pass
 
     @abstractmethod
@@ -71,7 +71,7 @@ class ParametersGenerationMethod(ABC):
         }
 
     def get_mean_value(
-        self, source_data: NDArrayFloat64 | None, weighted: bool = True
+        self, source_data: NDArrayFloat64T | None, weighted: bool = True
     ) -> float:
         if source_data is not None:
             weights = self.calculate_weights(len(source_data)) if weighted else None
@@ -93,7 +93,7 @@ class ParametersGenerationMethod(ABC):
         return value
 
     @staticmethod
-    def calculate_weights(num_values: int) -> NDArrayFloat64:
+    def calculate_weights(num_values: int) -> NDArrayFloat64T:
         progression_sum = (1 + num_values) * num_values / 2
         values = np.array([i + 1 for i in range(num_values)])
         return np.flip(values) / progression_sum

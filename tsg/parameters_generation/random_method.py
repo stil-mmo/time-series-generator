@@ -10,7 +10,7 @@ from tsg.parameters_generation.parameter_types import (
 from tsg.parameters_generation.parameters_generation_method import (
     ParametersGenerationMethod,
 )
-from tsg.utils.typing import NDArrayFloat64
+from tsg.utils.typing import NDArrayFloat64T
 
 
 class RandomMethod(ParametersGenerationMethod):
@@ -28,9 +28,9 @@ class RandomMethod(ParametersGenerationMethod):
 
     def change_source_data(
         self,
-        source_data: NDArrayFloat64,
+        source_data: NDArrayFloat64T,
         parameters_required: list[ParameterType],
-    ) -> NDArrayFloat64:
+    ) -> NDArrayFloat64T:
         return np.zeros(shape=(1, len(parameters_required)))[0]
 
     def generate_std(self, std_type: StdType) -> float:

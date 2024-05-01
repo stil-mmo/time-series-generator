@@ -5,7 +5,7 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 
 from tsg.time_series import TimeSeries
-from tsg.utils.typing import NDArrayFloat64
+from tsg.utils.typing import NDArrayFloat64T
 
 
 def save_parameters(ts_list: list[TimeSeries], json_path: str) -> None:
@@ -20,12 +20,12 @@ def load_parameters(json_path: str) -> dict:
     return json_data
 
 
-def save_values(array: NDArrayFloat64, csv_path: str) -> None:
+def save_values(array: NDArrayFloat64T, csv_path: str) -> None:
     with open(csv_path, "w") as csv_file:
         np.savetxt(csv_file, array)
 
 
-def load_values(csv_path: str) -> NDArrayFloat64:
+def load_values(csv_path: str) -> NDArrayFloat64T:
     return np.genfromtxt(csv_path)
 
 
@@ -53,11 +53,11 @@ def get_json_data(ts_list: list[TimeSeries]) -> dict:
 
 
 def save_plot(
-    coordinates: NDArrayFloat64,
-    clusters: NDArrayFloat64,
+    coordinates: NDArrayFloat64T,
+    clusters: NDArrayFloat64T,
     border_values: tuple[float, float],
     shift: float,
-    time_series_array: NDArrayFloat64,
+    time_series_array: NDArrayFloat64T,
     save_plot_path=None,
 ):
     fig = plt.figure(figsize=(12, 5))

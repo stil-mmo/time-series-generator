@@ -8,7 +8,7 @@ from tsg.parameters_generation.parameters_generation_method import (
     ParametersGenerationMethod,
 )
 from tsg.time_series import TimeSeries
-from tsg.utils.typing import NDArrayFloat64
+from tsg.utils.typing import NDArrayFloat64T
 
 
 class ParametersGenerator(ABC):
@@ -35,13 +35,15 @@ class ParametersGenerator(ABC):
         self._parameters_generation_method = parameters_generation_method
 
     @abstractmethod
-    def generate_parameters(self, source_data: NDArray | None = None) -> NDArrayFloat64:
+    def generate_parameters(
+        self, source_data: NDArray | None = None
+    ) -> NDArrayFloat64T:
         pass
 
     @abstractmethod
     def generate_init_values(
         self, source_data: NDArray | None = None
-    ) -> NDArrayFloat64:
+    ) -> NDArrayFloat64T:
         pass
 
 
@@ -98,16 +100,16 @@ class Process(ABC):
     @abstractmethod
     def generate_time_series(
         self,
-        data: tuple[int, NDArrayFloat64],
-        previous_values: NDArrayFloat64 | None = None,
-        source_data: NDArrayFloat64 | None = None,
+        data: tuple[int, NDArrayFloat64T],
+        previous_values: NDArrayFloat64T | None = None,
+        source_data: NDArrayFloat64T | None = None,
     ) -> tuple[TimeSeries, dict]:
         pass
 
     def get_info(
         self,
-        data: tuple[int, NDArrayFloat64],
-        init_values: NDArrayFloat64 | None = None,
+        data: tuple[int, NDArrayFloat64T],
+        init_values: NDArrayFloat64T | None = None,
     ) -> dict:
         info = {
             "name": self.name,

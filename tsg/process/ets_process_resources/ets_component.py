@@ -1,6 +1,6 @@
 from numpy import array, transpose
 
-from tsg.utils.typing import NDArrayFloat64
+from tsg.utils.typing import NDArrayFloat64T
 
 
 class ETSComponent:
@@ -33,10 +33,10 @@ class ETSComponent:
     def __init__(
         self,
         lag: int,
-        init_values: NDArrayFloat64,
+        init_values: NDArrayFloat64T,
         parameter: float,
-        error: NDArrayFloat64,
-        additional_values: NDArrayFloat64 | None = None,
+        error: NDArrayFloat64T,
+        additional_values: NDArrayFloat64T | None = None,
     ):
         self.num_samples = len(error)
         self.lag = lag

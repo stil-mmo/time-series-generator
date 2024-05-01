@@ -2,13 +2,13 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from tsg.utils.typing import NDArrayFloat64
+from tsg.utils.typing import NDArrayFloat64T
 
 
 class ParameterType(ABC):
     def __init__(
         self,
-        constraints: NDArrayFloat64 = np.array([]),
+        constraints: NDArrayFloat64T = np.array([]),
         source_value: float = 0.0,
     ):
         self._source_value = source_value
@@ -28,11 +28,11 @@ class ParameterType(ABC):
         self._source_value = source_value
 
     @property
-    def constraints(self) -> NDArrayFloat64:
+    def constraints(self) -> NDArrayFloat64T:
         return self._constraints
 
     @constraints.setter
-    def constraints(self, constraints: NDArrayFloat64) -> None:
+    def constraints(self, constraints: NDArrayFloat64T) -> None:
         self._constraints = constraints
 
 
@@ -57,7 +57,7 @@ class MeanType(ParameterType):
 class CoefficientType(ParameterType):
     def __init__(
         self,
-        constraints: NDArrayFloat64 = np.array([]),
+        constraints: NDArrayFloat64T = np.array([]),
         source_value: float = 0.0,
     ):
         super().__init__(constraints=constraints, source_value=source_value)

@@ -6,7 +6,7 @@ from tsg.process.process_storage import ProcessStorage
 from tsg.scheduler.scheduler import Scheduler
 from tsg.scheduler.scheduler_storage import SchedulerStorage
 from tsg.time_series import TimeSeries
-from tsg.utils.typing import NDArrayFloat64, ProcessDataType
+from tsg.utils.typing import NDArrayFloat64T, ProcessDataT
 
 
 class TimeSeriesGenerator:
@@ -27,8 +27,8 @@ class TimeSeriesGenerator:
 
     def generate_all(
         self,
-    ) -> tuple[NDArrayFloat64, list[TimeSeries]]:
-        ts_array: NDArrayFloat64 = np.ndarray((self.ts_number, self.ts_size))
+    ) -> tuple[NDArrayFloat64T, list[TimeSeries]]:
+        ts_array: NDArrayFloat64T = np.ndarray((self.ts_number, self.ts_size))
         ts_list = []
         scheduler = self.generate_new_scheduler()
         iterations = (
@@ -55,8 +55,8 @@ class TimeSeriesGenerator:
     def generate_time_series(
         self,
         process_storage: ProcessStorage,
-        schedule: list[ProcessDataType],
-        source_data: NDArrayFloat64 | None = None,
+        schedule: list[ProcessDataT],
+        source_data: NDArrayFloat64T | None = None,
     ) -> TimeSeries:
         current_time_series = TimeSeries(self.ts_size)
         for process_name, process_schedule in schedule:
@@ -93,7 +93,7 @@ class TimeSeriesGenerator:
 
     def get_point_schedule(
         self, point_index: int, general_scheduler: Scheduler
-    ) -> list[ProcessDataType]:
+    ) -> list[ProcessDataT]:
         if self.scheduler_storage is not None:
             cluster = self.scheduler_storage.get_cluster(point_index)
             scheduler = self.scheduler_storage.get_scheduler(cluster=cluster)

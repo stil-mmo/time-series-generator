@@ -1,6 +1,6 @@
 import numpy as np
 
-from tsg.utils.typing import NDArrayFloat64, ProcessConfigType
+from tsg.utils.typing import NDArrayFloat64T, ProcessConfigT
 
 
 class TimeSeries:
@@ -8,12 +8,12 @@ class TimeSeries:
         self.num_steps = num_steps
         self.last_index = 0
         self.values = np.zeros(shape=(1, num_steps))[0]
-        self.metadata: list[ProcessConfigType] = []
+        self.metadata: list[ProcessConfigT] = []
 
     def add_values(
         self,
-        new_values: NDArrayFloat64,
-        new_metadata: ProcessConfigType,
+        new_values: NDArrayFloat64T,
+        new_metadata: ProcessConfigT,
     ) -> None:
         if self.last_index + len(new_values) > self.num_steps:
             print(
@@ -26,7 +26,7 @@ class TimeSeries:
 
     def get_values(
         self, start_index: int = 0, end_index: int | None = None
-    ) -> NDArrayFloat64:
+    ) -> NDArrayFloat64T:
         if end_index is None:
             return self.values[start_index : self.last_index]
         else:

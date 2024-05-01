@@ -4,7 +4,7 @@ import numpy as np
 
 from tsg.linspace_info import LinspaceInfo
 from tsg.process.process_storage import ProcessStorage
-from tsg.utils.typing import NDArrayFloat64, ProcessDataType, ProcessOrderType
+from tsg.utils.typing import NDArrayFloat64T, ProcessDataT, ProcessOrderT
 
 
 class Scheduler:
@@ -15,7 +15,7 @@ class Scheduler:
         process_storage: ProcessStorage,
         strict_num_parts: bool = True,
         stable_parameters: bool = False,
-        process_order: ProcessOrderType | None = None,
+        process_order: ProcessOrderT | None = None,
     ):
         self.num_steps = num_steps
         self.linspace_info = linspace_info
@@ -29,12 +29,12 @@ class Scheduler:
         )
 
     def generate_schedule(
-        self, source_data: NDArrayFloat64 | None = None
-    ) -> list[ProcessDataType]:
+        self, source_data: NDArrayFloat64T | None = None
+    ) -> list[ProcessDataT]:
         schedule = []
         for steps, process_name in self.process_order:
             process = self.process_storage.get_processes([process_name])[0]
-            process_data: ProcessDataType = (process_name, [])
+            process_data: ProcessDataT = (process_name, [])
             if self.stable_parameters or steps == 1:
                 process_data[1].append(
                     (
@@ -61,7 +61,7 @@ class Scheduler:
             schedule.append(process_data)
         return schedule
 
-    def generate_process_order(self) -> ProcessOrderType:
+    def generate_process_order(self) -> ProcessOrderT:
         process_schedule = []
         num_parts = np.random.randint(1, int(sqrt(self.num_steps)))
         processes_steps = self.generate_steps_number(
@@ -73,7 +73,7 @@ class Scheduler:
             process_schedule.append((processes_steps[i], random_processes[i].name))
         return process_schedule
 
-    def set_process_order(self, process_order: ProcessOrderType) -> None:
+    def set_process_order(self, process_order: ProcessOrderT) -> None:
         self.process_order = process_order
 
     @staticmethod
