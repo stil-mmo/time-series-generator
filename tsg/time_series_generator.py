@@ -34,11 +34,11 @@ class TimeSeriesGenerator:
         iterations = (
             self.ts_number
             if self.scheduler_storage is None
-            else self.scheduler_storage.points.shape[0]
+            else self.scheduler_storage.source_points.shape[0]
         )
         for i in range(iterations):
             source_data = (
-                self.scheduler_storage.points[i]
+                self.scheduler_storage.source_points[i]
                 if self.scheduler_storage is not None
                 else None
             )
@@ -98,7 +98,7 @@ class TimeSeriesGenerator:
             cluster = self.scheduler_storage.get_cluster(point_index)
             scheduler = self.scheduler_storage.get_scheduler(cluster=cluster)
             schedule = scheduler.generate_schedule(
-                source_data=self.scheduler_storage.points[point_index]
+                source_data=self.scheduler_storage.source_points[point_index]
             )
         else:
             if self.single_schedule:

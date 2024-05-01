@@ -61,7 +61,7 @@ def main(cfg: DictConfig) -> None:
             cfg_scheduler=cfg.scheduler,
             linspace_info=linspace_info,
             process_storage=process_storage,
-            points=coordinates,
+            source_points=coordinates,
             clusters=clusters,
         )
     else:

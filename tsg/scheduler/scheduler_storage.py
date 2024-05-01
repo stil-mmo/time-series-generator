@@ -13,14 +13,14 @@ class SchedulerStorage:
         cfg_scheduler: DictConfig,
         linspace_info: LinspaceInfo,
         process_storage: ProcessStorage,
-        points: NDArrayFloat64T,
+        source_points: NDArrayFloat64T,
         clusters: NDArrayFloat64T,
     ) -> None:
         self.num_steps = num_steps
         self.cfg_scheduler = cfg_scheduler
         self.linspace_info = linspace_info
         self.process_storage = process_storage
-        self.points = points
+        self.source_points = source_points
         self.clusters = clusters
         self.scheduler_storage = self.create_storage()
 
