@@ -21,7 +21,7 @@ class AggregationMethod(ParametersGenerationMethod):
         linspace_info: LinspaceInfo,
         weighted_values: bool = True,
         use_max: bool = False,
-    ):
+    ) -> None:
         self.weighted_values = weighted_values
         self.use_max = use_max
 

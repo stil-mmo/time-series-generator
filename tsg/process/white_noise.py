@@ -20,7 +20,7 @@ class WNParametersGenerator(ParametersGenerator):
         linspace_info: LinspaceInfo,
         parameters_generation_method: ParametersGenerationMethod,
         parameters_required: list[ParameterType],
-    ):
+    ) -> None:
         super().__init__(
             lag=lag,
             linspace_info=linspace_info,
@@ -47,7 +47,7 @@ class WhiteNoise(Process):
         self,
         linspace_info: LinspaceInfo,
         parameters_generation_method: ParametersGenerationMethod,
-    ):
+    ) -> None:
         super().__init__(
             linspace_info=linspace_info,
             parameters_generation_method=parameters_generation_method,

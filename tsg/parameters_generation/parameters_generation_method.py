@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Callable
 
 import numpy as np
 
@@ -18,7 +19,7 @@ class ParametersGenerationMethod(ABC):
     def __init__(
         self,
         linspace_info: LinspaceInfo,
-    ):
+    ) -> None:
         self.linspace_info = linspace_info
 
     def generate_all_parameters(
@@ -60,7 +61,7 @@ class ParametersGenerationMethod(ABC):
         pass
 
     @property
-    def generation_functions(self):
+    def generation_functions(self) -> dict[str, Callable]:
         return {
             "std_type": self.generate_std,
             "mean_type": self.generate_mean,

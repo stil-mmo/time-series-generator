@@ -11,7 +11,7 @@ def info_to_string(info: dict) -> str:
     return line
 
 
-def draw_process_plot(values, info, path=None):
+def draw_process_plot(values, info, path=None) -> None:
     plt.plot(values)
     plt.title(info["name"])
     plt.xlabel("timestamp")

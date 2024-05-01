@@ -12,7 +12,7 @@ class ParameterType(ABC):
         self,
         constraints: NDArrayFloat64T = np.array([]),
         source_value: float = 0.0,
-    ):
+    ) -> None:
         self._source_value = source_value
         self._constraints = constraints
 
@@ -36,14 +36,14 @@ class ParameterType(ABC):
 class StdType(ParameterType):
     name = "std_type"
 
-    def __init__(self, source_value: float = 0.0):
+    def __init__(self, source_value: float = 0.0) -> None:
         super().__init__(source_value=source_value)
 
 
 class MeanType(ParameterType):
     name = "mean_type"
 
-    def __init__(self, source_value: float = 0.0):
+    def __init__(self, source_value: float = 0.0) -> None:
         super().__init__(source_value=source_value)
 
 
@@ -54,5 +54,5 @@ class CoefficientType(ParameterType):
         self,
         constraints: NDArrayFloat64T = np.array([]),
         source_value: float = 0.0,
-    ):
+    ) -> None:
         super().__init__(constraints=constraints, source_value=source_value)

@@ -32,7 +32,7 @@ class ProcessStorage:
         linspace_info: LinspaceInfo,
         generation_method: ParametersGenerationMethod,
         process_list: list[str] | None = None,
-    ):
+    ) -> None:
         self.cfg_process = cfg_process
         self.linspace_info = linspace_info
         self.processes: dict[str, Process] = {}

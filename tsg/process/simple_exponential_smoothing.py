@@ -27,7 +27,7 @@ class SESParametersGenerator(ParametersGenerator):
         parameters_required: list[ParameterType],
         init_values_coeff: float = 0.5,
         long_term_coeff_range: tuple[float, float] = (0.0, 0.3),
-    ):
+    ) -> None:
         super().__init__(
             lag=lag,
             linspace_info=linspace_info,
@@ -63,7 +63,7 @@ class SimpleExponentialSmoothing(Process):
         parameters_generation_method: ParametersGenerationMethod,
         init_values_coeff: float = 0.5,
         long_term_coeff_range: tuple[float, float] = (0.0, 0.3),
-    ):
+    ) -> None:
         self.long_term_coeff_range = long_term_coeff_range
         super().__init__(
             linspace_info=linspace_info,
@@ -117,7 +117,7 @@ class SimpleExponentialSmoothing(Process):
         return exp_time_series, self.get_info(data, init_value)
 
 
-def show_plot():
+def show_plot() -> None:
     test_generator_linspace = LinspaceInfo(0.0, 100.0, 100)
     method = AggregationMethod(test_generator_linspace)
     proc = SimpleExponentialSmoothing(test_generator_linspace, method)

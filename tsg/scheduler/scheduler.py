@@ -16,7 +16,7 @@ class Scheduler:
         strict_num_parts: bool = True,
         stable_parameters: bool = False,
         process_order: ProcessOrderT | None = None,
-    ):
+    ) -> None:
         self.num_steps = num_steps
         self.linspace_info = linspace_info
         self.strict_num_parts = strict_num_parts

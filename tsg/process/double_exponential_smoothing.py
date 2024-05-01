@@ -28,7 +28,7 @@ class DESParametersGenerator(ParametersGenerator):
         init_values_coeff: float = 0.5,
         long_term_coeff_range: tuple[float, float] = (0.0, 0.3),
         trend_coeff_range: tuple[float, float] = (0.0, 0.05),
-    ):
+    ) -> None:
         super().__init__(
             lag=lag,
             linspace_info=linspace_info,
@@ -67,7 +67,7 @@ class DoubleExponentialSmoothing(Process):
         init_values_coeff: float = 0.5,
         long_term_coeff_range: tuple[float, float] = (0.0, 0.3),
         trend_coeff_range: tuple[float, float] = (0.0, 0.05),
-    ):
+    ) -> None:
         self.long_term_coeff_range = long_term_coeff_range
         self.trend_coeff_range = trend_coeff_range
         super().__init__(
@@ -137,7 +137,7 @@ class DoubleExponentialSmoothing(Process):
         )
 
 
-def show_plot():
+def show_plot() -> None:
     test_generator_linspace = LinspaceInfo(0.0, 100.0, 100)
     method = AggregationMethod(test_generator_linspace)
     proc = DoubleExponentialSmoothing(test_generator_linspace, method)

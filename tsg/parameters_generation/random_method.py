@@ -19,7 +19,7 @@ class RandomMethod(ParametersGenerationMethod):
     def __init__(
         self,
         linspace_info: LinspaceInfo,
-    ):
+    ) -> None:
         super().__init__(
             linspace_info=linspace_info,
         )

@@ -12,7 +12,7 @@ class LinspaceInfo:
         center_shift: float = 1.0,
         step_coeff: float = 0.5,
         use_k: bool = True,
-    ):
+    ) -> None:
         self.start = start
         self.stop = stop
         self.parts = parts

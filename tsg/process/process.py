@@ -18,7 +18,7 @@ class ParametersGenerator(ABC):
         linspace_info: LinspaceInfo,
         parameters_generation_method: ParametersGenerationMethod,
         parameters_required: list[ParameterType],
-    ):
+    ) -> None:
         self.lag = lag
         self.linspace_info = linspace_info
         self._parameters_generation_method = parameters_generation_method
@@ -52,7 +52,7 @@ class Process(ABC):
         self,
         linspace_info: LinspaceInfo,
         parameters_generation_method: ParametersGenerationMethod,
-    ):
+    ) -> None:
         self._linspace_info = linspace_info
         self._parameters_generation_method = parameters_generation_method
 

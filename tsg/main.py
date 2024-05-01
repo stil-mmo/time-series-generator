@@ -20,7 +20,7 @@ from tsg.utils.utils import get_config_path
     config_path=get_config_path(path=Path(__file__)),
     config_name="config",
 )
-def main(cfg: DictConfig):
+def main(cfg: DictConfig) -> None:
     generation_method_name = cfg.generation.generation_method
     if cfg.parameters_generation_method.get(generation_method_name) is not None:
         method_partial = hydra.utils.instantiate(

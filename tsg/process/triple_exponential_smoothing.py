@@ -28,7 +28,7 @@ class TESParametersGenerator(ParametersGenerator):
         long_term_coeff_range: tuple[float, float] = (0.0, 0.3),
         trend_coeff_range: tuple[float, float] = (0.0, 0.05),
         seasonal_coeff_range: tuple[float, float] = (0.0, 0.05),
-    ):
+    ) -> None:
         super().__init__(
             lag=lag,
             linspace_info=linspace_info,
@@ -70,7 +70,7 @@ class TripleExponentialSmoothing(Process):
         long_term_coeff_range: tuple[float, float] = (0.0, 0.3),
         trend_coeff_range: tuple[float, float] = (0.0, 0.05),
         seasonal_coeff_range: tuple[float, float] = (0.0, 0.05),
-    ):
+    ) -> None:
         self.long_term_coeff_range = long_term_coeff_range
         self.trend_coeff_range = trend_coeff_range
         self.seasonal_coeff_range = seasonal_coeff_range
@@ -161,7 +161,7 @@ class TripleExponentialSmoothing(Process):
         )
 
 
-def show_plot():
+def show_plot() -> None:
     test_generator_linspace = LinspaceInfo(0.0, 100.0, 100)
     method = AggregationMethod(test_generator_linspace)
     proc = TripleExponentialSmoothing(test_generator_linspace, method)

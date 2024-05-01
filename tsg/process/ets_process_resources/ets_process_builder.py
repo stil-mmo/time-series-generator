@@ -9,7 +9,7 @@ STABLE_PARAMETER = 1.0
 
 
 class ETSProcessBuilder:
-    def __init__(self, samples_count: int):
+    def __init__(self, samples_count: int) -> None:
         self.num_samples = samples_count
         self.components = zeros(shape=(1, samples_count))
         self.set_normal_error()

@@ -21,7 +21,7 @@ class RWParametersGenerator(ParametersGenerator):
         parameters_generation_method: ParametersGenerationMethod,
         parameters_required: list[ParameterType],
         init_values_coeff: float = 0.5,
-    ):
+    ) -> None:
         super().__init__(
             lag=lag,
             linspace_info=linspace_info,
@@ -55,7 +55,7 @@ class RandomWalk(Process):
         linspace_info: LinspaceInfo,
         parameters_generation_method: ParametersGenerationMethod,
         init_values_coeff: float = 0.5,
-    ):
+    ) -> None:
         super().__init__(
             linspace_info=linspace_info,
             parameters_generation_method=parameters_generation_method,
@@ -113,7 +113,7 @@ class RandomWalk(Process):
             return rw_time_series, self.get_info(data, np.array([previous_values[-1]]))
 
 
-def show_plot():
+def show_plot() -> None:
     test_generator_linspace = LinspaceInfo(0.0, 100.0, 100)
     method = AggregationMethod(test_generator_linspace)
     proc = RandomWalk(test_generator_linspace, method)

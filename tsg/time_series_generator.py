@@ -16,7 +16,7 @@ class TimeSeriesGenerator:
         linspace_info: LinspaceInfo,
         process_storage: ProcessStorage,
         scheduler_storage: SchedulerStorage | None = None,
-    ):
+    ) -> None:
         self.cfg = cfg
         self.ts_number = cfg.generation.ts_number
         self.ts_size = cfg.generation.ts_size

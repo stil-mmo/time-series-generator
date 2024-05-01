@@ -59,7 +59,7 @@ def save_plot(
     shift: float,
     time_series_array: NDArrayFloat64T,
     save_plot_path=None,
-):
+) -> None:
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle("Generated time series with parameters clustering")
 

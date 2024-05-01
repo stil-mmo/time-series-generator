@@ -15,7 +15,7 @@ class SchedulerStorage:
         process_storage: ProcessStorage,
         points: NDArrayFloat64T,
         clusters: NDArrayFloat64T,
-    ):
+    ) -> None:
         self.num_steps = num_steps
         self.cfg_scheduler = cfg_scheduler
         self.linspace_info = linspace_info
