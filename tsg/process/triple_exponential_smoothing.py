@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import numpy as np
 from numpy.typing import NDArray
 
@@ -27,9 +25,9 @@ class TESParametersGenerator(ParametersGenerator):
         linspace_info: LinspaceInfo,
         parameters_generation_method: ParametersGenerationMethod,
         parameters_required: list[ParameterType],
-        long_term_coeff_range: Tuple[float, float] = (0.0, 0.3),
-        trend_coeff_range: Tuple[float, float] = (0.0, 0.05),
-        seasonal_coeff_range: Tuple[float, float] = (0.0, 0.05),
+        long_term_coeff_range: tuple[float, float] = (0.0, 0.3),
+        trend_coeff_range: tuple[float, float] = (0.0, 0.05),
+        seasonal_coeff_range: tuple[float, float] = (0.0, 0.05),
     ):
         super().__init__(
             lag=lag,
@@ -67,9 +65,9 @@ class TripleExponentialSmoothing(Process):
         linspace_info: LinspaceInfo,
         parameters_generation_method: ParametersGenerationMethod,
         lag: int = 12,
-        long_term_coeff_range: Tuple[float, float] = (0.0, 0.3),
-        trend_coeff_range: Tuple[float, float] = (0.0, 0.05),
-        seasonal_coeff_range: Tuple[float, float] = (0.0, 0.05),
+        long_term_coeff_range: tuple[float, float] = (0.0, 0.3),
+        trend_coeff_range: tuple[float, float] = (0.0, 0.05),
+        seasonal_coeff_range: tuple[float, float] = (0.0, 0.05),
     ):
         self.long_term_coeff_range = long_term_coeff_range
         self.trend_coeff_range = trend_coeff_range

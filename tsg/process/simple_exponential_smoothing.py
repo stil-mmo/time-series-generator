@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import numpy as np
 from numpy.typing import NDArray
 
@@ -28,7 +26,7 @@ class SESParametersGenerator(ParametersGenerator):
         parameters_generation_method: ParametersGenerationMethod,
         parameters_required: list[ParameterType],
         init_values_coeff: float = 0.5,
-        long_term_coeff_range: Tuple[float, float] = (0.0, 0.3),
+        long_term_coeff_range: tuple[float, float] = (0.0, 0.3),
     ):
         super().__init__(
             lag=lag,
@@ -62,7 +60,7 @@ class SimpleExponentialSmoothing(Process):
         linspace_info: LinspaceInfo,
         parameters_generation_method: ParametersGenerationMethod,
         init_values_coeff: float = 0.5,
-        long_term_coeff_range: Tuple[float, float] = (0.0, 0.3),
+        long_term_coeff_range: tuple[float, float] = (0.0, 0.3),
     ):
         self.long_term_coeff_range = long_term_coeff_range
         super().__init__(

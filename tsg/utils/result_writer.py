@@ -1,5 +1,4 @@
 import json
-from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,7 +8,7 @@ from tsg.time_series import TimeSeries
 from tsg.utils.typing import NDArrayFloat64
 
 
-def save_parameters(ts_list: List[TimeSeries], json_path: str) -> None:
+def save_parameters(ts_list: list[TimeSeries], json_path: str) -> None:
     with open(json_path, "w") as json_file:
         json_data = get_json_data(ts_list)
         json_file.write(json.dumps(json_data, indent=4))
@@ -30,7 +29,7 @@ def load_values(csv_path: str) -> NDArrayFloat64:
     return np.genfromtxt(csv_path)
 
 
-def get_json_data(ts_list: List[TimeSeries]) -> dict:
+def get_json_data(ts_list: list[TimeSeries]) -> dict:
     json_data = {}
     for i in range(len(ts_list)):
         last_steps = 0

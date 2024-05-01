@@ -1,5 +1,4 @@
 from random import choice
-from typing import List
 
 from hydra.utils import instantiate
 from omegaconf import DictConfig
@@ -8,7 +7,6 @@ from tsg.linspace_info import LinspaceInfo
 from tsg.parameters_generation.parameters_generation_method import (
     ParametersGenerationMethod,
 )
-from tsg.parameters_generation.random_method import RandomMethod
 from tsg.process.double_exponential_smoothing import DoubleExponentialSmoothing
 from tsg.process.process import Process
 from tsg.process.random_walk import RandomWalk
@@ -82,7 +80,7 @@ class ProcessStorage:
         return processes
 
     def get_random_processes(self, num_processes: int) -> list[Process]:
-        processes: List[Process] = list(self.processes.values())
+        processes: list[Process] = list(self.processes.values())
         return [choice(processes) for _ in range(num_processes)]
 
     def contains(self, process_name: str) -> bool:

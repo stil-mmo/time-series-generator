@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import numpy as np
 from numpy.typing import NDArray
 
@@ -28,8 +26,8 @@ class DESParametersGenerator(ParametersGenerator):
         parameters_generation_method: ParametersGenerationMethod,
         parameters_required: list[ParameterType],
         init_values_coeff: float = 0.5,
-        long_term_coeff_range: Tuple[float, float] = (0.0, 0.3),
-        trend_coeff_range: Tuple[float, float] = (0.0, 0.05),
+        long_term_coeff_range: tuple[float, float] = (0.0, 0.3),
+        trend_coeff_range: tuple[float, float] = (0.0, 0.05),
     ):
         super().__init__(
             lag=lag,
@@ -65,8 +63,8 @@ class DoubleExponentialSmoothing(Process):
         linspace_info: LinspaceInfo,
         parameters_generation_method: ParametersGenerationMethod,
         init_values_coeff: float = 0.5,
-        long_term_coeff_range: Tuple[float, float] = (0.0, 0.3),
-        trend_coeff_range: Tuple[float, float] = (0.0, 0.05),
+        long_term_coeff_range: tuple[float, float] = (0.0, 0.3),
+        trend_coeff_range: tuple[float, float] = (0.0, 0.05),
     ):
         self.long_term_coeff_range = long_term_coeff_range
         self.trend_coeff_range = trend_coeff_range
