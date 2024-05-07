@@ -93,7 +93,7 @@ class SimpleRandomWalk(Process):
 
     @property
     def parameters(self) -> list[ParameterType]:
-        return [CoefficientType(np.array([0.0, 1.0])), StdType()]
+        return [CoefficientType(), StdType()]
 
     @property
     def lag(self) -> int:

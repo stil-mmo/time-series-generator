@@ -47,10 +47,8 @@ class ProcessStorage:
         for process_name in process_list:
             if process_name not in self.processes.keys():
                 if self.cfg_process.get(process_name) is not None:
-                    process_partial = instantiate(
-                        self.cfg_process[process_name], _partial_=True
-                    )
-                    process = process_partial(
+                    process = instantiate(
+                        self.cfg_process[process_name],
                         linspace_info=self.linspace_info,
                         parameters_generation_method=self.generation_method,
                     )

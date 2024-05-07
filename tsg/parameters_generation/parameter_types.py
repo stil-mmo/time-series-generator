@@ -10,7 +10,7 @@ class ParameterType(ABC):
 
     def __init__(
         self,
-        constraints: NDArrayFloat64T = np.array([]),
+        constraints: NDArrayFloat64T = np.array([0.0, 1.0]),
         source_value: float = 0.0,
     ) -> None:
         self._source_value = source_value
@@ -52,7 +52,7 @@ class CoefficientType(ParameterType):
 
     def __init__(
         self,
-        constraints: NDArrayFloat64T = np.array([]),
+        constraints: NDArrayFloat64T = np.array([0.0, 1.0]),
         source_value: float = 0.0,
     ) -> None:
         super().__init__(constraints=constraints, source_value=source_value)

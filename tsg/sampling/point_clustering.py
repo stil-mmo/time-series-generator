@@ -1,13 +1,12 @@
 import numpy as np
-from numpy._typing import NDArray
 from sklearn.cluster import KMeans
 from sklearn.datasets import make_blobs
 
 from tsg.sampling.point_sampling import get_border_value, move_points
-from tsg.utils.typing import NDArrayFloat64T
+from tsg.utils.typing import NDArrayFloat64T, NDArrayIntT
 
 
-def cluster_points(points: NDArrayFloat64T, n_clusters: int) -> NDArray[np.int_]:
+def cluster_points(points: NDArrayFloat64T, n_clusters: int) -> NDArrayIntT:
     model = KMeans(n_clusters=n_clusters)
     model.fit(points)
     yhat = model.predict(points)

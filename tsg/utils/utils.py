@@ -26,11 +26,9 @@ def draw_process_plot(values, info, path=None) -> None:
     plt.close()
 
 
-def get_project_path(path: Path, level: int = 2) -> str:
-    for _ in range(level):
-        path = path.parent
-    return str(path)
+def get_project_path() -> str:
+    return str(Path(__file__).parent.parent.parent)
 
 
-def get_config_path(path: Path, level: int = 2) -> str:
-    return os.path.join(get_project_path(path, level), "config")
+def get_config_path() -> str:
+    return os.path.join(get_project_path(), "config")

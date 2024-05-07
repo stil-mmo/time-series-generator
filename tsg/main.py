@@ -1,10 +1,6 @@
 import os
-from pathlib import Path
-from typing import Callable
 
 import hydra
-import numpy as np
-from numpy.typing import NDArray
 from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
@@ -18,25 +14,23 @@ from tsg.scheduler.scheduler_storage import SchedulerStorage
 from tsg.time_series import TimeSeries
 from tsg.time_series_generator import TimeSeriesGenerator
 from tsg.utils.result_writer import save_parameters, save_plot, save_values
-from tsg.utils.typing import NDArrayFloat64T
+from tsg.utils.typing import NDArrayFloat64T, NDArrayIntT
 from tsg.utils.utils import get_config_path
 
 
 @hydra.main(
     version_base="1.2",
-    config_path=get_config_path(path=Path(__file__)),
+    config_path=get_config_path(),
     config_name="config",
 )
 def main(cfg: DictConfig) -> None:
-    method_partial = get_generation_method(cfg)
-
     if cfg.generation.sample_points:
         coordinates, clusters, border_values, shift = generate_source_data(cfg)
         plot_data = [coordinates, clusters, border_values, shift]
         linspace_info = get_linspace_info(
             cfg=cfg, start=border_values[0], stop=border_values[1]
         )
-        generation_method = method_partial(linspace_info=linspace_info)
+        generation_method = get_generation_method(cfg, linspace_info=linspace_info)
         process_storage = get_process_storage(cfg, linspace_info, generation_method)
         scheduler_storage = SchedulerStorage(
             num_steps=cfg.generation.ts_size,
@@ -53,7 +47,7 @@ def main(cfg: DictConfig) -> None:
             start=cfg.linspace_info.linspace_borders[0],
             stop=cfg.linspace_info.linspace_borders[1],
         )
-        generation_method = method_partial(linspace_info=linspace_info)
+        generation_method = get_generation_method(cfg, linspace_info=linspace_info)
         process_storage = get_process_storage(cfg, linspace_info, generation_method)
         scheduler_storage = None
 
@@ -72,22 +66,26 @@ def main(cfg: DictConfig) -> None:
     )
 
 
-def get_generation_method(cfg: DictConfig) -> Callable:
+def get_generation_method(
+    cfg: DictConfig, linspace_info: LinspaceInfo
+) -> ParametersGenerationMethod:
     generation_method_name = cfg.generation.generation_method
     if cfg.parameters_generation_method.get(generation_method_name) is not None:
-        method_partial = hydra.utils.instantiate(
-            cfg.parameters_generation_method[generation_method_name], _partial_=True
+        method = hydra.utils.instantiate(
+            cfg.parameters_generation_method[generation_method_name],
+            linspace_info=linspace_info,
         )
     else:
-        method_partial = hydra.utils.instantiate(
-            cfg.parameters_generation_method["random_method"], _partial_=True
+        method = hydra.utils.instantiate(
+            cfg.parameters_generation_method["random_method"],
+            linspace_info=linspace_info,
         )
-    return method_partial
+    return method
 
 
 def generate_source_data(
     cfg: DictConfig,
-) -> tuple[NDArrayFloat64T, NDArray[np.int_], tuple[float, float], float]:
+) -> tuple[NDArrayFloat64T, NDArrayIntT, tuple[float, float], float]:
     coordinates, border_values, shift = sample_points(cfg.generation.ts_number)
     clusters = cluster_points(coordinates, cfg.clustering.clusters)
     return coordinates, clusters, border_values, shift
