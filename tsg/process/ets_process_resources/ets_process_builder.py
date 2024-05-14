@@ -1,16 +1,15 @@
-import numpy as np
 from numpy import array, vstack, zeros
 from numpy.random import normal, triangular, uniform
-from numpy.typing import NDArray
 
 from tsg.process.ets_process_resources.ets_component import ETSComponent
+from tsg.utils.typing import NDArrayFloat64T
 
 NO_LAG = 0
 STABLE_PARAMETER = 1.0
 
 
 class ETSProcessBuilder:
-    def __init__(self, samples_count: int):
+    def __init__(self, samples_count: int) -> None:
         self.num_samples = samples_count
         self.components = zeros(shape=(1, samples_count))
         self.set_normal_error()
@@ -77,7 +76,7 @@ class ETSProcessBuilder:
         return self.components.shape[0] - 1
 
     def set_seasonal(
-        self, lag: int, init_values: NDArray[np.float64], parameter: float
+        self, lag: int, init_values: NDArrayFloat64T, parameter: float
     ) -> int:
         seasonal = ETSComponent(
             lag=lag,
@@ -88,5 +87,5 @@ class ETSProcessBuilder:
         self.components = vstack([self.components, seasonal.values])
         return self.components.shape[0] - 1
 
-    def generate_values(self) -> NDArray[np.float64]:
+    def generate_values(self) -> NDArrayFloat64T:
         return self.components.sum(axis=0)

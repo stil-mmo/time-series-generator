@@ -1,17 +1,30 @@
-import numpy as np
+import os
+
 import pytest
 from hydra import compose, initialize
 
 from tsg.linspace_info import LinspaceInfo
+from tsg.parameters_generation.random_method import RandomMethod
+from tsg.process.process_storage import ProcessStorage
 from tsg.scheduler.scheduler import Scheduler
 
-GENERATOR_LINSPACE = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
+GENERATOR_LINSPACE = LinspaceInfo(0.0, 100.0, 100)
 
 
 def test_generate_process_list():
-    with initialize(version_base=None, config_path=".."):
+    with initialize(version_base="1.2", config_path=os.path.join("..", "config")):
         cfg = compose(config_name="config")
-        schedule = Scheduler(cfg=cfg, linspace_info=GENERATOR_LINSPACE)
+        process_list = ProcessStorage(
+            process_list=cfg.scheduler.process_list,
+            cfg_process=cfg.process,
+            linspace_info=GENERATOR_LINSPACE,
+            generation_method=RandomMethod(GENERATOR_LINSPACE),
+        )
+        schedule = Scheduler(
+            num_steps=100,
+            linspace_info=GENERATOR_LINSPACE,
+            process_storage=process_list,
+        )
         assert (
             schedule.process_storage.processes["white_noise"] is not None
             and schedule.process_storage.processes["random_walk"] is not None
@@ -30,9 +43,19 @@ def test_generate_steps_number():
 
 
 def test_generate_process_order():
-    with initialize(version_base=None, config_path=".."):
+    with initialize(version_base="1.2", config_path=os.path.join("..", "config")):
         cfg = compose(config_name="config")
-        schedule = Scheduler(cfg=cfg, linspace_info=GENERATOR_LINSPACE)
+        process_list = ProcessStorage(
+            process_list=cfg.scheduler.process_list,
+            cfg_process=cfg.process,
+            linspace_info=GENERATOR_LINSPACE,
+            generation_method=RandomMethod(GENERATOR_LINSPACE),
+        )
+        schedule = Scheduler(
+            num_steps=100,
+            linspace_info=GENERATOR_LINSPACE,
+            process_storage=process_list,
+        )
         process_order = schedule.generate_process_order()
         assert sum([steps for steps, _ in process_order]) == 100
         assert len(process_order) <= 10
@@ -45,9 +68,19 @@ def test_generate_process_order():
 
 
 def test_generate_schedule():
-    with initialize(version_base=None, config_path=".."):
+    with initialize(version_base="1.2", config_path=os.path.join("..", "config")):
         cfg = compose(config_name="config")
-        scheduler = Scheduler(cfg=cfg, linspace_info=GENERATOR_LINSPACE)
+        process_list = ProcessStorage(
+            process_list=cfg.scheduler.process_list,
+            cfg_process=cfg.process,
+            linspace_info=GENERATOR_LINSPACE,
+            generation_method=RandomMethod(GENERATOR_LINSPACE),
+        )
+        scheduler = Scheduler(
+            num_steps=100,
+            linspace_info=GENERATOR_LINSPACE,
+            process_storage=process_list,
+        )
         schedule = scheduler.generate_schedule()
         assert len(schedule) == len(scheduler.process_order)
         steps_sum = []

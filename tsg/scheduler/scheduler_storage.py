@@ -1,23 +1,28 @@
 import numpy as np
-from numpy.typing import NDArray
+from numpy._typing import NDArray
 from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
-from tsg.sampling.aggregated_data import AggregatedData
+from tsg.process.process_storage import ProcessStorage
 from tsg.scheduler.scheduler import Scheduler
+from tsg.utils.typing import NDArrayFloat64T
 
 
 class SchedulerStorage:
     def __init__(
         self,
-        cfg: DictConfig,
+        num_steps: int,
+        cfg_scheduler: DictConfig,
         linspace_info: LinspaceInfo,
-        points: NDArray[np.float64],
-        clusters: NDArray[np.float64],
-    ):
-        self.cfg = cfg
+        process_storage: ProcessStorage,
+        source_points: NDArrayFloat64T,
+        clusters: NDArray[np.int_],
+    ) -> None:
+        self.num_steps = num_steps
+        self.cfg_scheduler = cfg_scheduler
         self.linspace_info = linspace_info
-        self.points = points
+        self.process_storage = process_storage
+        self.source_points = source_points
         self.clusters = clusters
         self.scheduler_storage = self.create_storage()
 
@@ -26,8 +31,12 @@ class SchedulerStorage:
         for cluster in self.clusters:
             if cluster not in storage.keys():
                 scheduler = Scheduler(
-                    cfg=self.cfg,
+                    num_steps=self.num_steps,
                     linspace_info=self.linspace_info,
+                    process_storage=self.process_storage,
+                    strict_num_parts=self.cfg_scheduler.strict_num_parts,
+                    stable_parameters=self.cfg_scheduler.stable_parameters,
+                    process_order=self.cfg_scheduler.process_order,
                 )
                 storage[cluster] = scheduler
         return storage
@@ -35,9 +44,5 @@ class SchedulerStorage:
     def get_cluster(self, point_index: int) -> int:
         return self.clusters[point_index]
 
-    def get_scheduler(
-        self, cluster: int, aggregated_data: AggregatedData | None = None
-    ) -> Scheduler:
-        if aggregated_data is not None:
-            self.scheduler_storage[cluster].set_aggregated_data(aggregated_data)
+    def get_scheduler(self, cluster: int) -> Scheduler:
         return self.scheduler_storage[cluster]

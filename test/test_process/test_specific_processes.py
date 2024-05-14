@@ -1,23 +1,31 @@
 import os.path
 
+import hydra
 import numpy as np
 import pytest
-from hydra import compose, initialize
 from numpy import isclose
 
 from tsg.linspace_info import LinspaceInfo
+from tsg.parameters_generation.random_method import RandomMethod
 from tsg.process.process_storage import ProcessStorage
 from tsg.process.simple_random_walk import SimpleRandomWalk
 from tsg.time_series import TimeSeries
 
-GENERATOR_LINSPACE = LinspaceInfo(np.float64(0.0), np.float64(100.0), 100)
+GENERATOR_LINSPACE = LinspaceInfo(0.0, 100.0, 100)
 
 
 @pytest.fixture
 def process_list():
-    with initialize(version_base=None, config_path=os.path.join("..", "..")):
-        cfg = compose(config_name="config")
-        process_list = ProcessStorage(cfg=cfg, linspace_info=GENERATOR_LINSPACE)
+    with hydra.initialize(
+        version_base="1.2", config_path=os.path.join("..", "..", "config")
+    ):
+        cfg = hydra.compose(config_name="config")
+        process_list = ProcessStorage(
+            process_list=cfg.scheduler.process_list,
+            cfg_process=cfg.process,
+            linspace_info=GENERATOR_LINSPACE,
+            generation_method=RandomMethod(GENERATOR_LINSPACE),
+        )
         return process_list
 
 
@@ -41,15 +49,24 @@ def test_generate_ts_with_values(process_list):
 
 
 def test_random_walk():
-    simple_random_walk = SimpleRandomWalk(GENERATOR_LINSPACE, fixed_walk=1.0)
-    data = (100, simple_random_walk.parameters_generator.generate_parameters())
-    time_series, info = simple_random_walk.generate_time_series(data)
+    with hydra.initialize(
+        version_base="1.2", config_path=os.path.join("..", "..", "config")
+    ):
+        cfg = hydra.compose(config_name="config")
+        generation_method = RandomMethod(
+            linspace_info=GENERATOR_LINSPACE,
+        )
+        simple_random_walk = SimpleRandomWalk(
+            GENERATOR_LINSPACE, generation_method, fixed_walk=1.0
+        )
+        data = (100, simple_random_walk.parameters_generator.generate_parameters())
+        time_series, info = simple_random_walk.generate_time_series(data)
 
-    # Check if the generated time series follows the random walk rule
-    values = time_series.get_values()
-    for i in range(1, len(values)):
-        diff = abs(values[i] - values[i - 1])
-        assert isclose(diff, 1.0)  # Assuming fixed_walk is set to 1.0
+        # Check if the generated time series follows the random walk rule
+        values = time_series.get_values()
+        for i in range(1, len(values)):
+            diff = abs(values[i] - values[i - 1])
+            assert isclose(diff, 1.0)  # Assuming fixed_walk is set to 1.0
 
 
 if __name__ == "__main__":

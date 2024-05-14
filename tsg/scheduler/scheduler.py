@@ -1,41 +1,48 @@
 from math import sqrt
 
 import numpy as np
-from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
 from tsg.process.process_storage import ProcessStorage
-from tsg.sampling.aggregated_data import AggregatedData
-from tsg.utils.typing import ProcessDataType, ProcessOrderType
+from tsg.utils.typing import NDArrayFloat64T, ProcessDataT, ProcessOrderT
 
 
 class Scheduler:
     def __init__(
         self,
-        cfg: DictConfig,
+        num_steps: int,
         linspace_info: LinspaceInfo,
-    ):
-        self.num_steps = cfg.generation.ts_size
+        process_storage: ProcessStorage,
+        strict_num_parts: bool = True,
+        stable_parameters: bool = False,
+        process_order: ProcessOrderT | None = None,
+    ) -> None:
+        self.num_steps = num_steps
         self.linspace_info = linspace_info
-        self.strict_num_parts = cfg.scheduler.strict_num_parts
-        self.stable_parameters = cfg.scheduler.stable_parameters
-        self.process_storage = ProcessStorage(cfg=cfg, linspace_info=linspace_info)
+        self.strict_num_parts = strict_num_parts
+        self.stable_parameters = stable_parameters
+        self.process_storage = process_storage
         self.process_order = (
-            cfg.scheduler.process_order
-            if cfg.scheduler.process_order is not None
+            process_order
+            if process_order is not None
             else self.generate_process_order()
         )
-        self.aggregated_data: AggregatedData | None = None
 
-    def generate_schedule(self) -> list[ProcessDataType]:
+    def generate_schedule(
+        self, source_data: NDArrayFloat64T | None = None
+    ) -> list[ProcessDataT]:
         schedule = []
         for steps, process_name in self.process_order:
             process = self.process_storage.get_processes([process_name])[0]
-            process.aggregated_data = self.aggregated_data
-            process_data: ProcessDataType = (process_name, [])
+            process_data: ProcessDataT = (process_name, [])
             if self.stable_parameters or steps == 1:
                 process_data[1].append(
-                    (steps, process.parameters_generator.generate_parameters())
+                    (
+                        steps,
+                        process.parameters_generator.generate_parameters(
+                            source_data=source_data
+                        ),
+                    )
                 )
             else:
                 parameters_steps = self.generate_steps_number(
@@ -46,13 +53,15 @@ class Scheduler:
                     process_data[1].append(
                         (
                             parameters_steps[i],
-                            process.parameters_generator.generate_parameters(),
+                            process.parameters_generator.generate_parameters(
+                                source_data=source_data
+                            ),
                         )
                     )
             schedule.append(process_data)
         return schedule
 
-    def generate_process_order(self) -> ProcessOrderType:
+    def generate_process_order(self) -> ProcessOrderT:
         process_schedule = []
         num_parts = np.random.randint(1, int(sqrt(self.num_steps)))
         processes_steps = self.generate_steps_number(
@@ -64,10 +73,7 @@ class Scheduler:
             process_schedule.append((processes_steps[i], random_processes[i].name))
         return process_schedule
 
-    def set_aggregated_data(self, aggregated_data: AggregatedData) -> None:
-        self.aggregated_data = aggregated_data
-
-    def set_process_order(self, process_order: ProcessOrderType) -> None:
+    def set_process_order(self, process_order: ProcessOrderT) -> None:
         self.process_order = process_order
 
     @staticmethod

@@ -1,23 +1,19 @@
-from typing import List
-
 import numpy as np
-from numpy import array
-from numpy.typing import NDArray
 
-from tsg.utils.typing import ProcessConfigType
+from tsg.utils.typing import NDArrayFloat64T, ProcessConfigT
 
 
 class TimeSeries:
-    def __init__(self, num_steps: int):
+    def __init__(self, num_steps: int) -> None:
         self.num_steps = num_steps
         self.last_index = 0
-        self.values = array([0.0 for _ in range(0, num_steps)])
-        self.metadata: List[ProcessConfigType] = []
+        self.values = np.zeros(shape=(1, num_steps))[0]
+        self.metadata: list[ProcessConfigT] = []
 
     def add_values(
         self,
-        new_values: NDArray[np.float64],
-        new_metadata: ProcessConfigType,
+        new_values: NDArrayFloat64T,
+        new_metadata: ProcessConfigT,
     ) -> None:
         if self.last_index + len(new_values) > self.num_steps:
             print(
@@ -28,7 +24,9 @@ class TimeSeries:
         self.last_index += len(new_values)
         self.metadata.append(new_metadata)
 
-    def get_values(self, start_index: int = 0, end_index: int | None = None) -> NDArray:
+    def get_values(
+        self, start_index: int = 0, end_index: int | None = None
+    ) -> NDArrayFloat64T:
         if end_index is None:
             return self.values[start_index : self.last_index]
         else:

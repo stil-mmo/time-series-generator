@@ -1,10 +1,12 @@
 from random import choice
-from typing import List
 
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 
 from tsg.linspace_info import LinspaceInfo
+from tsg.parameters_generation.parameters_generation_method import (
+    ParametersGenerationMethod,
+)
 from tsg.process.double_exponential_smoothing import DoubleExponentialSmoothing
 from tsg.process.process import Process
 from tsg.process.random_walk import RandomWalk
@@ -26,14 +28,16 @@ ALL_PROCESSES = {
 class ProcessStorage:
     def __init__(
         self,
-        cfg: DictConfig,
+        cfg_process: DictConfig,
         linspace_info: LinspaceInfo,
-    ):
-        self.cfg = cfg
+        generation_method: ParametersGenerationMethod,
+        process_list: list[str] | None = None,
+    ) -> None:
+        self.cfg_process = cfg_process
         self.linspace_info = linspace_info
         self.processes: dict[str, Process] = {}
         self.num_processes = 0
-        process_list = cfg.scheduler.process_list
+        self.generation_method = generation_method
         if process_list is not None:
             self.add_processes(process_list)
         else:
@@ -42,14 +46,16 @@ class ProcessStorage:
     def add_processes(self, process_list: list[str]) -> None:
         for process_name in process_list:
             if process_name not in self.processes.keys():
-                if self.cfg.process.get(process_name) is not None:
-                    process_partial = instantiate(
-                        self.cfg.process[process_name], _partial_=True
+                if self.cfg_process.get(process_name) is not None:
+                    process = instantiate(
+                        self.cfg_process[process_name],
+                        linspace_info=self.linspace_info,
+                        parameters_generation_method=self.generation_method,
                     )
-                    process = process_partial(linspace_info=self.linspace_info)
                 else:
                     process = ALL_PROCESSES[process_name](
-                        linspace_info=self.linspace_info
+                        linspace_info=self.linspace_info,
+                        parameters_generation_method=self.generation_method,
                     )
                 self.processes[process_name] = process
                 self.num_processes += 1
@@ -72,7 +78,7 @@ class ProcessStorage:
         return processes
 
     def get_random_processes(self, num_processes: int) -> list[Process]:
-        processes: List[Process] = list(self.processes.values())
+        processes: list[Process] = list(self.processes.values())
         return [choice(processes) for _ in range(num_processes)]
 
     def contains(self, process_name: str) -> bool:
