@@ -8,9 +8,8 @@ from tsg.parameters_generation.parameters_generation_method import (
     ParametersGenerationMethod,
 )
 from tsg.process.process_storage import ProcessStorage
-from tsg.sampling.point_clustering import cluster_points
-from tsg.sampling.point_sampling import sample_points
 from tsg.scheduler.scheduler_storage import SchedulerStorage
+from tsg.source_data_sampling.point_clustering import cluster_points
 from tsg.time_series import TimeSeries
 from tsg.time_series_generator import TimeSeriesGenerator
 from tsg.utils.result_writer import save_parameters, save_plot, save_values
@@ -86,9 +85,19 @@ def get_generation_method(
 def generate_source_data(
     cfg: DictConfig,
 ) -> tuple[NDArrayFloat64T, NDArrayIntT, tuple[float, float], float]:
-    coordinates, border_values, shift = sample_points(cfg.generation.ts_number)
-    clusters = cluster_points(coordinates, cfg.clustering.clusters)
-    return coordinates, clusters, border_values, shift
+    sampling_method_name = cfg.generation.sampling_method
+    sampling_method = hydra.utils.instantiate(
+        cfg.source_data_sampling_method[sampling_method_name],
+        linspace_info_cfg=cfg.linspace_info,
+    )
+    source_data, linspace_info = sampling_method.sample_source_data(
+        cfg.generation.ts_number
+    )
+    clusters = cluster_points(
+        points=source_data.data_characteristics, n_clusters=cfg.clustering.clusters
+    )
+    border_values = (linspace_info.start, linspace_info.stop)
+    return source_data.data_characteristics, clusters, border_values, source_data.shift
 
 
 def get_linspace_info(cfg: DictConfig, start: float, stop: float) -> LinspaceInfo:

@@ -2,7 +2,6 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.datasets import make_blobs
 
-from tsg.sampling.point_sampling import get_border_value, move_points
 from tsg.utils.typing import NDArrayFloat64T, NDArrayIntT
 
 
@@ -25,3 +24,19 @@ def get_blobs(
         get_border_value(X, is_min=False),
     )
     return X, y, border_values, shift
+
+
+def get_border_value(coordinates: NDArrayFloat64T, is_min: bool = True) -> float:
+    if is_min:
+        return float(np.min(coordinates))
+    else:
+        return float(np.max(coordinates))
+
+
+def move_points(coordinates: NDArrayFloat64T) -> float:
+    min_coordinate = get_border_value(coordinates)
+    shift = 0.0
+    if min_coordinate < 0:
+        coordinates += np.abs(min_coordinate) * 2
+        shift = np.abs(min_coordinate) * 2
+    return shift

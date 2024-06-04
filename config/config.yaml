@@ -3,6 +3,7 @@ generation:
   ts_size: 100
   sample_points: True
   generation_method: "aggregation_method"
+  sampling_method: "surface_sampling_method"
   save_data_folder: "../saved_data"
   json_name: "generation.json"
   csv_name: "values.csv"
@@ -24,6 +25,12 @@ scheduler:
   process_list: null
   process_order: null
   strict_num_parts: False
+
+source_data_sampling_method:
+  surface_sampling_method:
+    _target_: tsg.source_data_sampling.surface_sampling_method.SurfaceSamplingMethod
+  graph_sampling_method:
+    _target_: tsg.source_data_sampling.graph_sampling_method.GraphSamplingMethod
 
 parameters_generation_method:
   aggregation_method:
